@@ -3,6 +3,14 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.1.1 — 2026-10-31
+
+### 修复
+
+- 仓库改名后同步 GitHub 地址（`package.json` 的 `repository` / `homepage` / `bugs`，
+  `CONTRIBUTING.md`、`docs/INSTALL.md`、`docs/RELEASE.md` 里的克隆与远程地址），
+  版本号同步为 `0.1.1`，避免 v0.1.0 里残留旧仓库名。
+
 ## v0.1.0 — 2026-10-31
 
 首个公开发布。
