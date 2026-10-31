@@ -1,0 +1,64 @@
+{
+  "name": "dsh-plugin-resume-market",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "免费简历模板市场：6 套内置模板、按字段分栏的个人信息编辑、A4 实时预览、一键导出 PDF，可把简历发布到市场分享给其他用户。",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "resume",
+    "cv",
+    "resume-template",
+    "marketplace"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skylight54/-dsh-resume-market.git"
+  },
+  "homepage": "https://github.com/skylight54/-dsh-resume-market#readme",
+  "bugs": {
+    "url": "https://github.com/skylight54/-dsh-resume-market/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build/build.mjs",
+    "check": "node tools/check.mjs",
+    "test": "node tests/smoke.mjs && node tests/pdf.mjs"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "src",
+    "lib",
+    "locale",
+    "server",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "package.json"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-modules"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.4"
+  }
+}

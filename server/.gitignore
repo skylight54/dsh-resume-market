@@ -1,0 +1,6 @@
+# 运行时数据与临时文件
+market-data.json
+market-data.json.*.tmp-*
+market-data.json.corrupt-*
+*.tmp-*
+.corrupt-*

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>免费简历模板市场</title>
+<meta name="description" content="零依赖的免费简历模板市场：浏览模板、复制导入 JSON、一键下载分享包。" />
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --panel: #ffffff;
+    --ink: #172033;
+    --muted: #667085;
+    --line: #e4e9f2;
+    --brand: #3056d3;
+    --brand-2: #7b3fe4;
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  a { color: var(--brand); }
+  .top {
+    background:
+      radial-gradient(1100px 380px at 8% -20%, rgba(122, 162, 255, 0.35), transparent 60%),
+      linear-gradient(120deg, #1d3a8a 0%, #33329b 52%, #6d28d9 100%);
+    color: #fff;
+    padding: 38px 24px 34px;
+  }
+  .top-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .brand h1 { margin: 0 0 8px; font-size: clamp(22px, 3.2vw, 32px); letter-spacing: 0.5px; }
+  .sub { margin: 0; color: rgba(255, 255, 255, 0.76); font-size: 14px; line-height: 1.7; }
+  .sub strong { color: #fde68a; }
+  .search { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .search input,
+  .search select {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    min-height: 42px;
+  }
+  .search input { width: min(300px, 64vw); }
+  .search input::placeholder { color: rgba(255, 255, 255, 0.66); }
+  .search select option { color: var(--ink); background: #fff; }
+  .search button {
+    border: 0;
+    border-radius: 10px;
+    background: #fbbf24;
+    color: #3b2a03;
+    font-weight: 700;
+    padding: 0 20px;
+    min-height: 42px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .search button:hover { background: #fcd34d; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 24px 40px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: var(--shadow);
+  }
+  .card-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .card-title { margin: 0; font-size: 17px; line-height: 1.35; word-break: break-word; }
+  .badge {
+    flex: none;
+    font-size: 11px;
+    color: var(--brand);
+    background: #eef2ff;
+    border-radius: 999px;
+    padding: 3px 9px;
+    max-width: 42%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .meta { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; word-break: break-word; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 12px; color: #475467; background: #f2f4f7; border-radius: 999px; padding: 2px 9px; }
+  .note {
+    margin: 0;
+    color: #475467;
+    font-size: 13px;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  .actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+  .actions button {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: var(--brand);
+    color: #fff;
+    font-size: 13px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .actions button:hover { filter: brightness(1.06); }
+  .actions button.ghost { background: #f2f4f7; color: #344054; border-color: var(--line); }
+  .actions button.ghost:hover { background: #e9edf3; }
+  .empty {
+    border: 1px dashed #cbd5e1;
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+    background: #fff;
+    grid-column: 1 / -1;
+  }
+  .hint {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 26px 0 0;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .foot { text-align: center; color: #98a2b3; font-size: 12px; padding: 0 20px 34px; }
+  .foot a { color: #667085; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translate(-50%, 20px);
+    background: #111827;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 9;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (max-width: 640px) {
+    .top { padding: 26px 16px; }
+    .wrap { padding: 20px 16px 32px; }
+    .grid { grid-template-columns: 1fr; }
+    .search { width: 100%; }
+    .search input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>免费简历模板市场</h1>
+      <p class="sub">零依赖云端市场 · 共 <strong id="count">{{COUNT}}</strong> 个模板 · 复制导入 JSON 即可使用</p>
+    </div>
+    <form class="search" id="search-form" autocomplete="off">
+      <input id="q" type="search" placeholder="搜索标题 / 作者 / 标签 / 说明" maxlength="60" aria-label="搜索模板" />
+      <select id="sort" aria-label="排序方式">
+        <option value="newest">最新发布</option>
+        <option value="downloads">最多下载</option>
+        <option value="likes">最多点赞</option>
+      </select>
+      <button type="submit">搜索</button>
+    </form>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="cards" class="grid">
+{{CARDS}}
+  </div>
+  <p class="hint">
+    导入方式：点击卡片上的「复制导入 JSON」，然后在简历插件的市场页选择「导入模板」粘贴；也可以点「下载」保存分享包文件（<code>.resume-market-pack.json</code>）后导入。
+    列表只展示最近的 100 个模板，使用搜索查找更多。
+  </p>
+</main>
+
+<footer class="foot">
+  免费简历模板市场 · resume-market v1 · <a href="api/health">API 状态</a>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script id="boot-data" type="application/json">{{BOOT_JSON}}</script>
+<script>
+  (() => {
+    'use strict';
+
+    const cardsEl = document.getElementById('cards');
+    const countEl = document.getElementById('count');
+    const formEl = document.getElementById('search-form');
+    const qEl = document.getElementById('q');
+    const sortEl = document.getElementById('sort');
+    const toastEl = document.getElementById('toast');
+    const bootEl = document.getElementById('boot-data');
+
+    let boot = { items: [], total: 0 };
+    try {
+      boot = JSON.parse(bootEl ? bootEl.textContent : '{}') || boot;
+    } catch {
+      boot = { items: [], total: 0 };
+    }
+    if (!Array.isArray(boot.items)) boot.items = [];
+    if (typeof boot.total !== 'number') boot.total = boot.items.length;
+
+    let toastTimer = null;
+
+    function showToast(message) {
+      if (!toastEl) return;
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+    }
+
+    function makeEl(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined && text !== null) node.textContent = String(text);
+      return node;
+    }
+
+    function formatDate(iso) {
+      return typeof iso === 'string' && iso.length >= 10 ? iso.slice(0, 10) : '';
+    }
+
+    function makeButton(label, action, id, ghost) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.action = action;
+      btn.dataset.id = id;
+      if (ghost) btn.className = 'ghost';
+      btn.textContent = label;
+      return btn;
+    }
+
+    function makeCountButton(prefix, field, action, id, value) {
+      const btn = makeButton(prefix + ' ', action, id, true);
+      const span = makeEl('span', '', value);
+      span.dataset.field = field;
+      btn.appendChild(span);
+      return btn;
+    }
+
+    function renderCard(item) {
+      const card = makeEl('article', 'card');
+      card.dataset.id = item.id;
+
+      const head = makeEl('div', 'card-head');
+      head.appendChild(makeEl('h2', 'card-title', item.title || '未命名模板'));
+      head.appendChild(makeEl('span', 'badge', item.templateId || ''));
+      card.appendChild(head);
+
+      const date = formatDate(item.createdAt);
+      card.appendChild(makeEl('p', 'meta', '作者：' + (item.author || '匿名') + (date ? ' · ' + date : '')));
+
+      if (Array.isArray(item.tags) && item.tags.length) {
+        const tags = makeEl('div', 'tags');
+        item.tags.forEach((tag) => tags.appendChild(makeEl('span', 'tag', '#' + tag)));
+        card.appendChild(tags);
+      }
+      if (item.note) card.appendChild(makeEl('p', 'note', item.note));
+
+      const actions = makeEl('div', 'actions');
+      actions.appendChild(makeButton('复制导入 JSON', 'copy', item.id, false));
+      actions.appendChild(makeCountButton('赞', 'likes', 'like', item.id, item.likes || 0));
+      actions.appendChild(makeCountButton('下载', 'downloads', 'download', item.id, item.downloads || 0));
+      card.appendChild(actions);
+
+      return card;
+    }
+
+    function render(items, total) {
+      if (countEl) countEl.textContent = String(total);
+      cardsEl.textContent = '';
+      if (!items.length) {
+        cardsEl.appendChild(makeEl('p', 'empty', '没有找到匹配的模板，换个关键词试试。'));
+        return;
+      }
+      const fragment = document.createDocumentFragment();
+      items.forEach((item) => fragment.appendChild(renderCard(item)));
+      cardsEl.appendChild(fragment);
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, options);
+      let payload = null;
+      try {
+        payload = await res.json();
+      } catch {
+        payload = null;
+      }
+      if (!res.ok || !payload || payload.ok !== true) {
+        const message = payload && payload.error && payload.error.message
+          ? payload.error.message
+          : '请求失败（HTTP ' + res.status + '）';
+        throw new Error(message);
+      }
+      return payload.value;
+    }
+
+    async function fetchPack(id) {
+      const res = await fetch('api/templates/' + encodeURIComponent(id) + '/pack');
+      if (!res.ok) {
+        let message = '获取分享包失败（HTTP ' + res.status + '）';
+        try {
+          const payload = await res.json();
+          if (payload && payload.error && payload.error.message) message = payload.error.message;
+        } catch {
+          /* 忽略 */
+        }
+        throw new Error(message);
+      }
+      return res.json();
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.style.position = 'fixed';
+      area.style.left = '-9999px';
+      document.body.appendChild(area);
+      area.select();
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch {
+        ok = false;
+      }
+      document.body.removeChild(area);
+      return ok;
+    }
+
+    async function handleCopy(id, button) {
+      const label = button.textContent;
+      try {
+        const pack = await fetchPack(id);
+        const ok = await copyText(JSON.stringify(pack, null, 2));
+        showToast(ok ? '已复制导入 JSON，去插件里粘贴即可' : '复制失败，请改用「下载」保存分享包');
+        button.textContent = ok ? '已复制 ✓' : '复制失败';
+      } catch (err) {
+        showToast(err.message);
+        button.textContent = '复制失败';
+      } finally {
+        setTimeout(() => {
+          button.textContent = label;
+        }, 1800);
+      }
+    }
+
+    function findCount(card, field) {
+      return card ? card.querySelector('[data-field="' + field + '"]') : null;
+    }
+
+    async function handleLike(id, button) {
+      try {
+        const value = await api('api/templates/' + encodeURIComponent(id) + '/like', { method: 'POST' });
+        const span = findCount(button.closest('.card'), 'likes');
+        if (span) span.textContent = String(value.likes);
+        showToast('已点赞');
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    async function handleDownload(id, button) {
+      try {
+        const value = await api('api/templates/' + encodeURIComponent(id) + '/download', { method: 'POST' });
+        const span = findCount(button.closest('.card'), 'downloads');
+        if (span) span.textContent = String(value.downloads);
+        const pack = await fetchPack(id);
+        const blob = new Blob([JSON.stringify(pack, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = id + '.resume-market-pack.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast('分享包已开始下载');
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    cardsEl.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const id = button.dataset.id;
+      if (button.dataset.action === 'copy') handleCopy(id, button);
+      else if (button.dataset.action === 'like') handleLike(id, button);
+      else if (button.dataset.action === 'download') handleDownload(id, button);
+    });
+
+    async function load() {
+      const params = new URLSearchParams();
+      const q = (qEl.value || '').trim();
+      if (q) params.set('q', q);
+      params.set('limit', '100');
+      params.set('sort', sortEl.value);
+      const value = await api('api/templates?' + params.toString());
+      render(value.items, value.total);
+    }
+
+    formEl.addEventListener('submit', (event) => {
+      event.preventDefault();
+      load().catch((err) => showToast(err.message));
+    });
+    sortEl.addEventListener('change', () => {
+      load().catch((err) => showToast(err.message));
+    });
+
+    render(boot.items, boot.total);
+  })();
+</script>
+</body>
+</html>

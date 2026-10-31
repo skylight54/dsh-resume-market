@@ -1,0 +1,13 @@
+{
+  "name": "resume-market-devrender",
+  "private": true,
+  "description": "Test-only render toolchain for tests/render.mjs and tests/mount.mjs (not shipped in the plugin bundle).",
+  "dependencies": {
+    "jsdom": "24.1.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "scripts": {
+    "setup": "npm install --no-audit --no-fund --cache ./.npmcache"
+  }
+}

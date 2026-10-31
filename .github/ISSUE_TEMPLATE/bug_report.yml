@@ -1,0 +1,52 @@
+name: Bug 报告
+description: 报告插件运行中的问题（面板、模板、导出、模板市场、agent 工具）
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！提交前请先搜一下是否已有同类 issue。
+        请**不要**粘贴 DeepSeek API Key 或真实简历隐私数据（电话 / 邮箱可以用 `xxx` 代替）。
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么？涉及哪个标签页（我的简历 / 模板库 / 市场 / 设置 / AI 对话）？
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开「简历市场」面板
+        2. 选择模板 …
+        3. 点击导出 PDF
+        4. 看到 …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      description: 你期望它怎么做？
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 截图
+      description: DSH 控制台的报错文本、导出文件截图、面板截图等；贴文本即可，不要贴 Key。
+      render: shell
+  - type: input
+    id: environment
+    attributes:
+      label: 环境
+      description: DSH 版本 / 操作系统 / Node 版本
+      placeholder: "例如：DSH 0.9.x · Windows 11 · Node v22.18.0"
+    validations:
+      required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: 插件版本 / 安装方式
+      placeholder: "例如：v0.1.0，git clone 后 plugin_manager install_bundle"
