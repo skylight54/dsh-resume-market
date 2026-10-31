@@ -32,6 +32,7 @@ const LABELS = {
     namePlaceholder: '你的名字',
     empty: '（待填写）',
     present: '至今',
+    courses: '主修课程',
   },
   en: {
     summary: 'SUMMARY',
@@ -50,6 +51,7 @@ const LABELS = {
     namePlaceholder: 'Your Name',
     empty: '(to fill)',
     present: 'Present',
+    courses: 'Key courses',
   },
 };
 
@@ -87,6 +89,8 @@ const BASE_CSS = `
 .rm-doc .rm-item-role{color:#5a616c;font-size:12.5px;}
 .rm-doc .rm-date{flex:0 0 auto;font-size:11.5px;color:#8b929c;font-variant-numeric:tabular-nums;letter-spacing:.02em;white-space:nowrap;}
 .rm-doc .rm-item-sub{margin-top:2px;font-size:12px;color:#6b7280;}
+.rm-doc .rm-edu-courses{margin:2px 0 0;font-size:11.5px;line-height:1.55;color:#6b7280;overflow-wrap:anywhere;}
+.rm-doc .rm-edu-courses .rm-k{margin-right:8px;font-size:10.5px;letter-spacing:.06em;color:#8b929c;white-space:nowrap;}
 .rm-doc .rm-bullets{margin:4px 0 0;padding-left:16px;}
 .rm-doc .rm-bullets li{margin:2px 0;}
 .rm-doc .rm-bullets li::marker{color:#9aa1ab;}
@@ -423,6 +427,8 @@ function normalizeData(raw) {
       major: str(it.major, 60),
       period: str(it.period, 40),
       gpa: str(it.gpa, 30),
+      // 可选主修课程：一行字符串（用顿号/逗号分隔），空字符串表示不展示。
+      courses: str(it.courses, 200),
     })),
     skills: arr(src.skills, 10).map((it) => ({
       group: str(it.group, 30),
@@ -601,6 +607,15 @@ function renderEducation(data, L) {
     h.push('</div>');
     if (it.period) h.push('<div class="rm-date">' + esc(it.period) + '</div>');
     h.push('</div>');
+    if (it.courses) {
+      h.push(
+        '<p class="rm-edu-courses"><span class="rm-k">' +
+          esc(L.courses) +
+          '</span>' +
+          esc(it.courses) +
+          '</p>'
+      );
+    }
     if (it.gpa) h.push('<div class="rm-item-sub">GPA ' + esc(it.gpa) + '</div>');
     h.push('</div>');
     return h.join('');

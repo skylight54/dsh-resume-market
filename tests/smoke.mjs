@@ -174,7 +174,7 @@ res = await call('POST', '/resume', {
     summary: '8 年 B 端产品经验',
     experience: [{ company: '云启科技', role: '产品经理', period: '2021.06 — 至今', location: '上海', bullets: ['把续费率提升 **18%**'] }],
     projects: [],
-    education: [{ school: '复旦', degree: '本科', major: '信管', period: '2014 — 2018', gpa: '3.8/4.0' }],
+    education: [{ school: '复旦', degree: '本科', major: '信管', period: '2014 — 2018', gpa: '3.8/4.0', courses: '数据结构、计量经济学' }],
     skills: [{ group: '产品能力', items: '需求分析、数据分析' }],
     awards: [],
   },
@@ -183,6 +183,7 @@ assert.equal(res.status, 200, res.body);
 const resumeId = res.json.value.resume.id;
 assert.ok(resumeId);
 assert.equal(res.json.value.resume.data.basics.phone, '138 0013 8000');
+assert.equal(res.json.value.resume.data.education[0].courses, '数据结构、计量经济学', '主修课程应被保存');
 
 // 4) 更新简历
 res = await call('POST', '/resume', { resume: { id: resumeId, title: '产品经理_上海_林知夏 v2' } });
@@ -210,6 +211,10 @@ for (const tpl of TEMPLATES) {
 }
 assert.match(res.body, /rm-k/, '每个字段应有独立标签');
 assert.match(res.body, /138 0013 8000/);
+// 主修课程：HTML 导出要带上独立一行（标签 + 内容）
+assert.match(res.body, /class="rm-edu-courses"/, '导出 HTML 应包含主修课程行');
+assert.match(res.body, /主修课程/, '导出 HTML 应包含主修课程标签');
+assert.match(res.body, /数据结构、计量经济学/, '导出 HTML 应包含主修课程内容');
 
 // 5c) 可选照片：上传后应渲染在页眉，并受位置 / 形状控制
 const tinyPhoto = 'data:image/jpeg;base64,' + Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64');
@@ -236,7 +241,14 @@ assert.ok(eduPos > 0 && projPos > 0 && eduPos < projPos, '教育背景应排在�
 
 // 5d) 危险协议的照片必须被清掉，不能出现在导出 HTML 里
 res = await call('POST', '/resume', {
-  resume: { id: resumeId, data: { ...DEMO_RESUME_DATA, basics: { ...DEMO_RESUME_DATA.basics, photo: 'javascript:alert(1)' } } },
+  resume: {
+    id: resumeId,
+    data: {
+      ...DEMO_RESUME_DATA,
+      basics: { ...DEMO_RESUME_DATA.basics, photo: 'javascript:alert(1)' },
+      education: [{ ...DEMO_RESUME_DATA.education[0], courses: '数据结构、计量经济学' }],
+    },
+  },
 });
 assert.equal(res.status, 200, res.body);
 assert.equal(res.json.value.resume.data.basics.photo, '', '非图片协议的照片应被清洗');
@@ -247,6 +259,7 @@ res = await call('GET', '/export?id=' + encodeURIComponent(resumeId));
 assert.equal(res.status, 200, res.body);
 assert.match(res.body, /@page/);
 assert.equal(res.headers['content-type'].includes('text/html'), true);
+assert.match(res.body, /class="rm-edu-courses"/, '清空危险照片后主修课程仍应保留在导出里');
 
 // 5c) Host 落盘导出：返回真实路径，文件内容可读（浏览器下载在 Electron 里可能被吞）
 res = await call('POST', '/export', { id: resumeId });
@@ -256,6 +269,7 @@ assert.equal(res.json.value.format, 'html');
 assert.ok(exportedPath && exportedPath.endsWith('.html'), 'POST /export 应返回 html 路径');
 assert.equal(existsSync(exportedPath), true, '导出文件应真实写到磁盘');
 assert.match(await readFile(exportedPath, 'utf8'), /rm-contact/);
+assert.match(await readFile(exportedPath, 'utf8'), /主修课程/, '落盘 HTML 应带主修课程');
 
 // 5c-2) Word(.doc) 导出：Word 兼容 HTML，A4 页面设置 + 模板样式都在
 res = await call('POST', '/export', { id: resumeId, format: 'doc' });
@@ -267,6 +281,8 @@ const docText = await readFile(docPath, 'utf8');
 assert.match(docText, /xmlns:w="urn:schemas-microsoft-com:office:word"/);
 assert.match(docText, /WordSection1/);
 assert.match(docText, /rm-contact/);
+assert.match(docText, /class="rm-edu-courses"/, 'Word 导出也应带主修课程行');
+assert.match(docText, /数据结构、计量经济学/);
 
 // 5c-3) PDF 导出（Host 兜底路径）：能转换就出文件，不能转换也要给明确的错误码
 res = await call('POST', '/export', { id: resumeId, format: 'pdf' });

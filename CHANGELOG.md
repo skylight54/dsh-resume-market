@@ -3,6 +3,27 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.3.0 — 2026-10-31
+
+### 新增
+
+- **教育经历·主修课程（可选）**：每条教育经历可填「主修课程」，留空不渲染；填了会在预览、
+  HTML、Word、PDF 四种输出里单独一行展示（HTML 导出含 `rm-edu-courses`）。
+- **模块顺序拖拽 + 显隐**：「模块顺序与显示」改成紧凑小按钮（↑ / ↓ / 眼睛）+ HTML5 拖动把手，
+  拖动时显示插入位置；隐藏的模块变灰留在列表里，点眼睛恢复。顺序与显隐实时驱动预览与导出。
+- **AI 对话浮动窗**：从顶部标签页改成编辑界面右下角的「● AI 对话」胶囊按钮，点开是浮动面板，
+  可折叠 / 关闭，切换标签页不丢对话；保留一键「应用到当前简历」。
+- **AI 对话免 Key**：`chatApiKey` 为空时直接调用 DSH Host 的 `llm` 服务，用当前 DSH 模型聊，
+  不用配置、不单独计费；填了 DeepSeek API Key 仍走原来的 DeepSeek HTTP 路径（`mode:'api'`）。
+
+### 变更
+
+- 公共市场 `market/index.json` 内联 `templateId` / `css` / `sample`，公共市场卡片改成真实 A4 缩略预览
+  （之前只有 accent 色块，和安装后的简历预览观感不一致）；`market/build.mjs` 会同步生成。
+- 设置页 AI 卡片文案改为「免 Key 默认用当前 DSH 模型」，Key / 模型 / Base URL 标为可选。
+- README 更新浮动对话、免 Key、主修课程、模块拖拽与公共市场缩略预览说明。
+- 版本号 0.2.1 → 0.3.0；`market/validate.mjs` 与 `tests/github-market.mjs` 覆盖 index 的 css / sample 字段。
+
 ## v0.2.1 — 2026-10-31
 
 ### 修复

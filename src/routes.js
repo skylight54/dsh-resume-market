@@ -147,7 +147,7 @@ function sendHtml(res, status, html, downloadName) {
 
 /** 构造路由处理器（纯函数，方便 tests/smoke.mjs 直接驱动）。 */
 export function createHandler({ ctx, store }) {
-  const chatService = createChatService({ store, log: (message) => logWarn(ctx, message) });
+  const chatService = createChatService({ store, ctx, log: (message) => logWarn(ctx, message) });
   const githubMarket = createGithubMarket({ store, log: (message) => logWarn(ctx, message) });
 
   async function dispatch(req) {
@@ -337,7 +337,8 @@ export function createHandler({ ctx, store }) {
       return { status: 200, body: ok(await githubMarket.publishPayload(body)) };
     }
 
-    // AI 对话：把用户历史消息（可选带上当前简历）转发给 DeepSeek，返回纯文本回复。
+    // AI 对话：把用户历史消息（可选带上当前简历）转发给上游模型，返回纯文本回复。
+    // 填了 DeepSeek Key 走 DeepSeek API；没填就走宿主 llm（DSH 当前模型，免 Key）。
     // 面板负责解析回复里的 ```json 代码块并渲染「应用到当前简历」。
     if (suffix === '/chat' && method === 'POST') {
       const body = await readJsonBody(req);
@@ -378,7 +379,15 @@ export function createHandler({ ctx, store }) {
         }
       }
       const result = await chatService.chat({ messages, resume });
-      return { status: 200, body: ok({ reply: result.reply, model: result.model, usage: result.usage }) };
+      return {
+        status: 200,
+        body: ok({
+          reply: result.reply,
+          model: result.model,
+          mode: result.mode,
+          usage: result.usage,
+        }),
+      };
     }
 
     if (suffix === '/export' && method === 'POST') {

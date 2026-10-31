@@ -15,6 +15,78 @@
       "author": "大肥鱼",
       "accent": "#6f6880",
       "cls": "rm-t-academia",
+      "templateId": "mkt-academia",
+      "css": "\n.rm-t-academia{padding:60px 66px 54px;color:#23202b;font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",serif;}\n.rm-t-academia .rm-head{padding-bottom:18px;border-bottom:3px double #8a8296;}\n.rm-t-academia .rm-name{font-size:32px;font-weight:600;letter-spacing:.16em;color:#3a3348;line-height:1.25;}\n.rm-t-academia .rm-role{margin:8px 0 0;font-size:12.5px;color:#6f6880;letter-spacing:.08em;font-style:italic;}\n.rm-t-academia .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 18px;margin-top:16px;}\n.rm-t-academia .rm-k{font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;font-size:9.5px;letter-spacing:.14em;color:#9b93a8;text-transform:uppercase;}\n.rm-t-academia .rm-v{font-size:12px;color:#413a4e;}\n.rm-t-academia .rm-sec{margin-top:22px;}\n.rm-t-academia .rm-sec-h{margin:0 0 10px;padding-bottom:4px;border-bottom:1px solid #ded8e6;}\n.rm-t-academia .rm-sec-t{font-size:13px;font-weight:600;letter-spacing:.22em;color:#4a3f5e;}\n.rm-t-academia .rm-item-t{font-weight:600;color:#2f2839;}\n.rm-t-academia .rm-date{font-family:Georgia,serif;font-style:italic;color:#8b8299;}\n.rm-t-academia .rm-tag{border:0;background:transparent;padding:0;color:#5a5068;font-size:12px;}\n.rm-t-academia .rm-tags{gap:2px 8px;}\n.rm-t-academia .rm-skill-row{grid-template-columns:92px minmax(0,1fr);}\n.rm-t-academia .rm-bullets li::marker{color:#a99fbb;}\n",
+      "sample": {
+        "basics": {
+          "name": "周慕云",
+          "role": "社会学博士 · 城市研究方向",
+          "phone": "138 0013 8000",
+          "email": "muyun.zhou@example.com",
+          "city": "北京",
+          "wechat": "zhou-muyun",
+          "github": "",
+          "website": "muyun.academia.example",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle"
+        },
+        "summary": "社会学博士，研究城市更新与社区治理。博士期间主持 1 项省级课题，发表 CSSCI 论文 3 篇，其中 1 篇被《人大复印资料》全文转载。",
+        "experience": [
+          {
+            "company": "某大学社会学系",
+            "role": "博士研究生 / 助教",
+            "period": "2019.09 — 2024.06",
+            "location": "北京",
+            "bullets": [
+              "主持省级课题「老旧小区改造中的居民参与机制」，覆盖 6 个社区、428 份问卷。",
+              "协助讲授《城市社会学》课程 4 学期，独立带教 32 名本科生。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "企业工作流引擎 2.0",
+            "role": "产品负责人",
+            "period": "2022.03 — 2022.11",
+            "bullets": [
+              "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+              "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "华东师范大学",
+            "degree": "硕士",
+            "major": "信息管理",
+            "period": "2015.09 — 2018.01",
+            "gpa": "3.8 / 4.0"
+          }
+        ],
+        "skills": [
+          {
+            "group": "研究方法",
+            "items": "深度访谈、参与式观察、问卷设计、SPSS、NVivo"
+          },
+          {
+            "group": "语言",
+            "items": "英语（学术写作）、日语（N2）"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳产品奖",
+            "date": "2023.12",
+            "desc": "星野科技"
+          },
+          {
+            "title": "中国 SaaS 产品创新大赛 银奖",
+            "date": "2020.09",
+            "desc": ""
+          }
+        ]
+      },
       "file": "templates/rm-academia.json",
       "installs": 0,
       "updatedAt": "2026-09-12T02:10:00.000Z"
@@ -32,6 +104,78 @@
       "author": "大肥鱼",
       "accent": "#0f2b46",
       "cls": "rm-t-finance",
+      "templateId": "mkt-finance",
+      "css": "\n.rm-t-finance{padding:46px 52px 40px;color:#12212f;font-size:12.5px;line-height:1.55;}\n.rm-t-finance .rm-head{padding-bottom:14px;border-bottom:3px solid #0f2b46;}\n.rm-t-finance .rm-name{font-size:30px;font-weight:700;letter-spacing:.02em;color:#0f2b46;}\n.rm-t-finance .rm-role{margin:5px 0 0;font-size:12px;color:#3d5a75;letter-spacing:.08em;text-transform:uppercase;}\n.rm-t-finance .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 18px;margin-top:12px;padding:9px 12px;background:#f2f5f8;border-left:3px solid #0f2b46;}\n.rm-t-finance .rm-k{font-size:9.5px;letter-spacing:.1em;color:#7a8ea1;text-transform:uppercase;}\n.rm-t-finance .rm-v{font-size:11.5px;color:#1b3348;}\n.rm-t-finance .rm-sec{margin-top:18px;}\n.rm-t-finance .rm-sec-h{margin:0 0 8px;padding-bottom:3px;border-bottom:1px solid #cfd9e3;}\n.rm-t-finance .rm-sec-t{font-size:11.5px;font-weight:700;letter-spacing:.22em;color:#0f2b46;text-transform:uppercase;}\n.rm-t-finance .rm-item-t{color:#0f2b46;font-weight:700;}\n.rm-t-finance .rm-item-role{color:#3d5a75;}\n.rm-t-finance .rm-tag{border-radius:2px;border-color:#d3dde7;background:#f7f9fb;color:#2b4761;font-size:11px;}\n.rm-t-finance .rm-date{color:#5b7288;}\n.rm-t-finance .rm-skill-row{grid-template-columns:96px minmax(0,1fr);gap:8px;margin-bottom:4px;}\n",
+      "sample": {
+        "basics": {
+          "name": "沈砚",
+          "role": "投资银行部分析师 · 消费与零售组",
+          "phone": "138 0013 8000",
+          "email": "yan.shen@example.com",
+          "city": "深圳",
+          "wechat": "",
+          "github": "",
+          "website": "",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle"
+        },
+        "summary": "3 年投行经验，参与 6 单 IPO 与 2 单并购项目，累计交易规模约 48 亿元。熟悉消费行业财务模型与尽调流程。",
+        "experience": [
+          {
+            "company": "某证券投资银行部",
+            "role": "分析师",
+            "period": "2022.07 — 至今",
+            "location": "深圳",
+            "bullets": [
+              "参与 3 单消费类 IPO 项目，负责财务核查与招股书财务章节撰写。",
+              "搭建 DCF 与可比公司估值模型，支持 2 单并购交易的定价讨论。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "企业工作流引擎 2.0",
+            "role": "产品负责人",
+            "period": "2022.03 — 2022.11",
+            "bullets": [
+              "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+              "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "华东师范大学",
+            "degree": "硕士",
+            "major": "信息管理",
+            "period": "2015.09 — 2018.01",
+            "gpa": "3.8 / 4.0"
+          }
+        ],
+        "skills": [
+          {
+            "group": "专业能力",
+            "items": "财务建模、尽职调查、估值分析、招股书撰写"
+          },
+          {
+            "group": "工具",
+            "items": "Excel（VBA）、Wind、Bloomberg、PPT"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳产品奖",
+            "date": "2023.12",
+            "desc": "星野科技"
+          },
+          {
+            "title": "中国 SaaS 产品创新大赛 银奖",
+            "date": "2020.09",
+            "desc": ""
+          }
+        ]
+      },
       "file": "templates/rm-finance.json",
       "installs": 0,
       "updatedAt": "2026-09-18T09:40:00.000Z"
@@ -49,6 +193,89 @@
       "author": "大肥鱼",
       "accent": "#f2711c",
       "cls": "rm-t-vibrant",
+      "templateId": "mkt-vibrant",
+      "css": "\n.rm-t-vibrant{padding:50px 56px 46px;color:#2b2420;}\n.rm-t-vibrant .rm-head{padding:22px 26px;border-radius:14px;background:linear-gradient(120deg,#fff2e8 0%,#ffe3cf 60%,#ffd6b8 100%);}\n.rm-t-vibrant .rm-name{font-size:33px;font-weight:800;letter-spacing:.02em;color:#7a3812;line-height:1.2;}\n.rm-t-vibrant .rm-role{margin:6px 0 0;font-size:13px;color:#b4571f;font-weight:600;}\n.rm-t-vibrant .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 14px;margin-top:16px;}\n.rm-t-vibrant .rm-k{font-size:10px;color:#b8612b;font-weight:600;}\n.rm-t-vibrant .rm-v{font-size:12px;color:#4a3629;}\n.rm-t-vibrant .rm-sec{margin-top:20px;}\n.rm-t-vibrant .rm-sec-h{margin:0 0 9px;gap:6px;}\n.rm-t-vibrant .rm-sec-t{font-size:13px;font-weight:800;letter-spacing:.08em;color:#8a3d12;}\n.rm-t-vibrant .rm-sec-h::after{content:\"\";flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,#f2711c,#ffc27a);align-self:center;margin-left:8px;}\n.rm-t-vibrant .rm-tag{border-color:#ffd2ad;background:#fff7ef;color:#a64d16;}\n.rm-t-vibrant .rm-bullets li::marker{color:#f2711c;}\n.rm-t-vibrant .rm-skill-row{grid-template-columns:96px minmax(0,1fr);}\n",
+      "sample": {
+        "basics": {
+          "name": "林知夏",
+          "role": "高级产品经理 · 8 年 B 端产品经验",
+          "phone": "138 0013 8000",
+          "email": "zhixia.lin@example.com",
+          "city": "上海",
+          "wechat": "linzhixia-pm",
+          "github": "github.com/linzhixia",
+          "website": "zhixia.design",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle"
+        },
+        "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
+        "experience": [
+          {
+            "company": "星野科技",
+            "role": "高级产品经理",
+            "period": "2021.06 — 至今",
+            "location": "上海",
+            "bullets": [
+              "负责企业协作平台产品线，MAU 从 12 万提升至 58 万，续费率 **+18%**。",
+              "重构权限与工作流引擎，交付周期缩短 40%，支撑 200+ 企业客户的自定义配置。",
+              "搭建产品数据看板，把需求评审到上线的平均周期从 21 天压缩到 12 天。"
+            ]
+          },
+          {
+            "company": "云枢网络",
+            "role": "产品经理",
+            "period": "2018.03 — 2021.05",
+            "location": "杭州",
+            "bullets": [
+              "从 0 到 1 设计客户成功 SaaS，首年签约 120 家企业，ARR 突破 1800 万。",
+              "主导移动端改版，核心任务完成率提升 27%，客服咨询量下降 22%。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "企业工作流引擎 2.0",
+            "role": "产品负责人",
+            "period": "2022.03 — 2022.11",
+            "bullets": [
+              "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+              "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "华东师范大学",
+            "degree": "硕士",
+            "major": "信息管理",
+            "period": "2015.09 — 2018.01",
+            "gpa": "3.8 / 4.0"
+          }
+        ],
+        "skills": [
+          {
+            "group": "产品能力",
+            "items": "需求分析、产品规划、数据驱动、用户研究"
+          },
+          {
+            "group": "工具",
+            "items": "Axure、Figma、SQL、Mixpanel、Jira"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳产品奖",
+            "date": "2023.12",
+            "desc": "星野科技"
+          },
+          {
+            "title": "中国 SaaS 产品创新大赛 银奖",
+            "date": "2020.09",
+            "desc": ""
+          }
+        ]
+      },
       "file": "templates/rm-vibrant.json",
       "installs": 0,
       "updatedAt": "2026-09-26T13:05:00.000Z"
@@ -66,6 +293,89 @@
       "author": "简历市场",
       "accent": "#5f7896",
       "cls": "rm-t-luxury",
+      "templateId": "mkt-quiet-luxury",
+      "css": "\n.rm-t-luxury{padding:56px 62px 50px;counter-reset:rmsec;color:#2a3442;}\n.rm-t-luxury .rm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:34px;padding-bottom:20px;border-bottom:2px solid #c8d3e0;}\n.rm-t-luxury .rm-name{font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",serif;font-size:34px;font-weight:500;letter-spacing:.1em;color:#1f2b3d;line-height:1.2;}\n.rm-t-luxury .rm-role{margin:8px 0 0;font-size:12px;color:#7d8a9c;letter-spacing:.18em;text-transform:uppercase;}\n.rm-t-luxury .rm-contact{flex:0 0 300px;grid-template-columns:1fr 1fr;gap:5px 18px;margin:0;}\n.rm-t-luxury .rm-k{font-size:9.5px;letter-spacing:.12em;color:#93a2b8;text-transform:uppercase;}\n.rm-t-luxury .rm-v{font-size:12px;color:#33405a;}\n.rm-t-luxury .rm-sec{margin-top:23px;}\n.rm-t-luxury .rm-sec-h{margin:0 0 10px;gap:10px;}\n.rm-t-luxury .rm-sec-h::before{content:\"0\" counter(rmsec);counter-increment:rmsec;font-family:Georgia,serif;font-size:11px;color:#9db0c6;letter-spacing:.1em;}\n.rm-t-luxury .rm-sec-t{font-size:12px;font-weight:600;letter-spacing:.32em;color:#3d4c61;text-transform:uppercase;}\n.rm-t-luxury .rm-item-role{color:#6e7d92;}\n.rm-t-luxury .rm-date{color:#8193aa;}\n.rm-t-luxury .rm-tag{border-color:#dbe3ee;background:#f7f9fc;color:#44536b;}\n.rm-t-luxury .rm-skill-k{color:#6e7d92;}\n.rm-t-luxury .rm-skill-row{grid-template-columns:112px minmax(0,1fr);}\n",
+      "sample": {
+        "basics": {
+          "name": "林知夏",
+          "role": "高级产品经理 · 8 年 B 端产品经验",
+          "phone": "138 0013 8000",
+          "email": "zhixia.lin@example.com",
+          "city": "上海",
+          "wechat": "linzhixia-pm",
+          "github": "github.com/linzhixia",
+          "website": "zhixia.design",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle"
+        },
+        "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
+        "experience": [
+          {
+            "company": "星野科技",
+            "role": "高级产品经理",
+            "period": "2021.06 — 至今",
+            "location": "上海",
+            "bullets": [
+              "负责企业协作平台产品线，MAU 从 12 万提升至 58 万，续费率 **+18%**。",
+              "重构权限与工作流引擎，交付周期缩短 40%，支撑 200+ 企业客户的自定义配置。",
+              "搭建产品数据看板，把需求评审到上线的平均周期从 21 天压缩到 12 天。"
+            ]
+          },
+          {
+            "company": "云枢网络",
+            "role": "产品经理",
+            "period": "2018.03 — 2021.05",
+            "location": "杭州",
+            "bullets": [
+              "从 0 到 1 设计客户成功 SaaS，首年签约 120 家企业，ARR 突破 1800 万。",
+              "主导移动端改版，核心任务完成率提升 27%，客服咨询量下降 22%。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "企业工作流引擎 2.0",
+            "role": "产品负责人",
+            "period": "2022.03 — 2022.11",
+            "bullets": [
+              "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+              "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "华东师范大学",
+            "degree": "硕士",
+            "major": "信息管理",
+            "period": "2015.09 — 2018.01",
+            "gpa": "3.8 / 4.0"
+          }
+        ],
+        "skills": [
+          {
+            "group": "产品能力",
+            "items": "需求分析、产品规划、数据驱动、用户研究"
+          },
+          {
+            "group": "工具",
+            "items": "Axure、Figma、SQL、Mixpanel、Jira"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳产品奖",
+            "date": "2023.12",
+            "desc": "星野科技"
+          },
+          {
+            "title": "中国 SaaS 产品创新大赛 银奖",
+            "date": "2020.09",
+            "desc": ""
+          }
+        ]
+      },
       "file": "templates/rm-quiet-luxury.json",
       "installs": 0,
       "updatedAt": "2026-10-31T12:00:00.000Z"
@@ -83,6 +393,89 @@
       "author": "简历市场",
       "accent": "#2c5f96",
       "cls": "rm-t-tech",
+      "templateId": "mkt-tech-grid",
+      "css": "\n.rm-t-tech{padding:48px 54px 44px;color:#16202e;background:linear-gradient(180deg,#fbfdff 0%,#ffffff 260px);}\n.rm-t-tech .rm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;padding-bottom:16px;border-bottom:2px solid #14233a;}\n.rm-t-tech .rm-name{font-size:31px;font-weight:600;letter-spacing:.06em;color:#10213a;}\n.rm-t-tech .rm-role{margin:6px 0 0;font-size:12.5px;color:#3d6ea8;}\n.rm-t-tech .rm-contact{flex:0 0 338px;grid-template-columns:1fr 1fr;gap:4px 16px;margin:0;}\n.rm-t-tech .rm-k{font-family:Consolas,\"SFMono-Regular\",monospace;font-size:9.5px;color:#5d7fa8;letter-spacing:.06em;}\n.rm-t-tech .rm-v{font-size:11.5px;color:#1d3350;}\n.rm-t-tech .rm-sec{margin-top:19px;}\n.rm-t-tech .rm-sec-h{margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid #d9e3f0;gap:8px;}\n.rm-t-tech .rm-sec-t{font-size:12px;font-weight:700;letter-spacing:.14em;color:#133a63;}\n.rm-t-tech .rm-sec-t::before{content:\"#\";color:#7ba7d8;margin-right:4px;font-family:Consolas,monospace;}\n.rm-t-tech .rm-tag{border-color:#cddff2;background:#f4f9ff;color:#2c5f96;font-size:11px;}\n.rm-t-tech .rm-date{font-family:Consolas,\"SFMono-Regular\",monospace;font-size:11px;color:#6889ae;}\n.rm-t-tech .rm-skill-row{grid-template-columns:104px minmax(0,1fr);}\n.rm-t-tech .rm-item-t{color:#10213a;}\n",
+      "sample": {
+        "basics": {
+          "name": "林知夏",
+          "role": "高级产品经理 · 8 年 B 端产品经验",
+          "phone": "138 0013 8000",
+          "email": "zhixia.lin@example.com",
+          "city": "上海",
+          "wechat": "linzhixia-pm",
+          "github": "github.com/linzhixia",
+          "website": "zhixia.design",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle"
+        },
+        "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
+        "experience": [
+          {
+            "company": "星野科技",
+            "role": "高级产品经理",
+            "period": "2021.06 — 至今",
+            "location": "上海",
+            "bullets": [
+              "负责企业协作平台产品线，MAU 从 12 万提升至 58 万，续费率 **+18%**。",
+              "重构权限与工作流引擎，交付周期缩短 40%，支撑 200+ 企业客户的自定义配置。",
+              "搭建产品数据看板，把需求评审到上线的平均周期从 21 天压缩到 12 天。"
+            ]
+          },
+          {
+            "company": "云枢网络",
+            "role": "产品经理",
+            "period": "2018.03 — 2021.05",
+            "location": "杭州",
+            "bullets": [
+              "从 0 到 1 设计客户成功 SaaS，首年签约 120 家企业，ARR 突破 1800 万。",
+              "主导移动端改版，核心任务完成率提升 27%，客服咨询量下降 22%。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "企业工作流引擎 2.0",
+            "role": "产品负责人",
+            "period": "2022.03 — 2022.11",
+            "bullets": [
+              "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+              "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "华东师范大学",
+            "degree": "硕士",
+            "major": "信息管理",
+            "period": "2015.09 — 2018.01",
+            "gpa": "3.8 / 4.0"
+          }
+        ],
+        "skills": [
+          {
+            "group": "产品能力",
+            "items": "需求分析、产品规划、数据驱动、用户研究"
+          },
+          {
+            "group": "工具",
+            "items": "Axure、Figma、SQL、Mixpanel、Jira"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳产品奖",
+            "date": "2023.12",
+            "desc": "星野科技"
+          },
+          {
+            "title": "中国 SaaS 产品创新大赛 银奖",
+            "date": "2020.09",
+            "desc": ""
+          }
+        ]
+      },
       "file": "templates/rm-tech-grid.json",
       "installs": 0,
       "updatedAt": "2026-10-31T12:00:00.000Z"

@@ -59,6 +59,13 @@ function normalizeGithubItem(raw) {
     author: String(item.author || '匿名').slice(0, 40),
     accent: /^#[0-9a-fA-F]{3,8}$/.test(String(item.accent || '')) ? String(item.accent) : '#2f6fde',
     cls: /^rm-t-[a-z0-9-]{1,40}$/.test(String(item.cls || '')) ? String(item.cls) : '',
+    // 列表条目可以内联 css/sample，用于市场卡片直接渲染真实 A4 缩略图。
+    templateId: String(item.templateId || '').slice(0, 60),
+    css: typeof item.css === 'string' && item.css.length <= 200 * 1024 ? item.css : '',
+    sample:
+      item.sample && typeof item.sample === 'object' && !Array.isArray(item.sample)
+        ? normalizeData(item.sample)
+        : null,
     file: String(item.file || '').slice(0, 200),
     installs: Number(item.installs) || 0,
     updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : '',

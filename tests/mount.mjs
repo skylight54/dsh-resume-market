@@ -23,6 +23,8 @@ const React = localRequire('react');
 const ReactDOMClient = localRequire('react-dom/client');
 const { JSDOM } = localRequire('jsdom');
 const act = React.act || localRequire('react-dom/test-utils').act;
+// jsdom 里原生 input 事件不会触发 React 18 的 onChange，用 test-utils 的 Simulate 驱动受控输入。
+const { Simulate } = localRequire('react-dom/test-utils');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -254,6 +256,60 @@ const previewSecs = [...container.querySelectorAll('.rm-preview-col .rm-sec')].m
 const eduIdx = previewSecs.findIndex((c) => c.includes('rm-sec-education'));
 const projIdx = previewSecs.findIndex((c) => c.includes('rm-sec-projects'));
 check(eduIdx >= 0 && projIdx >= 0 && eduIdx < projIdx, 'preview order should follow editor order: ' + JSON.stringify(previewSecs));
+
+// --- 拖动把手：HTML5 draggable + grab 光标 --------------------------------
+const grips = [...container.querySelectorAll('.rm-order-row .rm-order-grip')];
+check(grips.length === 6, 'section rows should each have a drag grip, got ' + grips.length);
+check(grips.every((g) => g.getAttribute('draggable') === 'true'), 'visible section grips should be draggable');
+check(
+  grips.length > 0 && dom.window.getComputedStyle(grips[0]).cursor === 'grab',
+  'drag grip cursor should be grab, got ' + (grips[0] ? dom.window.getComputedStyle(grips[0]).cursor : 'none')
+);
+const sectionTools = orderRows().map((r) => r.querySelectorAll('.rm-item-tools .rm-mini').length);
+check(sectionTools.every((n) => n === 3), 'section rows should have 3 compact buttons (↑ ↓ eye), got ' + JSON.stringify(sectionTools));
+
+// --- 主修课程：教育背景里的可选字段，实时进预览 ---------------------------
+const coursesInput = container.querySelector('input[placeholder="数据结构、计量经济学"]');
+check(!!coursesInput, 'education 主修课程 input missing');
+check(text().includes('主修课程'), 'education 主修课程 label missing');
+if (coursesInput) {
+  const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+  const courseText = '数据结构、计量经济学';
+  await act(async () => {
+    valueSetter.call(coursesInput, courseText);
+    Simulate.change(coursesInput, { target: { value: courseText } });
+    await sleep(50);
+  });
+  const eduCourses = container.querySelector('.rm-preview-col .rm-edu-courses');
+  check(!!eduCourses, 'preview should render 主修课程 row');
+  check(
+    !!eduCourses && eduCourses.textContent.includes(courseText),
+    'preview 主修课程 content wrong: ' + (eduCourses ? eduCourses.textContent : 'missing')
+  );
+}
+
+// --- 隐藏 / 显示：点眼睛后预览立刻少一节，再点恢复 ------------------------
+const sectionRow = (name) => orderRows().find((r) => rowName(r) === name);
+const eyeOf = (row) => row.querySelectorAll('.rm-item-tools .rm-mini')[2];
+let eduRow = sectionRow('教育背景');
+check(!!eduRow && !!eyeOf(eduRow), 'education section eye button missing');
+await act(async () => {
+  eyeOf(eduRow).click();
+  await sleep(40);
+});
+check(orderRows().length === 6, 'hidden section should stay in the list, got ' + orderRows().length);
+const hiddenRow = sectionRow('教育背景');
+check(!!hiddenRow && hiddenRow.className.includes('is-hidden'), 'hidden section row should be greyed (is-hidden)');
+check(!container.querySelector('.rm-preview-col .rm-sec-education'), 'hidden section should leave the preview');
+check(text().includes('灰色模块已隐藏'), 'hidden sections hint missing');
+await act(async () => {
+  eyeOf(sectionRow('教育背景')).click();
+  await sleep(40);
+});
+const shownRow = sectionRow('教育背景');
+check(!!shownRow && !shownRow.className.includes('is-hidden'), 'restored section row should be visible again');
+check(!!container.querySelector('.rm-preview-col .rm-sec-education'), 'restored section should come back to the preview');
+check(!!container.querySelector('.rm-preview-col .rm-edu-courses'), '主修课程 should still render after restore');
 
 // --- preview: paper + contact grid ---------------------------------------
 const contactCells = container.querySelectorAll('.rm-preview-col .rm-contact .rm-k');

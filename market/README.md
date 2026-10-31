@@ -10,7 +10,7 @@
 
 ```
 market/
-├── index.json                   # 市场列表（轻量元数据，插件一次只读这个）
+├── index.json                   # 市场列表（元数据 + 预览用 css/sample，插件一次只读这个）
 ├── templates/
 │   ├── rm-academia.json         # 学术科研 · 大肥鱼
 │   ├── rm-finance.json          # 金融投行 · 大肥鱼
@@ -39,6 +39,9 @@ market/
       "author": "大肥鱼",
       "accent": "#6f6880",
       "cls": "rm-t-academia",
+      "templateId": "mkt-academia",
+      "css": ".rm-t-academia{padding:60px 66px 54px;…}",
+      "sample": { "basics": { "name": "周慕云" }, "summary": "…", "experience": [], "…": [] },
       "file": "templates/rm-academia.json",
       "installs": 0,
       "updatedAt": "2026-09-12T02:10:00.000Z"
@@ -58,8 +61,13 @@ market/
 | `accent` | `#rrggbb` 主题色，用于卡片/缩略图 |
 | `cls` | 必须是 `rm-t-*`，**必须和模板 CSS 的根选择器一致** |
 | `file` | 固定 `templates/<id>.json` |
+| `templateId` | 安装后在本地模板库使用的 id，建议 `mkt-<去掉 rm- 后的 id>` |
+| `css` | 可选但**强烈建议**内联模板 CSS：市场卡片直接渲染真实 A4 缩略图，不用再拉一次详情 |
+| `sample` | 可选但**强烈建议**内联示例简历数据：同卡片缩略图使用；格式同 `templates/<id>.json` 的 `sample` |
 | `installs` | 新条目填 `0`；这个数只是展示，插件不做服务端统计 |
 | `updatedAt` | ISO 时间字符串，条目有改动时更新 |
+
+> `css` / `sample` 写在 index 里与写在模板文件里是同一份内容，`node market/build.mjs` 会自动同步；手写投稿时两处保持一致即可（`validate.mjs` 会比对）。
 
 `templates` 数组最多 500 条（插件上限）。多余的未知字段会被插件忽略。
 

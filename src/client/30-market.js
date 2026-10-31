@@ -118,14 +118,22 @@ function PublicMarketCard(props) {
   var installed = props.installed;
   var likes = props.likes || 0;
   var accent = item.accent || '#2f6fde';
+  var hasPreview = !!(item.css && item.sample);
+  var thumb = hasPreview
+    ? h(Thumb, {
+        resume: rmSampleResume(item.sample),
+        template: { id: item.templateId || 'pub-' + item.id, name: item.name, cls: item.cls, css: item.css },
+        initialWidth: 190,
+      })
+    : h(
+        'div',
+        { className: 'rm-tpl-thumb', style: { background: accent + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+        h('div', { style: { fontSize: '16px', fontWeight: '600', color: accent } }, item.name || ''),
+      );
   return h(
     'div',
     { className: 'rm-tpl' },
-    h(
-      'div',
-      { className: 'rm-tpl-thumb', style: { background: accent + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
-      h('div', { style: { fontSize: '16px', fontWeight: '600', color: accent } }, item.name || ''),
-    ),
+    thumb,
     h(
       'div',
       { className: 'rm-tpl-body' },

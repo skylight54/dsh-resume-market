@@ -270,14 +270,30 @@ function SettingsView(props) {
     h(
       'div',
       { className: 'rm-card' },
-      h('div', { className: 'rm-card-h' }, h('h3', null, 'AI 对话（DeepSeek）')),
+      h('div', { className: 'rm-card-h' }, h('h3', null, 'AI 对话')),
       h(
         'div',
         { className: 'rm-card-b rm-col' },
-        h(Field, { label: 'API Key', value: form.chatApiKey, type: 'password', placeholder: 'sk-…', onChange: set('chatApiKey') }),
-        h(Field, { label: '模型', value: form.chatModel, placeholder: 'deepseek-chat', onChange: set('chatModel') }),
-        h(Field, { label: 'Base URL', value: form.chatBaseUrl, placeholder: 'https://api.deepseek.com', onChange: set('chatBaseUrl') }),
-        h('div', { className: 'rm-hint' }, 'API Key 只保存在本机的 store.json，不会随简历/模板上传；「AI 对话」页用它把聊天内容整理成结构化简历。'),
+        h(
+          'div',
+          { className: 'rm-hint' },
+          '免 Key 默认用当前 DSH 模型：编辑界面右下角的「AI 对话」浮动按钮直接就能用，不额外收费、不用在这里填任何东西。'
+        ),
+        h(Field, {
+          label: 'API Key（可留空）',
+          value: form.chatApiKey,
+          type: 'password',
+          placeholder: 'sk-…（留空就用当前 DSH 模型）',
+          onChange: set('chatApiKey'),
+        }),
+        h(Field, { label: '模型（填了 Key 才生效）', value: form.chatModel, placeholder: 'deepseek-chat', onChange: set('chatModel') }),
+        h(Field, {
+          label: 'Base URL（填了 Key 才生效）',
+          value: form.chatBaseUrl,
+          placeholder: 'https://api.deepseek.com',
+          onChange: set('chatBaseUrl'),
+        }),
+        h('div', { className: 'rm-hint' }, '想让简历对话走独立的 DeepSeek API（独立计费）再填上面的 Key；Key 只保存在本机的 store.json，不会随简历/模板上传。'),
         h(
           'div',
           { className: 'rm-row' },
@@ -1109,8 +1125,6 @@ function ResumePanel() {
       busy: busy === 'settings',
       onSave: saveSettings,
     });
-  } else if (tab === 'chat') {
-    body = h(ChatView, { draft: draft, settings: boot.settings, onApply: applyChat });
   } else if (!draft) {
     body = h(
       'div',
@@ -1233,7 +1247,6 @@ function ResumePanel() {
         ['resumes', '我的简历'],
         ['templates', '模板库'],
         ['market', '模板市场'],
-        ['chat', 'AI 对话'],
         ['settings', '设置'],
       ].map(function (pair) {
         return h(
@@ -1279,6 +1292,10 @@ function ResumePanel() {
           onClose: function () { setPublicSubmission(null); },
           onToast: flash,
         })
+      : null,
+    // AI 对话改成右下角浮动入口：不占 tab，任何 tab 下都在（发布/导出弹窗按 z-index 会盖住它）。
+    boot.status === 'ready'
+      ? h(RMChatDock, { draft: draft, settings: boot.settings, onApply: applyChat })
       : null,
     h(Toast, { toast: toast })
   );

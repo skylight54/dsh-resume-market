@@ -114,6 +114,11 @@ const index = {
     author: entry.author,
     accent: entry.accent,
     cls: entry.cls,
+    templateId: entry.templateId,
+    // 内联 css + sample：插件只读一次 index.json 就能渲染真实 A4 缩略图，
+    // 不需要为了「看一眼长什么样」再逐个拉模板文件。模板详情接口仍然保留。
+    css: entry.css,
+    sample: entry.sample,
     file: 'templates/' + entry.id + '.json',
     installs: 0,
     updatedAt: entry.createdAt,

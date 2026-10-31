@@ -2,7 +2,8 @@
  * 简历市场 client — AI 对话（60）。
  *
  * 这里是一个「聊天 → 结构化简历 → 一键应用」的轻量面板：
- *  - 用户用自然语言描述自己，Host 转发给 DeepSeek；
+ *  - 入口是编辑界面右下角的浮动按钮（RMChatDock），不占顶部 tab；
+ *  - 用户用自然语言描述自己，Host 转发给 DeepSeek（填了 Key）或宿主 llm（没填 Key，用 DSH 当前模型）；
  *  - 模型在回复末尾输出一个 ```json 代码块（结构见 Host 的 SYSTEM_PROMPT）；
  *  - 本文件解析最后一个 json 代码块，渲染「应用到当前简历」按钮。
  *
@@ -15,6 +16,9 @@ var RM_CHAT_CSS = [
   '.rm-chat-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px 8px;border-bottom:1px solid var(--dsw-alias-border-l1,#e5e7eb);}',
   '.rm-chat-head-main{display:flex;flex-direction:column;gap:3px;min-width:0;}',
   '.rm-chat-head-main b{font-size:13px;color:var(--dsw-alias-label-primary,#1d2129);}',
+  '.rm-chat-head-right{flex:0 0 auto;display:flex;align-items:center;gap:6px;}',
+  '.rm-chat-note{flex:0 0 auto;margin:8px 18px 0;padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.5;',
+  '  color:var(--dsw-alias-label-secondary,#6b7280);background:var(--dsw-alias-bg-layer-1,#fafbfc);border:1px solid var(--dsw-alias-border-l1,#e5e7eb);}',
   '.rm-chat-warn{flex:0 0 auto;margin:8px 18px 0;padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.5;',
   '  color:var(--dsw-alias-state-error-primary,#dc2626);background:var(--dsw-alias-state-error-secondary,#fef2f2);border:1px solid var(--dsw-alias-state-error-primary,#dc2626);opacity:.85;}',
   '.rm-chat-scroll{flex:1 1 auto;min-height:0;overflow:auto;padding:14px 18px 6px;display:flex;flex-direction:column;gap:10px;}',
@@ -104,8 +108,10 @@ function rmChatMergeData(current, incoming) {
  * AI 对话视图。
  * props:
  *  - draft: 当前简历（可能为 null；null 时允许纯聊天，应用时会新建一份）
- *  - settings: boot.settings（用 chatApiKey 判断是否已配置，显示引导）
+ *  - settings: boot.settings（有 chatApiKey 就显示 DeepSeek 通道，没有就提示走 DSH 当前模型）
  *  - onApply(payload): 点「应用到当前简历」时回调，payload 形如 {title?, data}
+ *  - onFold(): 可选，浮动面板的「折叠」按钮；不传就不渲染
+ *  - onClose(): 可选，浮动面板的「关闭」按钮；不传就不渲染
  */
 function ChatView(props) {
   var settings = props.settings || {};
@@ -138,6 +144,11 @@ function ChatView(props) {
     var node = scrollRef.current;
     if (node) node.scrollTop = node.scrollHeight;
   }, [messages, busy, error]);
+
+  // 浮动面板打开时才挂载，挂载后直接把焦点给输入框（点了按钮就能打字）。
+  useEffect(function () {
+    if (inputRef.current && typeof inputRef.current.focus === 'function') inputRef.current.focus();
+  }, []);
 
   function request(history) {
     setBusy(true);
@@ -201,7 +212,7 @@ function ChatView(props) {
     setApplied(index);
   }
 
-  var noKey = !settings.chatApiKey;
+  var hasKey = !!(settings.chatApiKey && String(settings.chatApiKey).trim());
 
   return h(
     'div',
@@ -213,7 +224,7 @@ function ChatView(props) {
       h(
         'div',
         { className: 'rm-chat-head-main' },
-        h('b', null, 'AI 对话 · DeepSeek'),
+        h('b', null, 'AI 对话 · ' + (hasKey ? 'DeepSeek API' : 'DSH 当前模型')),
         h(
           'span',
           { className: 'rm-hint' },
@@ -222,17 +233,31 @@ function ChatView(props) {
             : '还没有简历：先聊，聊完可以直接从对话新建一份'
         )
       ),
-      messages.length
-        ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', disabled: busy, onClick: clearAll }, '清空对话')
-        : null
+      h(
+        'div',
+        { className: 'rm-chat-head-right' },
+        messages.length
+          ? h('button', { key: 'clear', type: 'button', className: 'rm-btn rm-btn-sm', disabled: busy, onClick: clearAll }, '清空')
+          : null,
+        typeof props.onFold === 'function'
+          ? h(
+              'button',
+              { key: 'fold', type: 'button', className: 'rm-btn rm-btn-sm', title: '折叠成小条（对话保留）', onClick: props.onFold },
+              '折叠'
+            )
+          : null,
+        typeof props.onClose === 'function'
+          ? h('button', { key: 'close', type: 'button', className: 'rm-btn rm-btn-sm', title: '关闭对话', onClick: props.onClose }, '✕')
+          : null
+      )
     ),
-    noKey
-      ? h(
+    hasKey
+      ? null
+      : h(
           'div',
-          { className: 'rm-chat-warn' },
-          '还没填 DeepSeek API Key：先到「设置」页填上（保存在本机），再回来聊天。'
-        )
-      : null,
+          { className: 'rm-chat-note' },
+          '不用填 Key：默认直接用你当前在 DSH 里使用的模型聊天；想改用独立的 DeepSeek API（独立计费）可到「设置」页填 Key。'
+        ),
     h(
       'div',
       { className: 'rm-chat-scroll', ref: scrollRef },
@@ -315,13 +340,99 @@ function ChatView(props) {
       h(
         'div',
         { className: 'rm-chat-actions' },
-        h('span', { className: 'rm-hint' }, busy ? '正在等 DeepSeek 回复…' : 'Enter 发送 · Shift+Enter 换行'),
+        h('span', { className: 'rm-hint' }, busy ? '正在等 AI 回复…' : 'Enter 发送 · Shift+Enter 换行'),
         h(
           'button',
           { type: 'button', className: 'rm-btn rm-btn-primary', disabled: busy || !input.trim(), onClick: function () { send(input); } },
           busy ? '思考中…' : '发送'
         )
       )
+    )
+  );
+}
+
+/**
+ * 浮动入口的样式：右下角胶囊按钮 + 浮动面板 + 折叠后的小条。
+ * 只写在这里（60-chat.js），不动 10-css.js，避免和别的任务冲突。
+ * 层级：按钮/面板 25（高于 toast 20，低于 modal 30），所以打开发布/导出弹窗时会被盖住。
+ */
+var RM_CHAT_DOCK_CSS = [
+  '.rm-chat-dock{position:absolute;right:18px;bottom:18px;z-index:25;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}',
+  '.rm-chat-dock-fab{cursor:pointer;display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid transparent;',
+  '  font-size:12.5px;font-weight:600;color:var(--dsw-alias-bg-base,#fff);background:var(--dsw-alias-brand-primary,#2f6fde);',
+  '  box-shadow:0 10px 24px rgba(47,111,222,.32);}',
+  '.rm-chat-dock-fab:hover{filter:brightness(1.06);}',
+  '.rm-chat-dock-fab-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.85);}',
+  '.rm-chat-dock-panel{width:min(430px,calc(100vw - 36px));height:min(560px,calc(100vh - 150px));min-height:360px;display:flex;flex-direction:column;',
+  '  overflow:hidden;background:var(--dsw-alias-bg-base,#fff);border:1px solid var(--dsw-alias-border-l2,#d5d9e0);border-radius:14px;',
+  '  box-shadow:0 18px 44px rgba(15,23,42,.22);}',
+  '.rm-chat-dock-mini{display:none;align-items:center;gap:8px;padding:6px 8px 6px 12px;border-radius:10px;background:var(--dsw-alias-bg-overlay,#fff);',
+  '  border:1px solid var(--dsw-alias-border-l2,#d5d9e0);box-shadow:0 10px 26px rgba(15,23,42,.18);font-size:12px;color:var(--dsw-alias-label-primary,#1d2129);}',
+  '.rm-chat-dock-mini b{font-size:12.5px;}',
+  '.rm-chat-dock.is-mini .rm-chat-dock-panel{display:none;}',
+  '.rm-chat-dock.is-mini .rm-chat-dock-mini{display:flex;}',
+].join('\n');
+
+/**
+ * 右下角浮动的 AI 对话入口。
+ *  - 关闭：收起成全局面板外的胶囊按钮；
+ *  - 折叠：面板变成一条只留标题的小条（ChatView 只是被 CSS 隐藏，对话记录不丢）。
+ * props: { draft, settings, onApply }，直接透传给 ChatView。
+ */
+function RMChatDock(props) {
+  var openState = useState(false);
+  var open = openState[0];
+  var setOpen = openState[1];
+  var miniState = useState(false);
+  var mini = miniState[0];
+  var setMini = miniState[1];
+
+  function close() {
+    setOpen(false);
+    setMini(false);
+  }
+
+  if (!open) {
+    return h(
+      'div',
+      { className: 'rm-chat-dock' },
+      h('style', { key: 'rm-chat-dock-css' }, RM_CHAT_DOCK_CSS),
+      h(
+        'button',
+        {
+          type: 'button',
+          className: 'rm-chat-dock-fab',
+          title: 'AI 对话：说说你的经历，帮你整理成简历',
+          'aria-label': '打开 AI 对话',
+          onClick: function () { setOpen(true); },
+        },
+        h('span', { className: 'rm-chat-dock-fab-dot' }),
+        'AI 对话'
+      )
+    );
+  }
+
+  return h(
+    'div',
+    { className: 'rm-chat-dock' + (mini ? ' is-mini' : '') },
+    h('style', { key: 'rm-chat-dock-css' }, RM_CHAT_DOCK_CSS),
+    h(
+      'div',
+      { className: 'rm-chat-dock-mini' },
+      h('b', null, 'AI 对话'),
+      h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { setMini(false); } }, '展开'),
+      h('button', { type: 'button', className: 'rm-btn rm-btn-sm', title: '关闭对话', onClick: close }, '✕')
+    ),
+    h(
+      'div',
+      { className: 'rm-chat-dock-panel' },
+      h(ChatView, {
+        draft: props.draft,
+        settings: props.settings,
+        onApply: props.onApply,
+        onFold: function () { setMini(true); },
+        onClose: close,
+      })
     )
   );
 }

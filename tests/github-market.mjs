@@ -129,6 +129,14 @@ assert.equal(res.json.value.items.length, 5, '公共市场应有 5 个模板');
 assert.equal(res.json.value.stale, false);
 assert.equal(res.json.value.repo, 'skylight54/dsh-resume-market');
 
+// 1b) 列表条目自带 css/sample，市场卡片才能渲染真实 A4 缩略图（与安装后的预览一致）
+const firstItem = res.json.value.items[0];
+assert.ok(firstItem && firstItem.id, '列表应有条目');
+assert.ok(String(firstItem.css || '').includes('.rm-t-'), '列表条目应内联 css');
+assert.ok(firstItem.sample && firstItem.sample.basics, '列表条目应内联 sample');
+assert.ok(/^rm-t-/.test(firstItem.cls || ''), '列表条目应带 cls');
+assert.ok(firstItem.templateId, '列表条目应带 templateId');
+
 // 2) index 字段与模板文件一一对应，逐个安装
 const seen = new Set();
 for (const item of index.templates) {

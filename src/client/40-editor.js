@@ -311,13 +311,13 @@ function ProjectsCard(props) {
 function EducationCard(props) {
   return card({
     title: '教育背景',
-    hint: '学校 / 学历 / 专业 / 时间',
+    hint: '学校 / 学历 / 专业 / 时间 · 主修课程可选',
     children: h(ListEditor, {
       items: props.items,
       onChange: props.onChange,
       addLabel: '添加教育经历',
       makeItem: function () {
-        return { school: '', degree: '', major: '', period: '', gpa: '' };
+        return { school: '', degree: '', major: '', period: '', gpa: '', courses: '' };
       },
       render: function (item, update) {
         return h(
@@ -327,7 +327,8 @@ function EducationCard(props) {
           h(Field, { label: '学历', value: item.degree, placeholder: '本科 / 硕士', onChange: function (v) { update({ degree: v }); } }),
           h(Field, { label: '专业', value: item.major, placeholder: '信息管理与信息系统', onChange: function (v) { update({ major: v }); } }),
           h(Field, { label: '时间', value: item.period, placeholder: '2014 – 2018', onChange: function (v) { update({ period: v }); } }),
-          h(Field, { label: 'GPA / 排名（可选）', value: item.gpa, placeholder: '3.8 / 4.0', wide: true, onChange: function (v) { update({ gpa: v }); } })
+          h(Field, { label: 'GPA / 排名（可选）', value: item.gpa, placeholder: '3.8 / 4.0', onChange: function (v) { update({ gpa: v }); } }),
+          h(Field, { label: '主修课程（可选）', value: item.courses, placeholder: '数据结构、计量经济学', wide: true, onChange: function (v) { update({ courses: v }); } })
         );
       },
     }),
@@ -387,8 +388,22 @@ function AwardsCard(props) {
 
 var RM_SECTION_LABELS_UI = { summary: '个人简介', experience: '工作经历', projects: '项目经历', education: '教育背景', skills: '专业技能', awards: '荣誉奖项' };
 
+/**
+ * 模块顺序与显示：
+ *  - 拖动左侧把手（HTML5 draggable）调整顺序，悬停行显示插入位；
+ *  - 小按钮 ↑ / ↓ 也能排序（键盘 / 触屏友好，jsdom 测试走这条路径）；
+ *  - 眼睛按钮切换隐藏 / 显示，隐藏的模块仍留在列表里但变灰；
+ *  - 所有变化都直接改 resume.sections，预览与导出随之实时更新。
+ */
 function SectionsCard(props) {
   var sections = props.sections || [];
+  var dragState = useState('');
+  var dragKey = dragState[0];
+  var setDragKey = dragState[1];
+  var overState = useState('');
+  var overKey = overState[0];
+  var setOverKey = overState[1];
+
   function move(index, delta) {
     var target = index + delta;
     if (target < 0 || target >= sections.length) return;
@@ -398,52 +413,136 @@ function SectionsCard(props) {
     next[index] = tmp;
     props.onChange(next);
   }
+  function reorder(fromKey, toKey) {
+    var from = sections.indexOf(fromKey);
+    var to = sections.indexOf(toKey);
+    if (from < 0 || to < 0 || from === to) return;
+    var next = sections.slice();
+    next.splice(from, 1);
+    next.splice(to, 0, fromKey);
+    props.onChange(next);
+  }
   function hide(key) {
     props.onChange(sections.filter(function (k) { return k !== key; }));
   }
   function show(key) {
     props.onChange(sections.concat([key]));
   }
+  function toggle(key) {
+    if (sections.indexOf(key) >= 0) hide(key);
+    else show(key);
+  }
+  function endDrag() {
+    setDragKey('');
+    setOverKey('');
+  }
+  function drop(event, key) {
+    if (event && event.preventDefault) event.preventDefault();
+    var from = dragKey;
+    if (!from && event && event.dataTransfer) {
+      try {
+        from = event.dataTransfer.getData('text/plain');
+      } catch (err) {
+        /* jsdom 里可能没有 dataTransfer */
+      }
+    }
+    endDrag();
+    if (from) reorder(from, key);
+  }
+
   var hidden = SECTION_ORDER.filter(function (k) { return sections.indexOf(k) < 0; });
+  // 可见模块按 sections 顺序在前，隐藏模块附在最后但仍在列表里显示（变灰）。
+  var rows = sections.concat(hidden);
+  var dragIndex = dragKey ? sections.indexOf(dragKey) : -1;
+
   return h(
     'div',
     { className: 'rm-card' },
-    h('div', { className: 'rm-card-h' }, h('h3', null, '模块顺序与显示'), h('span', { className: 'rm-muted' }, '↑ ↓ 调整顺序，预览和导出会跟着变')),
+    h(
+      'div',
+      { className: 'rm-card-h' },
+      h('h3', null, '模块顺序与显示'),
+      h('span', { className: 'rm-muted' }, '拖动 ⠿ 排序 · 点眼睛隐藏 / 显示 · 预览实时跟随')
+    ),
     h(
       'div',
       { className: 'rm-card-b' },
       h(
         'div',
         { className: 'rm-order-list' },
-        sections.map(function (key, index) {
+        rows.map(function (key, index) {
+          var visible = sections.indexOf(key) >= 0;
+          var cls = 'rm-order-row' + (visible ? '' : ' is-hidden');
+          if (dragKey === key) cls += ' is-dragging';
+          if (visible && overKey === key && dragKey && dragKey !== key) {
+            cls += dragIndex >= 0 && index > dragIndex ? ' is-drop-below' : ' is-drop-above';
+          }
           return h(
             'div',
-            { className: 'rm-order-row', key: key },
-            h('span', { className: 'rm-order-idx' }, String(index + 1)),
+            {
+              key: key,
+              className: cls,
+              onDragOver: function (event) {
+                if (!dragKey || dragKey === key) return;
+                if (event.preventDefault) event.preventDefault();
+                if (event.dataTransfer) {
+                  try { event.dataTransfer.dropEffect = 'move'; } catch (err) { /* ignore */ }
+                }
+                if (overKey !== key) setOverKey(key);
+              },
+              onDragLeave: function () {
+                if (overKey === key) setOverKey('');
+              },
+              onDrop: function (event) { drop(event, key); },
+            },
+            h(
+              'span',
+              {
+                className: 'rm-order-grip',
+                title: visible ? '拖动排序' : '已隐藏，点眼睛恢复',
+                draggable: visible ? true : undefined,
+                onDragStart: function (event) {
+                  if (!visible) return;
+                  setDragKey(key);
+                  if (event && event.dataTransfer) {
+                    try {
+                      event.dataTransfer.effectAllowed = 'move';
+                      event.dataTransfer.setData('text/plain', key);
+                    } catch (err) {
+                      /* ignore */
+                    }
+                  }
+                },
+                onDragEnd: endDrag,
+              },
+              visible ? '⠿' : '·'
+            ),
+            h('span', { className: 'rm-order-idx' }, visible ? String(index + 1) : '–'),
             h('span', { className: 'rm-order-name' }, RM_SECTION_LABELS_UI[key] || key),
             h(
               'span',
               { className: 'rm-item-tools' },
-              h('button', { type: 'button', className: 'rm-mini', title: '上移', disabled: index === 0, onClick: function () { move(index, -1); } }, '↑'),
-              h('button', { type: 'button', className: 'rm-mini', title: '下移', disabled: index === sections.length - 1, onClick: function () { move(index, 1); } }, '↓'),
-              h('button', { type: 'button', className: 'rm-mini rm-danger', title: '隐藏', onClick: function () { hide(key); } }, '隐藏')
+              h(
+                'button',
+                { type: 'button', className: 'rm-mini rm-mini-xs', title: '上移', disabled: !visible || index === 0, onClick: function () { move(index, -1); } },
+                '↑'
+              ),
+              h(
+                'button',
+                { type: 'button', className: 'rm-mini rm-mini-xs', title: '下移', disabled: !visible || index === sections.length - 1, onClick: function () { move(index, 1); } },
+                '↓'
+              ),
+              h(
+                'button',
+                { type: 'button', className: 'rm-mini rm-mini-xs rm-order-eye' + (visible ? '' : ' is-on'), title: visible ? '隐藏' : '显示', onClick: function () { toggle(key); } },
+                '👁'
+              )
             )
           );
         })
       ),
       hidden.length
-        ? h(
-          'div',
-          { className: 'rm-sec-chips rm-order-hidden' },
-          h('span', { className: 'rm-muted' }, '已隐藏：'),
-          hidden.map(function (key) {
-            return h(
-              'button',
-              { key: key, type: 'button', className: 'rm-chip', onClick: function () { show(key); } },
-              '+ ' + (RM_SECTION_LABELS_UI[key] || key)
-            );
-          })
-        )
+        ? h('div', { className: 'rm-muted rm-order-tip' }, '灰色模块已隐藏，预览 / 导出不会包含；点眼睛恢复。')
         : null
     )
   );
