@@ -355,6 +355,47 @@ assert.equal(res.status, 200);
 res = await call('POST', '/market/unpublish', { id: entryId });
 assert.equal(res.status, 200);
 
+// 8a) 模板库：新建 / 编辑 / 发布模板（发布主语是模板，不是简历）
+res = await call('POST', '/template/save', {
+  template: {
+    name: '我的测试模板',
+    tagline: '模板库新建',
+    tags: ['测试'],
+    accent: '#445566',
+    style: { accent: '#445566', nameSize: 32, headingStyle: 'bar', fontFamily: 'serif' },
+  },
+});
+assert.equal(res.status, 200, res.body);
+const customTemplate = res.json.value.template;
+assert.ok(/^my-[a-z0-9-]+$/.test(customTemplate.id), '新模板 id 应合法：' + customTemplate.id);
+assert.equal(customTemplate.cls, 'rm-t-' + customTemplate.id);
+assert.equal(customTemplate.style.nameSize, 32);
+assert.equal(customTemplate.style.headingStyle, 'bar');
+assert.ok(customTemplate.sample && customTemplate.sample.basics, '新模板应带示例数据');
+res = await call('POST', '/template/save', {
+  template: { id: customTemplate.id, name: '我的测试模板 v2', css: '.' + customTemplate.cls + '{padding:40px;color:#111}' },
+});
+assert.equal(res.status, 200, res.body);
+assert.equal(res.json.value.template.name, '我的测试模板 v2');
+assert.ok(res.json.value.template.css.includes(customTemplate.cls), '保存的 CSS 应保留模板根 class');
+res = await call('POST', '/template/save', { template: { id: 'business-minimal', name: '想改内置' } });
+assert.equal(res.status, 409, '内置模板不能直接改');
+assert.equal(res.json.error.code, 'template/builtin');
+res = await call('POST', '/template/publish', { templateId: customTemplate.id, title: '模板库发布测试' });
+assert.equal(res.status, 200, res.body);
+const templateEntry = res.json.value.entry;
+assert.equal(templateEntry.templateId, customTemplate.id);
+assert.equal(templateEntry.cls, customTemplate.cls);
+assert.ok(templateEntry.sample && templateEntry.sample.basics, '发布条目应带示例数据');
+assert.ok(templateEntry.css.includes(customTemplate.cls), '发布条目应带模板 CSS');
+res = await call('POST', '/github/publish-template', { templateId: customTemplate.id, name: '模板库发布测试' });
+assert.equal(res.status, 200, res.body);
+assert.ok(res.json.value.repoPath.startsWith('market/templates/'), res.json.value.repoPath);
+assert.ok(res.json.value.json.includes(customTemplate.cls), '模板投稿 JSON 应带模板 class');
+assert.ok(res.json.value.payload.style && res.json.value.payload.style.nameSize === 32, '投稿应保留 style');
+res = await call('POST', '/template/publish', { templateId: 'business-minimal' });
+assert.equal(res.status, 409, '内置模板不能直接发布');
+
 // 8b) GitHub 公共市场：index / 安装 / 点赞 / 投稿
 res = await call('GET', '/github/state');
 assert.equal(res.status, 200, res.body);
@@ -406,7 +447,7 @@ for (const tool of tools) {
   assert.ok(['object', 'array'].includes(tool.output.schema.type), tool.name + ' 的 output.schema 类型不受支持');
 }
 const listed = await byName.get('resume_market_list').execute({ include: 'all' });
-assert.equal(listed.templates.length, 8, '6 内置 + 1 市场安装 + 1 公共市场安装');
+assert.equal(listed.templates.length, 9, '6 内置 + 1 市场安装 + 1 公共市场安装 + 1 模板库新建');
 const saved = await byName.get('resume_save').execute({
   title: 'AI 直出简历',
   templateId: 'quiet-luxury',

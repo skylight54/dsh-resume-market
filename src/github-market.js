@@ -216,16 +216,11 @@ export function createGithubMarket({ store, log, fetchImpl }) {
     return template;
   }
 
-  /**
-   * 生成投稿用的 JSON 与 GitHub 链接。
-   * 默认不包含用户真实简历内容（sample 用示例数据），includeSample=true 才带自己的。
-   */
-  async function publishPayload(input = {}) {
-    const resume = store.getResume(String(input.resumeId || ''));
-    const template = store.templateForResume(resume);
+  /** 把「一份模板 + 一份示例数据」打包成 GitHub 投稿 JSON 与几个直达链接。 */
+  function buildSubmission(input) {
     const { repo, branch } = source();
-    const id = makeTemplateId(resume);
-    const name = String(input.name || resume.title || '我的简历模板').slice(0, 40);
+    const id = makeTemplateId({ title: input.slug || input.name, data: { basics: { name: input.slug || input.name } } });
+    const name = String(input.name || '我的简历模板').slice(0, 40);
     const tagline = String(input.tagline || '').slice(0, 160) || '我的简历模板';
     const tags = Array.isArray(input.tags)
       ? input.tags.map((t) => String(t).slice(0, 12)).filter(Boolean).slice(0, 6)
@@ -233,8 +228,7 @@ export function createGithubMarket({ store, log, fetchImpl }) {
           .split(/[,，\s]+/)
           .filter(Boolean)
           .slice(0, 6);
-    const sampleData =
-      input.includeSample === true ? normalizeData(resume.data) : normalizeData(DEMO_RESUME_DATA);
+    const sampleData = normalizeData(input.sample || DEMO_RESUME_DATA);
     const payload = {
       schema: 1,
       id,
@@ -243,10 +237,11 @@ export function createGithubMarket({ store, log, fetchImpl }) {
       tagline,
       tags,
       author: String(input.author || store.settings().author || '匿名').slice(0, 40),
-      accent: /^#[0-9a-fA-F]{3,8}$/.test(String(template && template.accent)) ? template.accent : '#2f6fde',
-      cls: (template && template.cls) || 'rm-t-' + String(template && template.id).replace(/[^a-z0-9-]/gi, ''),
+      accent: /^#[0-9a-fA-F]{3,8}$/.test(String(input.accent)) ? input.accent : '#2f6fde',
+      cls: input.cls || 'rm-t-' + id,
       templateId: 'pub-' + id.slice(3, 23),
-      css: String((template && template.css) || '').slice(0, 100 * 1024),
+      css: String(input.css || '').slice(0, 100 * 1024),
+      style: input.style && typeof input.style === 'object' ? input.style : undefined,
       sample: sampleData,
       createdAt: new Date().toISOString(),
     };
@@ -281,7 +276,57 @@ export function createGithubMarket({ store, log, fetchImpl }) {
     };
   }
 
-  return { source, loadIndex, loadTemplate, install, publishPayload };
+  /**
+   * 生成投稿用的 JSON 与 GitHub 链接（简历版，兼容旧入口）。
+   * 默认不包含用户真实简历内容（sample 用示例数据），includeSample=true 才带自己的。
+   */
+  async function publishPayload(input = {}) {
+    const resume = store.getResume(String(input.resumeId || ''));
+    const template = store.templateForResume(resume);
+    return buildSubmission({
+      name: String(input.name || resume.title || '我的简历模板'),
+      en: input.en || (template && template.en),
+      tagline: input.tagline || (template && template.tagline),
+      tags: input.tags && input.tags.length ? input.tags : template && template.tags,
+      author: input.author || (template && template.author),
+      accent: template && template.accent,
+      cls: template && template.cls,
+      css: template && template.css,
+      style: template && template.style,
+      sample: input.includeSample === true ? resume.data : DEMO_RESUME_DATA,
+    });
+  }
+
+  /**
+   * 模板投稿：发布主语是模板库里的自定义模板。
+   * 示例数据优先用模板自带的 sample；includeSample 时用调用方给的。
+   */
+  async function publishTemplatePayload(input = {}) {
+    const template = store.getTemplateById(String(input.templateId || ''));
+    if (!template) {
+      const error = new Error('找不到这个模板');
+      error.code = 'template/not-found';
+      throw error;
+    }
+    return buildSubmission({
+      slug: String(template.id || '').replace(/^my-/, ''),
+      name: String(input.name || template.name || '我的模板'),
+      en: input.en || template.en,
+      tagline: input.tagline || template.tagline,
+      tags: input.tags && input.tags.length ? input.tags : template.tags,
+      author: input.author || template.author,
+      accent: template.accent,
+      cls: template.cls,
+      css: template.css,
+      style: template.style,
+      sample:
+        input.includeSample === true && input.sample
+          ? input.sample
+          : template.sample || input.sample || DEMO_RESUME_DATA,
+    });
+  }
+
+  return { source, loadIndex, loadTemplate, install, publishPayload, publishTemplatePayload };
 }
 
 function messageOf(error) {

@@ -94,6 +94,11 @@ function newId(prefix) {
   return prefix + '_' + Date.now().toString(36) + randomBytes(3).toString('hex');
 }
 
+/** 模板 id 必须是 URL/文件名友好的小写串（会变成 GitHub 文件名与 CSS class）。 */
+function newTemplateId() {
+  return 'my-' + Date.now().toString(36) + '-' + randomBytes(2).toString('hex');
+}
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -219,8 +224,7 @@ function reconcile(raw) {
     state.templates = raw.templates
       .filter((t) => t && typeof t === 'object')
       .slice(0, MAX_TEMPLATES)
-      .map((t) => ({ ...normalizeTemplate(t), author: String(t.author || '').slice(0, 40), addedAt: String(t.addedAt || nowIso()) }));
-  }
+      .map((t) => ({ ...normalizeTemplate(t), author: String(t.author || '').slice(0, 40), addedAt: String(t.addedAt || nowIso()) }));  }
   if (Array.isArray(raw.market)) {
     const saved = raw.market.filter((m) => m && typeof m === 'object');
     const byId = new Map(saved.map((m) => [String(m.id), m]));
@@ -247,6 +251,10 @@ function reconcile(raw) {
         accent: /^#[0-9a-fA-F]{3,8}$/.test(String(m.accent || '')) ? String(m.accent) : '#2f6fde',
         desc: String(m.desc || '').slice(0, 120),
         css: String(m.css || '').slice(0, 100 * 1024),
+        cls:
+          /^rm-t-[a-z0-9-]{1,40}$/.test(String(m.cls || ''))
+            ? String(m.cls)
+            : templateClass({ id: String(m.templateId || m.id), css: String(m.css || '') }),
         author: String(m.author || '匿名').slice(0, 40),
         source: m.source === 'local' ? 'local' : 'local',
         installs: Number(m.installs) || 0,
@@ -603,6 +611,120 @@ export function openStore(options = {}) {
         }
         state.templates.splice(index, 1);
         return { id };
+      });
+    },
+
+    /** 读一个模板（内置或自定义的拷贝）；找不到返回 null。 */
+    getTemplateById(id) {
+      const template = getTemplate(String(id || ''));
+      return template ? clone(template) : null;
+    },
+
+    /** 新建一个自定义模板（模板库「新建模板」）。 */
+    createTemplate(input = {}) {
+      return mutate(() => {
+        const id = newTemplateId();
+        const template = normalizeTemplate(
+          {
+            ...input,
+            id: id,
+            cls: 'rm-t-' + id,
+            name: input.name || '我的模板',
+          },
+          id,
+        );
+        const record = {
+          ...template,
+          id: id,
+          cls: 'rm-t-' + id,
+          sample: template.sample || normalizeData(input.sample || DEMO_RESUME_DATA),
+          author: String(input.author || state.settings.author || '我').slice(0, 40),
+          addedAt: nowIso(),
+        };
+        if (state.templates.length >= MAX_TEMPLATES) {
+          throw new StoreError('template/limit', `最多只能保存 ${MAX_TEMPLATES} 个模板，请先清理`, 409);
+        }
+        state.templates.push(record);
+        return clone(record);
+      });
+    },
+
+    /** 修改自定义模板；内置模板只能先复制。 */
+    updateTemplate(id, patch = {}) {
+      return mutate(() => {
+        const templateId = String(id || '');
+        if (TEMPLATES.some((t) => t.id === templateId)) {
+          throw new StoreError('template/builtin', '内置模板不能直接修改，先「复制为新模板」再改', 409);
+        }
+        const index = state.templates.findIndex((t) => t.id === templateId);
+        if (index === -1) throw new StoreError('template/not-found', '找不到这个模板', 404);
+        const existing = state.templates[index];
+        const merged = normalizeTemplate(
+          {
+            ...existing,
+            ...patch,
+            id: existing.id,
+          },
+          existing.id,
+        );
+        const record = {
+          ...existing,
+          ...merged,
+          id: existing.id,
+          cls: merged.cls || existing.cls || 'rm-t-' + existing.id,
+          style: merged.style || existing.style,
+          sample: merged.sample || existing.sample,
+          author: existing.author,
+          addedAt: existing.addedAt,
+        };
+        state.templates[index] = record;
+        return clone(record);
+      });
+    },
+
+    /**
+     * 发布「模板」到本地市场（发布主语是模板，不是某份简历）。
+     * 内置模板要先复制成自己的模板才能发布。
+     */
+    publishTemplate({ templateId, title, tagline, tags, desc, includeSample, sample, author }) {
+      return mutate(() => {
+        const template = getTemplate(String(templateId || ''));
+        if (!template) throw new StoreError('template/not-found', '找不到这个模板', 404);
+        if (TEMPLATES.some((t) => t.id === template.id)) {
+          throw new StoreError('template/builtin', '内置模板不能直接发布，先在模板库「复制为新模板」再发布', 409);
+        }
+        const shareContent = includeSample === true;
+        const marketId = newId('m');
+        const entryName = String(title || template.name || '未命名模板').slice(0, 40).trim() || '未命名模板';
+        const sampleData = normalizeData(
+          shareContent && sample ? sample : template.sample || sample || DEMO_RESUME_DATA,
+        );
+        const entry = {
+          id: marketId,
+          kind: 'template',
+          templateId: template.id,
+          name: entryName,
+          en: template.en || '',
+          tagline: String(tagline || template.tagline || '').slice(0, 120),
+          tags: Array.isArray(tags)
+            ? tags.map((t) => String(t).slice(0, 12)).filter(Boolean).slice(0, 5)
+            : (template.tags || []).slice(0, 5),
+          accent: template.accent,
+          desc: String(desc || template.desc || '').slice(0, 120),
+          css: String(template.css || '').slice(0, 100 * 1024),
+          cls: templateClass(template),
+          author: String(author || template.author || state.settings.author || '我').slice(0, 40),
+          source: 'local',
+          installs: 0,
+          likes: 0,
+          createdAt: nowIso(),
+          sample: sampleData,
+        };
+        if (state.market.length >= MAX_MARKET) {
+          throw new StoreError('market/limit', `市场里最多 ${MAX_MARKET} 个条目`, 409);
+        }
+        state.market.unshift(entry);
+        return clone(entry);
       });
     },
 

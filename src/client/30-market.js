@@ -18,6 +18,7 @@ function rmSampleResume(sample) {
 function TemplateCard(props) {
   var template = props.template;
   var onUse = props.onUse;
+  var builtin = !!template.builtin;
   return h(
     'div',
     { className: 'rm-tpl' + (props.current ? ' is-current' : '') },
@@ -29,7 +30,7 @@ function TemplateCard(props) {
         'div',
         { className: 'rm-tpl-name' },
         template.name,
-        template.builtin ? h('span', { className: 'rm-pill rm-pill-brand' }, '内置') : null,
+        builtin ? h('span', { className: 'rm-pill rm-pill-brand' }, '内置') : h('span', { className: 'rm-pill' }, '我的'),
         props.current ? h('span', { className: 'rm-pill rm-pill-warn' }, '使用中') : null
       ),
       h('div', { className: 'rm-tpl-tag' }, template.tagline || template.en || ''),
@@ -37,8 +38,23 @@ function TemplateCard(props) {
         'div',
         { className: 'rm-tpl-foot' },
         h('button', { type: 'button', className: 'rm-btn rm-btn-sm' + (props.current ? '' : ' rm-btn-primary'), onClick: function () { onUse(template); } }, props.current ? '换回' : '使用此模板'),
-        props.onOpen ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onOpen(template); } }, '预览') : null
-      )
+        props.onPreview ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onPreview(template); } }, '预览') : null
+      ),
+      builtin
+        ? props.onCopy
+          ? h(
+              'div',
+              { className: 'rm-tpl-foot' },
+              h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onCopy(template); } }, '复制为新模板')
+            )
+          : null
+        : h(
+            'div',
+            { className: 'rm-tpl-foot' },
+            props.onEdit ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onEdit(template); } }, '编辑') : null,
+            props.onPublishTemplate ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onPublishTemplate(template); } }, '发布') : null,
+            props.onDelete ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm rm-btn-danger', onClick: function () { props.onDelete(template); } }, '删除') : null
+          )
     )
   );
 }
@@ -99,17 +115,42 @@ function TemplatesView(props) {
   var templates = props.templates || [];
   return h(
     'div',
-    { className: 'rm-grid' },
-    templates.map(function (template) {
-      return h(TemplateCard, {
-        key: template.id,
-        template: template,
-        current: props.currentTemplateId === template.id,
-        sample: template.sample || DEMO_RESUME_DATA,
-        onUse: props.onUse,
-        onOpen: props.onPreview,
-      });
-    })
+    { className: 'rm-lib' },
+    h(
+      'div',
+      { className: 'rm-lib-bar' },
+      h(
+        'div',
+        { className: 'rm-col' },
+        h('h3', null, '模板库'),
+        h('span', { className: 'rm-hint' }, '选一套版式套用；内置模板可以「复制为新模板」后随便改，自定义模板能编辑、发布到市场或删除。')
+      ),
+      h(
+        'div',
+        { className: 'rm-row' },
+        props.onCreate ? h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: props.onCreate }, '+ 新建模板') : null,
+        props.onImport ? h('button', { type: 'button', className: 'rm-btn', onClick: props.onImport }, '从图片生成') : null
+      )
+    ),
+    h(
+      'div',
+      { className: 'rm-grid' },
+      templates.map(function (template) {
+        return h(TemplateCard, {
+          key: template.id,
+          template: template,
+          current: props.currentTemplateId === template.id,
+          sample: template.sample || DEMO_RESUME_DATA,
+          onUse: props.onUse,
+          onPreview: props.onPreview,
+          onCreate: props.onCreate,
+          onCopy: props.onCopy,
+          onEdit: props.onEdit,
+          onPublishTemplate: props.onPublishTemplate,
+          onDelete: props.onDelete,
+        });
+      })
+    )
   );
 }
 
@@ -268,6 +309,13 @@ function MarketView(props) {
           },
           '刷新',
         ),
+        source === 'local' && props.onPublishResume
+          ? h(
+              'button',
+              { type: 'button', className: 'rm-btn rm-btn-sm rm-btn-primary', onClick: props.onPublishResume },
+              '发布简历到市场'
+            )
+          : null,
       ),
     ),
     body,

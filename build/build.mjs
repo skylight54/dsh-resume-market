@@ -20,6 +20,7 @@ const FILES = [
   'src/client/10-css.js',
   'src/client/20-docview.js',
   'src/client/30-market.js',
+  'src/client/33-template-editor.js',
   'src/client/40-editor.js',
   'src/client/45-resumes.js',
   'src/client/55-pdf.js',

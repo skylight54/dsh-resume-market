@@ -779,6 +779,26 @@ function buildWordHtml(resume, template) {
   );
 }
 
+/** 模板样式对象（模板编辑器用的结构化字段）白名单收敛。 */
+function sanitizeStyle(raw) {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const out = {};
+  const colors = ['accent', 'nameColor', 'headingColor', 'bodyColor', 'background', 'bandColor'];
+  for (const key of colors) {
+    if (/^#[0-9a-fA-F]{3,8}$/.test(String(raw[key] || ''))) out[key] = String(raw[key]);
+  }
+  const nums = ['nameSize', 'headingSize', 'bodySize', 'lineHeight', 'padX', 'padY', 'sectionGap', 'contactCols'];
+  for (const key of nums) {
+    const value = Number(raw[key]);
+    if (Number.isFinite(value) && value > 0 && value <= 400) out[key] = value;
+  }
+  if (['rule', 'bar', 'underline', 'plain'].indexOf(raw.headingStyle) !== -1) out.headingStyle = raw.headingStyle;
+  if (['sans', 'serif', 'mono'].indexOf(raw.fontFamily) !== -1) out.fontFamily = raw.fontFamily;
+  if (['left', 'center'].indexOf(raw.headerAlign) !== -1) out.headerAlign = raw.headerAlign;
+  if (raw.headerBand === true) out.headerBand = true;
+  return Object.keys(out).length ? out : undefined;
+}
+
 /** 校验/收敛模板对象（导入市场包时用）。 */
 function normalizeTemplate(raw, fallbackId) {
   if (!raw || typeof raw !== 'object') return templateById(fallbackId);
@@ -802,6 +822,8 @@ function normalizeTemplate(raw, fallbackId) {
     accent: /^#[0-9a-fA-F]{3,8}$/.test(String(raw.accent || '')) ? String(raw.accent) : base.accent,
     desc: String(raw.desc || '').slice(0, 120),
     css: css || base.css,
+    style: sanitizeStyle(raw.style),
+    sample: raw.sample && typeof raw.sample === 'object' ? normalizeData(raw.sample) : undefined,
   };
 }
 

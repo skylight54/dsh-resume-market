@@ -3,6 +3,29 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.4.0 — 2026-10-31
+
+### 新增
+
+- **模板库创作闭环**：模板库支持「+ 新建模板」「复制为新模板」「编辑」「发布」「删除」，
+  不再只能发布简历。发布的对象是模板本身（含 css / style / 示例数据），可在弹窗里选择是否
+  携带示例内容，并可直接生成 GitHub 公共投稿。
+- **模板元素格式编辑器**：强调色 / 姓名色 / 标题色 / 正文色 / 纸张底色 / 页眉色带、姓名 /
+  标题 / 正文字号、行距、左右与上下页边距、区块间距、标题样式（rule/bar/underline/plain）、
+  字体（sans/serif/mono）、页眉对齐、联系信息列数、页眉色带开关；右侧 A4 实时预览。
+- **从图片生成模板初稿**：选一张简历截图，本地 canvas 取色 + 版式启发式生成一套模板初稿
+  （强调色、字号、边距、标题样式、页眉色带），再在编辑器里微调，不依赖视觉模型。
+- 后端：`POST /template/save`、`POST /template/publish`、`POST /github/publish-template`；
+  `store` 新增 `getTemplateById` / `createTemplate` / `updateTemplate` / `publishTemplate`；
+  `normalizeTemplate` 保留 `style` 白名单与 `sample`；市场条目补 `cls`。
+
+### 变更
+
+- 「发布到市场」入口从顶部工具栏移到「模板库」，顶部改为提示「发布模板请到模板库」；
+  市场页不再提供简历发布入口。
+- 内置模板只读：编辑/发布内置模板时提示先「复制为新模板」。
+- 版本号 0.3.0 → 0.4.0；mount 测试增加模板库新建 / 编辑 / 图片导入 / 发布弹窗覆盖。
+
 ## v0.3.0 — 2026-10-31
 
 ### 新增

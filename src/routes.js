@@ -278,6 +278,25 @@ export function createHandler({ ctx, store }) {
       return { status: 200, body: ok({ settings: await store.updateSettings(body || {}) }) };
     }
 
+    // 模板库：新建 / 编辑模板、把模板发布到市场（发布主语是模板，不是简历）。
+    if (suffix === '/template/save' && method === 'POST') {
+      const body = await readJsonBody(req);
+      const input = body && body.template ? body.template : body;
+      if (!input || typeof input !== 'object' || Array.isArray(input)) {
+        return { status: 400, body: fail('http/bad-request', '缺少模板内容') };
+      }
+      const template = input.id
+        ? await store.updateTemplate(String(input.id), input)
+        : await store.createTemplate(input);
+      return { status: 200, body: ok({ template }) };
+    }
+
+    if (suffix === '/template/publish' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.templateId) return { status: 400, body: fail('http/bad-request', '缺少 templateId') };
+      return { status: 200, body: ok({ entry: await store.publishTemplate(body) }) };
+    }
+
     // 公共市场（GitHub 仓库当市场）：读 index、安装模板、本地点赞、生成投稿内容。
     if (suffix === '/github/state' && method === 'GET') {
       const settings = store.settings();
@@ -335,6 +354,13 @@ export function createHandler({ ctx, store }) {
       const body = await readJsonBody(req);
       if (!body || !body.resumeId) return { status: 400, body: fail('http/bad-request', '缺少 resumeId') };
       return { status: 200, body: ok(await githubMarket.publishPayload(body)) };
+    }
+
+    // 模板投稿：把模板库里的自定义模板生成一份可直接提交到 GitHub 的 JSON。
+    if (suffix === '/github/publish-template' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.templateId) return { status: 400, body: fail('http/bad-request', '缺少 templateId') };
+      return { status: 200, body: ok(await githubMarket.publishTemplatePayload(body)) };
     }
 
     // AI 对话：把用户历史消息（可选带上当前简历）转发给上游模型，返回纯文本回复。

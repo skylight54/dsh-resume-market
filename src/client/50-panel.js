@@ -359,6 +359,19 @@ function ResumePanel() {
   var publicSubmissionState = useState(null);
   var publicSubmission = publicSubmissionState[0];
   var setPublicSubmission = publicSubmissionState[1];
+  // 模板库：编辑器 / 图片生成初稿 / 发布模板 / 大图预览
+  var templateEditorState = useState(null);
+  var templateEditor = templateEditorState[0];
+  var setTemplateEditor = templateEditorState[1];
+  var templateImportState = useState(false);
+  var templateImportOpen = templateImportState[0];
+  var setTemplateImportOpen = templateImportState[1];
+  var templatePublishState = useState(null);
+  var templatePublish = templatePublishState[0];
+  var setTemplatePublish = templatePublishState[1];
+  var templatePreviewState = useState(null);
+  var templatePreview = templatePreviewState[0];
+  var setTemplatePreview = templatePreviewState[1];
 
   var saveTimer = useRef(null);
   var toastTimer = useRef(null);
@@ -694,6 +707,200 @@ function ResumePanel() {
     updateDraft({ templateId: template.id });
     persist(Object.assign({}, draft, { templateId: template.id }), true);
     flash('已切换到「' + template.name + '」');
+  }
+
+  /* ---------- 模板库：新建 / 编辑 / 复制 / 删除 / 发布 ---------- */
+
+  // 把一套模板转成编辑器初值：样式取模板自带 style；复制/新建时换一个全新的根类名。
+  function buildTemplateInitial(template, mode) {
+    var isEdit = mode === 'edit' && !!(template && template.id);
+    var style = isEdit || mode === 'copy' ? rmTemplateStyle(template) : rmStyleDefaults();
+    var name = mode === 'copy'
+      ? String((template && template.name) || '模板') + ' 副本'
+      : isEdit ? template.name : '未命名模板';
+    var cls = isEdit ? rmStyleClass(template.cls || template.id) : rmNewStyleClass(name);
+    var css = '';
+    if (template && typeof template.css === 'string' && template.css.trim()) {
+      css = rmRewriteCssRoot(template.css, templateClass(template), cls);
+    }
+    if (!css || css.indexOf('.' + cls) < 0) css = rmStyleToCss(style, cls);
+    return {
+      id: isEdit ? template.id : '',
+      name: name,
+      en: template ? template.en || '' : '',
+      tagline: template ? template.tagline || '' : '',
+      tags: template && Array.isArray(template.tags) ? template.tags.slice(0, 5) : [],
+      cls: cls,
+      css: css,
+      style: style,
+      sample: template && template.sample ? template.sample : DEMO_RESUME_DATA,
+    };
+  }
+
+  function openTemplateCreate() {
+    setTemplateEditor({ key: 'create-' + Date.now(), title: '新建模板', initial: buildTemplateInitial(null, 'create'), error: '' });
+  }
+
+  function openTemplateCopy(template) {
+    if (!template) return;
+    setTemplateEditor({ key: 'copy-' + (template.id || '') + '-' + Date.now(), title: '复制为新模板', initial: buildTemplateInitial(template, 'copy'), error: '' });
+  }
+
+  function openTemplateEdit(template) {
+    if (!template) return;
+    // 内置模板不能直接改：自动走「复制为新模板」，和产品语义一致。
+    if (template.builtin) {
+      openTemplateCopy(template);
+      flash('内置模板不能直接修改，已复制成新模板');
+      return;
+    }
+    if (!template.id) {
+      flash('这个模板还没有 id，无法编辑', true);
+      return;
+    }
+    setTemplateEditor({ key: 'edit-' + template.id, title: '编辑模板', initial: buildTemplateInitial(template, 'edit'), error: '' });
+  }
+
+  function openTemplateImport() {
+    setTemplateImportOpen(true);
+  }
+
+  function openTemplatePreview(template) {
+    if (template) setTemplatePreview(template);
+  }
+
+  function applyTemplateAnalysis(analysis) {
+    var style = rmStyleFromAnalysis(analysis);
+    var name = '图片生成初稿';
+    var cls = rmNewStyleClass(name);
+    setTemplateImportOpen(false);
+    setTemplateEditor({
+      key: 'import-' + Date.now(),
+      title: '新建模板（图片初稿）',
+      initial: {
+        name: name,
+        en: '',
+        tagline: '从图片取色生成的初稿',
+        tags: [],
+        cls: cls,
+        css: rmStyleToCss(style, cls),
+        style: style,
+        sample: DEMO_RESUME_DATA,
+      },
+      error: '',
+    });
+    flash('已按图片主色生成初稿，可以继续微调');
+  }
+
+  function saveTemplate(payload, publish) {
+    if (busy || !payload) return;
+    setBusy('template-save');
+    rmApi('/template/save', { method: 'POST', body: { template: payload } }).then(
+      function (value) {
+        return (value && value.template) || payload;
+      }
+    ).then(function (saved) {
+      var savedCls = templateClass(saved);
+      // 服务端会给新模板分配 cls=rm-t-<id>：若和我们生成的 CSS 根不一致，用返回的 cls 重写 CSS 再存一次。
+      if (saved && typeof saved.css === 'string' && saved.css.indexOf('.' + savedCls) < 0) {
+        var fixedCss = rmStyleToCss(payload.style || (saved && saved.style) || null, savedCls);
+        var fixed = Object.assign({}, payload, { id: saved.id, cls: savedCls, css: fixedCss });
+        return rmApi('/template/save', { method: 'POST', body: { template: fixed } }).then(
+          function (value) {
+            return (value && value.template) || Object.assign({}, saved, { css: fixedCss });
+          }
+        );
+      }
+      return saved;
+    }).then(function (saved) {
+      setBusy('');
+      setTemplateEditor(null);
+      return reload().then(function () {
+        if (publish && saved && saved.id) {
+          setTemplatePublish(saved);
+        } else {
+          flash('模板已保存：' + ((saved && saved.name) || payload.name));
+        }
+      });
+    }, function (err) {
+      setBusy('');
+      var code = err && err.code;
+      var message = rmErrText(err);
+      if (code === 'template/builtin') message = '内置模板不能直接修改，先「复制为新模板」再改';
+      setTemplateEditor(function (prev) {
+        return prev ? Object.assign({}, prev, { error: message }) : prev;
+      });
+      flash(message, true);
+    });
+  }
+
+  function removeTemplate(template) {
+    if (!template || !template.id || busy) return;
+    if (typeof window !== 'undefined' && window.confirm && !window.confirm('删除模板「' + template.name + '」？已经用过它的简历不受影响。')) return;
+    setBusy('template-delete');
+    rmApi('/template?id=' + encodeURIComponent(template.id), { method: 'DELETE' }).then(
+      function () {
+        setBusy('');
+        return reload().then(function () {
+          flash('模板已删除');
+        });
+      },
+      function (err) {
+        setBusy('');
+        flash('删除失败：' + rmErrText(err), true);
+      }
+    );
+  }
+
+  function submitTemplatePublish(payload) {
+    if (busy || !payload || !payload.templateId) return;
+    var publishing = templatePublish || {};
+    setBusy('template-publish');
+    rmApi('/template/publish', {
+      method: 'POST',
+      body: {
+        templateId: payload.templateId,
+        title: payload.title,
+        tagline: payload.tagline,
+        tags: payload.tags,
+        desc: payload.desc,
+        includeSample: !!payload.includeSample,
+        sample: publishing.sample || undefined,
+      },
+    }).then(function () {
+      if (!payload.publishGh) return null;
+      return rmApi('/github/publish-template', {
+        method: 'POST',
+        body: {
+          templateId: payload.templateId,
+          name: payload.title,
+          tagline: payload.tagline,
+          tags: payload.tags,
+          includeSample: !!payload.includeSample,
+          sample: publishing.sample || undefined,
+        },
+      }).then(function (info) {
+        setPublicSubmission(info);
+        return info;
+      });
+    }).then(
+      function () {
+        setBusy('');
+        setTemplatePublish(null);
+        setMarketSource('local');
+        return reload().then(function () {
+          setTab('market');
+          flash('模板已发布到本地市场' + (payload.publishGh ? '，公共投稿已生成' : ''));
+        });
+      },
+      function (err) {
+        setBusy('');
+        flash('发布失败：' + rmErrText(err), true);
+        setTemplatePublish(function (prev) {
+          return prev ? Object.assign({}, prev, { error: rmErrText(err) }) : prev;
+        });
+      }
+    );
   }
 
   function remoteBase() {
@@ -1090,6 +1297,13 @@ function ResumePanel() {
       templates: boot.templates,
       currentTemplateId: draft ? draft.templateId : '',
       onUse: applyTemplate,
+      onCreate: openTemplateCreate,
+      onImport: openTemplateImport,
+      onCopy: openTemplateCopy,
+      onEdit: openTemplateEdit,
+      onPublishTemplate: function (item) { setTemplatePublish(item); },
+      onDelete: removeTemplate,
+      onPreview: openTemplatePreview,
     });
   } else if (tab === 'market') {
     var merged = remote.entries && remote.entries.length ? remote.entries : [];
@@ -1111,6 +1325,7 @@ function ResumePanel() {
       onGhInstall: installGithub,
       onGhLike: likeGithub,
       onGhRefresh: function () { loadGithub(true); },
+      onPublishResume: null,
     });
     if (remote.error) {
       body = h('div', null, body, h('div', { className: 'rm-hint', style: { padding: '0 18px 14px' } }, '远端市场暂不可用：' + remote.error + '（本地市场照常可用）'));
@@ -1234,7 +1449,7 @@ function ResumePanel() {
                     )
                   : null
               ),
-              h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: function () { setPublishOpen(true); } }, '发布到市场')
+              h('span', { className: 'rm-hint', style: { marginLeft: '4px' } }, '发布模板请到「模板库」')
             )
           : null
       )
@@ -1291,6 +1506,40 @@ function ResumePanel() {
           info: publicSubmission,
           onClose: function () { setPublicSubmission(null); },
           onToast: flash,
+        })
+      : null,
+    templateEditor
+      ? h(TemplateEditor, {
+          key: templateEditor.key,
+          title: templateEditor.title,
+          initial: templateEditor.initial,
+          error: templateEditor.error,
+          busy: busy === 'template-save',
+          onSave: saveTemplate,
+          onClose: function () { setTemplateEditor(null); },
+        })
+      : null,
+    templateImportOpen
+      ? h(TemplateImportDialog, {
+          onGenerated: applyTemplateAnalysis,
+          onClose: function () { setTemplateImportOpen(false); },
+        })
+      : null,
+    templatePublish
+      ? h(TemplatePublishDialog, {
+          template: templatePublish,
+          busy: busy === 'template-publish',
+          error: templatePublish.error,
+          includeSampleDefault: true,
+          onClose: function () { setTemplatePublish(null); },
+          onSubmit: submitTemplatePublish,
+        })
+      : null,
+    templatePreview
+      ? h(TemplatePreviewDialog, {
+          template: templatePreview,
+          sample: templatePreview.sample,
+          onClose: function () { setTemplatePreview(null); },
         })
       : null,
     // AI 对话改成右下角浮动入口：不占 tab，任何 tab 下都在（发布/导出弹窗按 z-index 会盖住它）。

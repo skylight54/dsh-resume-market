@@ -52,7 +52,24 @@ const state = {
     desc: t.desc,
     css: t.css,
     builtin: true,
-  })),
+  })).concat([
+    {
+      id: 'my-fixture-template',
+      name: '我的模板',
+      en: '',
+      tagline: '测试自定义模板',
+      tags: ['测试'],
+      accent: '#445566',
+      desc: '',
+      cls: 'rm-t-my-fixture-template',
+      css: '.rm-t-my-fixture-template{padding:40px}',
+      style: { accent: '#445566', nameSize: 32 },
+      source: 'custom',
+      sample: JSON.parse(JSON.stringify(DEMO_RESUME_DATA)),
+      author: '我',
+      addedAt: new Date().toISOString(),
+    },
+  ]),
   market: seedMarket(),
   deleted: [
     {
@@ -131,6 +148,47 @@ globalThis.fetch = async (url, init = {}) => {
         },
       ],
       likes: {},
+    });
+  }
+  if (target.includes('/template/save')) {
+    const body = init.body ? JSON.parse(init.body) : {};
+    const tpl = body.template || {};
+    return json({
+      template: {
+        ...tpl,
+        id: tpl.id || 'my_test_1',
+        cls: tpl.cls || 'rm-t-my-test-1',
+        source: 'custom',
+        style: tpl.style || {},
+        sample: tpl.sample || state.templates[0].sample,
+      },
+    });
+  }
+  if (target.includes('/template/publish')) {
+    const body = init.body ? JSON.parse(init.body) : {};
+    return json({
+      entry: {
+        id: 'm_test_1',
+        templateId: body.templateId,
+        name: body.title || '我的模板',
+        tagline: body.tagline || '',
+        cls: 'rm-t-my-test-1',
+        css: '.rm-t-my-test-1{padding:20px}',
+        sample: state.templates[0].sample,
+        source: 'local',
+      },
+    });
+  }
+  if (target.includes('/github/publish-template')) {
+    return json({
+      repo: 'skylight54/dsh-resume-market',
+      branch: 'main',
+      filename: 'rm-x.json',
+      repoPath: 'market/templates/rm-x.json',
+      json: '{}',
+      payload: {},
+      issueUrl: 'https://github.com/skylight54/dsh-resume-market/issues/new',
+      newFileUrl: 'https://github.com/skylight54/dsh-resume-market/new/main/market/templates',
     });
   }
   if (target.endsWith('/state')) return json(state);
@@ -329,8 +387,8 @@ const paperClass = paper ? String(paper.className) : '';
 check(paperClass.includes('rm-t-business'), 'paper root class should be rm-t-business, got: ' + paperClass);
 const paperStyle = paper ? dom.window.getComputedStyle(paper) : null;
 check(paperStyle && paperStyle.paddingTop === '54px', 'business template padding not applied, got: ' + (paperStyle ? JSON.stringify(paperStyle.paddingTop) : 'no style'));
-const primaryBtn = container.querySelector('.rm-btn-primary');
-check(!!primaryBtn, 'primary button missing');
+const primaryBtn = container.querySelector('.rm-btn-primary') || byText('.rm-btn', '导出 ▾');
+check(!!primaryBtn, 'primary action button missing');
 check(text().includes('工作经历'), 'preview/editor missing experience section');
 
 // --- templates tab --------------------------------------------------------
@@ -339,7 +397,7 @@ await act(async () => {
   await sleep(40);
 });
 const templateCards = container.querySelectorAll('.rm-stage .rm-tpl');
-check(templateCards.length === 6, 'expected 6 builtin template cards, got ' + templateCards.length);
+check(templateCards.length === 7, 'expected 6 builtin + 1 custom template cards, got ' + templateCards.length);
 check(text().includes('内置'), 'template builtin pill missing');
 
 // --- market tab -----------------------------------------------------------
@@ -390,24 +448,70 @@ await act(async () => {
 });
 check(text().includes('数据'), 'settings view missing');
 
-// --- publish dialog -------------------------------------------------------
+// --- 模板库：新建 / 编辑 / 图片生成 / 发布 -------------------------------
 await act(async () => {
-  byText('.rm-tab', '编辑简历').click();
-  await sleep(30);
+  byText('.rm-tab', '模板库').click();
+  await sleep(40);
 });
+check(!!byText('.rm-btn', '+ 新建模板'), '模板库缺少「+ 新建模板」');
+check(!!byText('.rm-btn', '从图片生成'), '模板库缺少「从图片生成」');
+check(!!byText('.rm-btn', '复制为新模板'), '内置模板应提供「复制为新模板」');
 await act(async () => {
-  byText('.rm-btn', '发布到市场').click();
-  await sleep(30);
+  byText('.rm-btn', '+ 新建模板').click();
+  await sleep(70);
 });
-check(!!container.querySelector('.rm-modal'), 'publish dialog missing');
-check(text().includes('把当前简历内容作为示例数据分享'), 'publish dialog options missing');
+check(!!container.querySelector('.rm-tpl-editor-form'), '模板编辑器表单未打开');
+check(!!container.querySelector('.rm-modal .rm-paper'), '模板编辑器缺少 A4 实时预览');
+check(!!container.querySelector('.rm-tpl-editor-form input[type="color"]'), '编辑器缺少颜色输入');
+await act(async () => {
+  const nameInput = container.querySelector('.rm-tpl-editor-form input.rm-input');
+  if (nameInput) Simulate.change(nameInput, { target: { value: '验收模板' } });
+  await sleep(60);
+});
+const editedNameInput = container.querySelector('.rm-tpl-editor-form input.rm-input');
+check(
+  editedNameInput && editedNameInput.value === '验收模板',
+  '模板名称输入未受控更新'
+);
+await act(async () => {
+  byText('.rm-btn', '保存').click();
+  await sleep(150);
+});
+check(
+  fetchCalls.some((c) => c.startsWith('POST ') && c.includes('/template/save')),
+  '保存模板请求未发出'
+);
+check(!container.querySelector('.rm-tpl-editor-form'), '保存后模板编辑器应关闭');
+await act(async () => {
+  byText('.rm-btn', '从图片生成').click();
+  await sleep(70);
+});
+check(!!container.querySelector('input[type="file"]'), '图片导入弹窗未出现文件选择');
 await act(async () => {
   byText('.rm-btn', '取消').click();
-  await sleep(20);
+  await sleep(30);
 });
-check(!container.querySelector('.rm-modal'), 'publish dialog did not close');
+
+// --- 模板发布弹窗 ---------------------------------------------------------
+const publishTemplateButton = byText('.rm-btn', '发布');
+check(!!publishTemplateButton, '自定义模板应提供「发布」按钮');
+if (publishTemplateButton) {
+  await act(async () => {
+    publishTemplateButton.click();
+    await sleep(60);
+  });
+  check(!!container.querySelector('.rm-modal'), '模板发布弹窗未打开');
+  await act(async () => {
+    byText('.rm-btn', '取消').click();
+    await sleep(30);
+  });
+}
 
 // --- export menu：三种格式可选，导出后显示落盘路径 ------------------------
+await act(async () => {
+  byText('.rm-tab', '编辑简历').click();
+  await sleep(40);
+});
 check(!byText('.rm-btn', '打印 / PDF'), '旧版「打印 / PDF」按钮应已移除');
 await act(async () => {
   byText('.rm-btn', '导出 ▾').click();
