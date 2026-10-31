@@ -44,7 +44,7 @@ const SETTINGS_DEFAULTS = {
   githubRepo: 'skylight54/dsh-resume-market',
   githubBranch: 'main',
   // 国内直连 raw.githubusercontent.com 常常被重置；可填一个 GitHub 加速前缀（如 https://gh-proxy.com/）。
-  githubProxy: '',
+  githubProxy: 'https://gh-proxy.com/',
 };
 
 /** 公共市场缓存条目（来自仓库 market/index.json，只存轻量元数据）。 */

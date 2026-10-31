@@ -3,6 +3,14 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.2.1 — 2026-10-31
+
+### 修复
+
+- 公共市场默认先走 `https://gh-proxy.com/` 加速前缀：国内直连 `raw.githubusercontent.com`
+  会被重置，默认配置下开箱即可加载公共市场；不想走第三方代理可在设置页把前缀清空
+  （之后依次尝试官方 raw 与 jsDelivr）。
+
 ## v0.2.0 — 2026-10-31
 
 ### 新增

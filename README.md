@@ -105,8 +105,9 @@ docs/MARKET.md                    使用与投稿的用户向说明
 4. 点「安装」只下载 `market/templates/<id>.json`，存进本地模板库（之后离线可用）；
 5. GitHub 不可达且本地有缓存时，界面显示「离线缓存」并继续可用。
 
-> 国内直连 `raw.githubusercontent.com` 经常被重置；如果公共市场显示离线，到「设置」页
-> 把「GitHub 加速前缀」填成你常用的加速站（例如 `https://gh-proxy.com/`）再刷新即可。
+> 国内直连 `raw.githubusercontent.com` 经常被重置，所以默认会先走 `https://gh-proxy.com/`
+> 这个加速前缀；不想走第三方代理，到「设置」页把「GitHub 加速前缀」清空即可
+> （之后依次试官方 raw、jsDelivr）。
 
 投稿（两种都行，改完提交 PR 即可）：
 
