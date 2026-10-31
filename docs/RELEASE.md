@@ -1,17 +1,17 @@
 # 发布流程 · Release
 
 本文档把「简历市场」插件从本地工程发到 GitHub 的完整步骤。仓库地址已经按
-`skylight54/-dsh-resume-market` 填好；如果你把仓库建在别的账号/名字下，先把全文的
-`skylight54/-dsh-resume-market` 换成实际地址。
+`skylight54/dsh-resume-market` 填好；如果你把仓库建在别的账号/名字下，先把全文的
+`skylight54/dsh-resume-market` 换成实际地址。
 
 ## 0. 一次性准备
 
 1. **核对仓库地址**：`package.json` 的 `repository` / `homepage` / `bugs`，以及
    `README.md`、`docs/INSTALL.md`、`CONTRIBUTING.md` 里的克隆地址都指向
-   `github.com/skylight54/-dsh-resume-market`。换账号时搜索替换即可：
+   `github.com/skylight54/dsh-resume-market`。换账号时搜索替换即可：
 
    ```bash
-   grep -rn 'skylight54/-dsh-resume-market' --exclude-dir=node_modules --exclude-dir=.devrender .
+   grep -rn 'skylight54/dsh-resume-market' --exclude-dir=node_modules --exclude-dir=.devrender .
    ```
 
 2. **配置 git 身份**（只需一次，全局或本仓库）：
@@ -38,7 +38,7 @@
 - [ ] `CHANGELOG.md` 有当前版本条目（顶部 `## vX.Y.Z — YYYY-MM-DD`），内容与实际功能一致
 - [ ] `LICENSE` 存在且版权行正确（`Copyright (c) 2026 Resume Market contributors`）
 - [ ] `README.md` 的安装命令、截图路径、功能列表已更新
-- [ ] 仓库地址统一为 `github.com/skylight54/-dsh-resume-market`（改过账号/仓库名的话全局搜一遍）
+- [ ] 仓库地址统一为 `github.com/skylight54/dsh-resume-market`（改过账号/仓库名的话全局搜一遍）
 - [ ] `git status` 里**没有** `node_modules/`、`.devrender/node_modules/`、`.devrender/.npmcache/`、
       `*.log`、`.tmp-*`、`~/.dsh/resume-market/` 数据、`server/market-data.json`
 - [ ] `previews/` 里的模板预览是最新的（改过模板时重跑 `node tools/previews.mjs`）
@@ -67,7 +67,7 @@ git commit -m "feat: resume market plugin v0.1.0"
 2. 加远端并推送：
 
    ```bash
-   git remote add origin https://github.com/skylight54/-dsh-resume-market.git
+   git remote add origin https://github.com/skylight54/dsh-resume-market.git
    git branch -M main
    git push -u origin main
    ```
@@ -98,7 +98,7 @@ git push origin v0.1.0
 发布后，任何 DSH 用户：
 
 ```bash
-git clone https://github.com/skylight54/-dsh-resume-market.git
+git clone https://github.com/skylight54/dsh-resume-market.git
 cd dsh-resume-market
 node tools/check.mjs
 ```
@@ -138,5 +138,5 @@ dsh plugin --profile web add file:D:/plugins/dsh-resume-market
 - **check.mjs 报 client 产物缺失 / id 不一致**：先 `node build/build.mjs`；`package.json`
   的 `name` 不要改（`lib/client.js` 里的 module id 和 `cordis.patch.yml` 都依赖它）。
 - **Windows 上换行警告**：可设 `git config core.autocrlf true`；`.gitattributes` 暂未启用。
-- **想用私有仓库 / 自建分发**：把 `github.com/skylight54/-dsh-resume-market` 换成企业主机地址即可，
+- **想用私有仓库 / 自建分发**：把 `github.com/skylight54/dsh-resume-market` 换成企业主机地址即可，
   `plugin_manager install_bundle` 支持任意本地目录路径。

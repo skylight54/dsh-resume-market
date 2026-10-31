@@ -15,11 +15,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/skylight54/-dsh-resume-market.git"
+    "url": "https://github.com/skylight54/dsh-resume-market.git"
   },
-  "homepage": "https://github.com/skylight54/-dsh-resume-market#readme",
+  "homepage": "https://github.com/skylight54/dsh-resume-market#readme",
   "bugs": {
-    "url": "https://github.com/skylight54/-dsh-resume-market/issues"
+    "url": "https://github.com/skylight54/dsh-resume-market/issues"
   },
   "engines": {
     "node": ">=20"

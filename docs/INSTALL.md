@@ -12,7 +12,7 @@
 ## 方式一：从 GitHub 克隆后安装（推荐）
 
 ```bash
-git clone https://github.com/skylight54/-dsh-resume-market.git
+git clone https://github.com/skylight54/dsh-resume-market.git
 cd dsh-resume-market
 
 # 包形状自检，应当输出「✓ 包形状检查通过」（只读检查，不改任何东西）
@@ -22,7 +22,7 @@ node tools/check.mjs
 Windows（Git Bash 或 PowerShell）：
 
 ```powershell
-git clone https://github.com/skylight54/-dsh-resume-market.git D:\plugins\dsh-resume-market
+git clone https://github.com/skylight54/dsh-resume-market.git D:\plugins\dsh-resume-market
 cd D:\plugins\dsh-resume-market
 node tools\check.mjs
 ```

@@ -13,7 +13,7 @@ React 拼接产物（`lib/client.js` 由 `build/build.mjs` 生成）。
 ## 本地开发
 
 ```bash
-git clone https://github.com/skylight54/-dsh-resume-market.git
+git clone https://github.com/skylight54/dsh-resume-market.git
 cd dsh-resume-market
 
 # 1) 构建客户端产物（改过 src/client/*.js 或 src/shared/doc.js 后必须重跑）
