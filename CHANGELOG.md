@@ -3,6 +3,26 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.2.0 — 2026-10-31
+
+### 新增
+
+- **公共市场（GitHub）**：「模板市场」页新增「本地面板 / 公共市场 · GitHub」切换，直接读
+  `market/index.json`，10 分钟本地缓存，离线时退回缓存；安装只拉单套模板 JSON。
+- **投稿闭环**：发布弹窗新增「同时生成 GitHub 公共投稿」，生成规范 JSON + Issue 链接 +
+  「新建模板文件」链接，PR 合并进 `market/` 即对所有用户上架。
+- **公共市场内容目录**：`market/index.json` + `market/templates/*.json`（首批 5 套：
+  学术科研 / 金融投行 / 活力橙 / 静奢蓝灰 / 科技网格）、`market/validate.mjs` 校验脚本、
+  `market/README.md` 投稿规范、`docs/MARKET.md` 用户指南。
+- **可配置市场源**：设置页新增「公共市场仓库 / 分支」，可指向自己的 fork 或团队仓库。
+- **AI 工具**：新增 `resume_market_public` / `resume_install_public` / `resume_publish_public`
+  三个工具（共 9 个），大肥鱼可以直接浏览、安装、投稿公共市场模板。
+
+### 变更
+
+- 发布弹窗增加公共投稿 checkbox；设置页增加 GitHub 仓库与分支两项。
+- README 增加「公共市场（GitHub）」章节与 `market/validate.mjs` 开发命令。
+
 ## v0.1.1 — 2026-10-31
 
 ### 修复

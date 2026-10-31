@@ -113,11 +113,93 @@ function TemplatesView(props) {
   );
 }
 
+function PublicMarketCard(props) {
+  var item = props.item;
+  var installed = props.installed;
+  var likes = props.likes || 0;
+  var accent = item.accent || '#2f6fde';
+  return h(
+    'div',
+    { className: 'rm-tpl' },
+    h(
+      'div',
+      { className: 'rm-tpl-thumb', style: { background: accent + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+      h('div', { style: { fontSize: '16px', fontWeight: '600', color: accent } }, item.name || ''),
+    ),
+    h(
+      'div',
+      { className: 'rm-tpl-body' },
+      h('div', { className: 'rm-tpl-name' }, item.name || '未命名模板', h('span', { className: 'rm-pill rm-pill-brand' }, '公共')),
+      h('div', { className: 'rm-tpl-tag' }, item.tagline || ''),
+      h(
+        'div',
+        { className: 'rm-tpl-foot' },
+        h('span', { className: 'rm-pill' }, 'by ' + (item.author || '匿名')),
+        h('span', { className: 'rm-muted' }, '↓ ' + (item.installs || 0)),
+        h('span', { className: 'rm-muted' }, '♥ ' + likes),
+      ),
+      h(
+        'div',
+        { className: 'rm-tpl-foot' },
+        h(
+          'button',
+          {
+            type: 'button',
+            className: 'rm-btn rm-btn-sm' + (installed ? '' : ' rm-btn-primary'),
+            disabled: installed || props.busy,
+            onClick: function () { props.onInstall(item); },
+          },
+          installed ? '已安装' : '安装',
+        ),
+        h('button', { type: 'button', className: 'rm-btn rm-btn-sm', disabled: props.busy, onClick: function () { props.onLike(item); } }, '♥'),
+      ),
+    ),
+  );
+}
+
+function PublicMarketGrid(props) {
+  var gh = props.gh || {};
+  if (gh.loading && !(gh.items || []).length) return h('div', { className: 'rm-loading' }, '正在从 GitHub 读取公共市场…');
+  if (!(gh.items || []).length) {
+    return h(
+      'div',
+      { className: 'rm-empty' },
+      gh.error ? '暂时连不上公共市场：' + (gh.error.message || gh.error.code || '未知错误') : '公共市场里还没有模板。做一份喜欢的简历，然后发布成公共模板吧。',
+      h('div', { className: 'rm-hint', style: { marginTop: '8px' } }, '公共市场就是 GitHub 仓库里的 market/ 目录；投稿用「发布到市场」里的「同时生成公共投稿」。'),
+    );
+  }
+  return h(
+    'div',
+    { className: 'rm-grid' },
+    (gh.items || []).map(function (item) {
+      return h(PublicMarketCard, {
+        key: item.id,
+        item: item,
+        installed: (props.installedIds || []).indexOf(item.id) >= 0,
+        likes: (gh.likes || {})[item.id] || 0,
+        busy: props.busyId === 'gh:' + item.id,
+        onInstall: props.onInstall,
+        onLike: props.onLike,
+      });
+    }),
+  );
+}
+
 function MarketView(props) {
   var entries = props.market || [];
   var installedIds = props.installedTemplateIds || [];
+  var source = props.source === 'public' ? 'public' : 'local';
+  var gh = props.gh || { loading: false, items: [], likes: {}, stale: false, error: null };
   var body;
-  if (props.loading) {
+  if (source === 'public') {
+    body = h(PublicMarketGrid, {
+      gh: gh,
+      installedIds: props.ghInstalledIds || [],
+      busyId: props.busyId,
+      onInstall: props.onGhInstall,
+      onLike: props.onGhLike,
+    });
+  } else if (props.loading) {
     body = h('div', { className: 'rm-loading' }, '正在读取市场…');
   } else if (!entries.length) {
     body = h('div', { className: 'rm-empty' }, '市场里还没有模板。先做一份简历，再把它发布上来吧。');
@@ -136,22 +218,50 @@ function MarketView(props) {
           onUnpublish: props.onUnpublish,
           onLike: props.onLike,
         });
-      })
+      }),
     );
   }
+  var title = source === 'public' ? '公共市场 · GitHub' : '大肥鱼模板市场';
+  var hint =
+    source === 'public'
+      ? '大家的作品都放在 ' + (props.repo || 'GitHub 仓库') + ' 里，点安装即可套用' + (gh.stale ? '（当前显示离线缓存）' : '')
+      : '免费模板 · 安装即用 · 一键发布你的作品，让其他装了插件的用户也能用';
   return h(
     'div',
     { className: 'rm-col', style: { width: '100%', minHeight: 0, overflow: 'auto' } },
     h(
       'div',
       { className: 'rm-row', style: { padding: '14px 18px 0' } },
-      h('div', { className: 'rm-col' }, h('b', { style: { fontSize: '13px' } }, '大肥鱼模板市场'), h('span', { className: 'rm-hint' }, '免费模板 · 安装即用 · 一键发布你的作品，让其他装了插件的用户也能用')),
+      h('div', { className: 'rm-col' }, h('b', { style: { fontSize: '13px' } }, title), h('span', { className: 'rm-hint' }, hint)),
       h(
         'div',
-        { style: { marginLeft: 'auto', display: 'flex', gap: '8px' } },
-        h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: props.onRefresh, disabled: props.loading }, '刷新')
-      )
+        { style: { marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' } },
+        h(
+          'div',
+          { className: 'rm-seg' },
+          h(
+            'button',
+            { type: 'button', className: 'rm-seg-btn' + (source === 'local' ? ' is-on' : ''), onClick: function () { props.onSourceChange('local'); } },
+            '本地面板',
+          ),
+          h(
+            'button',
+            { type: 'button', className: 'rm-seg-btn' + (source === 'public' ? ' is-on' : ''), onClick: function () { props.onSourceChange('public'); } },
+            '公共市场',
+          ),
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            className: 'rm-btn rm-btn-sm',
+            onClick: source === 'public' ? props.onGhRefresh : props.onRefresh,
+            disabled: source === 'public' ? !!gh.loading : !!props.loading,
+          },
+          '刷新',
+        ),
+      ),
     ),
-    body
+    body,
   );
 }

@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "id": "rm-academia",
+  "name": "学术科研",
+  "en": "Academia",
+  "tagline": "衬线字与双线分割，像论文扉页一样克制。适合博士、科研与教职申请。",
+  "tags": [
+    "学术",
+    "科研",
+    "教职"
+  ],
+  "author": "大肥鱼",
+  "accent": "#6f6880",
+  "cls": "rm-t-academia",
+  "templateId": "mkt-academia",
+  "css": "\n.rm-t-academia{padding:60px 66px 54px;color:#23202b;font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",serif;}\n.rm-t-academia .rm-head{padding-bottom:18px;border-bottom:3px double #8a8296;}\n.rm-t-academia .rm-name{font-size:32px;font-weight:600;letter-spacing:.16em;color:#3a3348;line-height:1.25;}\n.rm-t-academia .rm-role{margin:8px 0 0;font-size:12.5px;color:#6f6880;letter-spacing:.08em;font-style:italic;}\n.rm-t-academia .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 18px;margin-top:16px;}\n.rm-t-academia .rm-k{font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;font-size:9.5px;letter-spacing:.14em;color:#9b93a8;text-transform:uppercase;}\n.rm-t-academia .rm-v{font-size:12px;color:#413a4e;}\n.rm-t-academia .rm-sec{margin-top:22px;}\n.rm-t-academia .rm-sec-h{margin:0 0 10px;padding-bottom:4px;border-bottom:1px solid #ded8e6;}\n.rm-t-academia .rm-sec-t{font-size:13px;font-weight:600;letter-spacing:.22em;color:#4a3f5e;}\n.rm-t-academia .rm-item-t{font-weight:600;color:#2f2839;}\n.rm-t-academia .rm-date{font-family:Georgia,serif;font-style:italic;color:#8b8299;}\n.rm-t-academia .rm-tag{border:0;background:transparent;padding:0;color:#5a5068;font-size:12px;}\n.rm-t-academia .rm-tags{gap:2px 8px;}\n.rm-t-academia .rm-skill-row{grid-template-columns:92px minmax(0,1fr);}\n.rm-t-academia .rm-bullets li::marker{color:#a99fbb;}\n",
+  "sample": {
+    "basics": {
+      "name": "周慕云",
+      "role": "社会学博士 · 城市研究方向",
+      "phone": "138 0013 8000",
+      "email": "muyun.zhou@example.com",
+      "city": "北京",
+      "wechat": "zhou-muyun",
+      "github": "",
+      "website": "muyun.academia.example",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle"
+    },
+    "summary": "社会学博士，研究城市更新与社区治理。博士期间主持 1 项省级课题，发表 CSSCI 论文 3 篇，其中 1 篇被《人大复印资料》全文转载。",
+    "experience": [
+      {
+        "company": "某大学社会学系",
+        "role": "博士研究生 / 助教",
+        "period": "2019.09 — 2024.06",
+        "location": "北京",
+        "bullets": [
+          "主持省级课题「老旧小区改造中的居民参与机制」，覆盖 6 个社区、428 份问卷。",
+          "协助讲授《城市社会学》课程 4 学期，独立带教 32 名本科生。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "企业工作流引擎 2.0",
+        "role": "产品负责人",
+        "period": "2022.03 — 2022.11",
+        "bullets": [
+          "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+          "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "华东师范大学",
+        "degree": "硕士",
+        "major": "信息管理",
+        "period": "2015.09 — 2018.01",
+        "gpa": "3.8 / 4.0"
+      }
+    ],
+    "skills": [
+      {
+        "group": "研究方法",
+        "items": "深度访谈、参与式观察、问卷设计、SPSS、NVivo"
+      },
+      {
+        "group": "语言",
+        "items": "英语（学术写作）、日语（N2）"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳产品奖",
+        "date": "2023.12",
+        "desc": "星野科技"
+      },
+      {
+        "title": "中国 SaaS 产品创新大赛 银奖",
+        "date": "2020.09",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-09-12T02:10:00.000Z"
+}

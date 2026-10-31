@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "updatedAt": "2026-10-31T12:00:00.000Z",
+  "templates": [
+    {
+      "id": "rm-academia",
+      "name": "学术科研",
+      "en": "Academia",
+      "tagline": "衬线字与双线分割，像论文扉页一样克制。适合博士、科研与教职申请。",
+      "tags": [
+        "学术",
+        "科研",
+        "教职"
+      ],
+      "author": "大肥鱼",
+      "accent": "#6f6880",
+      "cls": "rm-t-academia",
+      "file": "templates/rm-academia.json",
+      "installs": 0,
+      "updatedAt": "2026-09-12T02:10:00.000Z"
+    },
+    {
+      "id": "rm-finance",
+      "name": "金融投行",
+      "en": "Finance",
+      "tagline": "深海军蓝色块 + 紧凑行距，把「能扛住加班」写在版面上。",
+      "tags": [
+        "金融",
+        "投行",
+        "咨询"
+      ],
+      "author": "大肥鱼",
+      "accent": "#0f2b46",
+      "cls": "rm-t-finance",
+      "file": "templates/rm-finance.json",
+      "installs": 0,
+      "updatedAt": "2026-09-18T09:40:00.000Z"
+    },
+    {
+      "id": "rm-vibrant",
+      "name": "活力橙",
+      "en": "Vibrant",
+      "tagline": "暖橙色圆角页眉，友好但不轻浮。适合运营、增长与内容岗位。",
+      "tags": [
+        "运营",
+        "增长",
+        "内容"
+      ],
+      "author": "大肥鱼",
+      "accent": "#f2711c",
+      "cls": "rm-t-vibrant",
+      "file": "templates/rm-vibrant.json",
+      "installs": 0,
+      "updatedAt": "2026-09-26T13:05:00.000Z"
+    },
+    {
+      "id": "rm-quiet-luxury",
+      "name": "静奢蓝灰",
+      "en": "Quiet Luxury",
+      "tagline": "低饱和蓝灰 + 编号章节，安静但有分量。适合产品、咨询、品牌。",
+      "tags": [
+        "产品",
+        "咨询",
+        "资深"
+      ],
+      "author": "简历市场",
+      "accent": "#5f7896",
+      "cls": "rm-t-luxury",
+      "file": "templates/rm-quiet-luxury.json",
+      "installs": 0,
+      "updatedAt": "2026-10-31T12:00:00.000Z"
+    },
+    {
+      "id": "rm-tech-grid",
+      "name": "科技网格",
+      "en": "Tech Grid",
+      "tagline": "蓝黑网格与等宽小标签，克制、精确，研发与数据岗的舒适区。",
+      "tags": [
+        "研发",
+        "数据",
+        "算法"
+      ],
+      "author": "简历市场",
+      "accent": "#2c5f96",
+      "cls": "rm-t-tech",
+      "file": "templates/rm-tech-grid.json",
+      "installs": 0,
+      "updatedAt": "2026-10-31T12:00:00.000Z"
+    }
+  ]
+}

@@ -20,6 +20,46 @@ const { apply } = await import('../src/index.js');
 const { TEMPLATES, buildHtml, DEMO_RESUME_DATA, SECTION_ORDER, templateClass } = await import('../src/shared/doc.js');
 const { findBrowser } = await import('../src/export-file.js');
 
+// GitHub 公共市场用 fetch 取 raw.githubusercontent.com；测试里换成确定性的假实现。
+const GH_INDEX = {
+  schema: 1,
+  updatedAt: '2026-10-31T00:00:00.000Z',
+  templates: [
+    {
+      id: 'rm-demo',
+      name: '演示公共模板',
+      en: 'Demo Public',
+      tagline: '来自公共市场的测试模板',
+      tags: ['演示', '公共'],
+      author: '社区',
+      accent: '#334455',
+      cls: 'rm-t-demo',
+      file: 'templates/rm-demo.json',
+      installs: 3,
+      updatedAt: '2026-10-31T00:00:00.000Z',
+    },
+  ],
+};
+const GH_TEMPLATE = {
+  schema: 1,
+  id: 'rm-demo',
+  name: '演示公共模板',
+  en: 'Demo Public',
+  tagline: '来自公共市场的测试模板',
+  tags: ['演示', '公共'],
+  author: '社区',
+  accent: '#334455',
+  cls: 'rm-t-demo',
+  templateId: 'pub-demo',
+  css: '.rm-t-demo{padding:24px 0;border-top:3px solid #334455}',
+  sample: null,
+};
+globalThis.fetch = async (input) => {
+  const url = String(input && input.url ? input.url : input);
+  const body = url.endsWith('market/index.json') ? GH_INDEX : GH_TEMPLATE;
+  return { ok: true, status: 200, json: async () => body };
+};
+
 const routes = [];
 const tools = [];
 const disposers = [];
@@ -56,7 +96,7 @@ await new Promise((resolve) => setTimeout(resolve, 120));
 
 assert.equal(routes.length, 1, '应该注册一个 prefix 路由');
 assert.equal(routes[0].kind, 'prefix');
-assert.equal(tools.length, 6, '应该注册 6 个 resume_* 工具，实际 ' + tools.length);
+assert.equal(tools.length, 9, '应该注册 9 个 resume_* 工具，实际 ' + tools.length);
 
 const handle = routes[0].handler;
 
@@ -299,6 +339,26 @@ assert.equal(res.status, 200);
 res = await call('POST', '/market/unpublish', { id: entryId });
 assert.equal(res.status, 200);
 
+// 8b) GitHub 公共市场：index / 安装 / 点赞 / 投稿
+res = await call('GET', '/github/state');
+assert.equal(res.status, 200, res.body);
+assert.equal(res.json.value.repo, 'skylight54/dsh-resume-market');
+assert.equal(res.json.value.items.length, 1);
+assert.equal(res.json.value.items[0].name, '演示公共模板');
+res = await call('POST', '/github/install', { id: 'rm-demo' });
+assert.equal(res.status, 200, res.body);
+assert.ok(res.json.value.template && res.json.value.template.id, '公共模板应安装成功');
+res = await call('GET', '/state');
+assert.ok(res.json.value.templates.some((item) => item.name === '演示公共模板'), '安装后模板库应有公共模板');
+res = await call('POST', '/github/like', { id: 'rm-demo' });
+assert.equal(res.status, 200);
+assert.equal(res.json.value.likes, 1);
+res = await call('POST', '/github/publish', { resumeId, name: '公共投稿测试', tagline: '测试', tags: '演示', includeSample: false });
+assert.equal(res.status, 200, res.body);
+assert.ok(res.json.value.repoPath.startsWith('market/templates/'), res.json.value.repoPath);
+assert.ok(res.json.value.issueUrl.includes('skylight54/dsh-resume-market'), res.json.value.issueUrl);
+assert.ok(res.json.value.json.includes('rm-t-'), '投稿 JSON 里应有模板 class');
+
 // 9) 设置
 res = await call('POST', '/settings', { author: '测试作者', marketUrl: 'http://127.0.0.1:8787' });
 assert.equal(res.status, 200);
@@ -316,7 +376,7 @@ assert.equal(res.status, 404);
 
 // 12) agent 工具：resume_market_list + resume_save 真能用
 const byName = new Map(tools.map((tool) => [tool.name, tool]));
-for (const name of ['resume_market_list', 'resume_save', 'resume_export', 'resume_publish', 'resume_import_template', 'resume_list_templates']) {
+for (const name of ['resume_market_list', 'resume_save', 'resume_export', 'resume_publish', 'resume_import_template', 'resume_list_templates', 'resume_market_public', 'resume_install_public', 'resume_publish_public']) {
   assert.ok(byName.has(name), '缺少工具 ' + name);
 }
 // 模型服务商要求 parameters 根必须是 object schema（否则整条请求会 400，插件装上就报错）
@@ -330,7 +390,7 @@ for (const tool of tools) {
   assert.ok(['object', 'array'].includes(tool.output.schema.type), tool.name + ' 的 output.schema 类型不受支持');
 }
 const listed = await byName.get('resume_market_list').execute({ include: 'all' });
-assert.equal(listed.templates.length, 7);
+assert.equal(listed.templates.length, 8, '6 内置 + 1 市场安装 + 1 公共市场安装');
 const saved = await byName.get('resume_save').execute({
   title: 'AI 直出简历',
   templateId: 'quiet-luxury',

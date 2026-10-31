@@ -8,6 +8,7 @@
  */
 import { templateById } from './shared/doc.js';
 import { resolveFormat, writeResumeExport } from './export-file.js';
+import { createGithubMarket } from './github-market.js';
 
 const str = (description) => ({ type: 'string', description });
 const bool = (description) => ({ type: 'boolean', description });
@@ -128,6 +129,7 @@ export function registerTools(ctx, { store }) {
   }
 
   const tools = [];
+  const githubMarket = createGithubMarket({ store });
   /**
    * 把「字段名 → 字段 schema」的简写规范成模型服务商要求的 JSON Schema：
    * 根必须是 { type: 'object', properties, required? }，且字段级不能出现 required: true。
@@ -353,6 +355,103 @@ export function registerTools(ctx, { store }) {
     },
     async execute() {
       return store.listTemplates().map((t) => `${t.id}｜${t.name}｜${t.source === 'builtin' ? '内置' : '市场安装'}｜${t.tagline || ''}`);
+    },
+  });
+
+  add({
+    name: 'resume_market_public',
+    description:
+      '查看 GitHub 公共市场里大家分享的简历模板（别人发布、维护者合并进仓库 market/ 目录的模板）。安装某个模板用 resume_install_public。',
+    parameters: {
+      refresh: bool('是否强制刷新（绕过 10 分钟缓存），默认 false'),
+    },
+    output: {
+      schema: { type: 'object', additionalProperties: true },
+      render: (_args, value) => {
+        const lines = [
+          `公共市场：${value.repo}（${value.items.length} 个模板${value.stale ? '，当前显示本地缓存' : ''}）`,
+        ];
+        for (const item of value.items.slice(0, 20)) {
+          lines.push(`· ${item.id}｜${item.name}｜by ${item.author}｜${item.tagline || ''}`);
+        }
+        if (value.error) lines.push(`提示：${value.error.message}`);
+        return textResult(lines);
+      },
+    },
+    async execute(args) {
+      const index = await githubMarket.loadIndex({ force: !!(args && args.refresh) });
+      return {
+        repo: index.repo,
+        branch: index.branch,
+        stale: index.stale,
+        fetchedAt: index.fetchedAt,
+        error: index.error || null,
+        items: index.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          tagline: item.tagline,
+          tags: item.tags,
+          author: item.author,
+          installs: item.installs,
+        })),
+      };
+    },
+  });
+
+  add({
+    name: 'resume_install_public',
+    description:
+      '从 GitHub 公共市场安装一个模板（先 resume_market_public 看 id），装好后就能用 resume_save 的 templateId 指定它。',
+    parameters: {
+      id: str('公共市场模板 id，例如 rm-quiet-luxury'),
+    },
+    output: {
+      schema: { type: 'object', additionalProperties: true },
+      render: (_args, value) => textResult([`已安装公共模板：${value.template.name}（模板 id ${value.template.id}）`]),
+    },
+    async execute(args) {
+      const id = args && args.id;
+      if (!id) throw new Error('resume_install_public 需要 id');
+      const template = await githubMarket.install(String(id));
+      return { template: { id: template.id, name: template.name, cls: template.cls || '' } };
+    },
+  });
+
+  add({
+    name: 'resume_publish_public',
+    description:
+      '生成「投稿到 GitHub 公共市场」所需的 JSON 与链接。默认不带用户真实简历内容（示例数据为演示候选人）；includeSample=true 才会把本人内容作为样例分享。把返回的 json 内容存成文件或贴到 GitHub Issue/PR 即可上架。',
+    parameters: {
+      resumeId: str('要投稿的简历 id（必填）'),
+      name: str('模板名，例如「静奢蓝灰」'),
+      tagline: str('一句话介绍'),
+      tags: textArray('标签，最多 6 个'),
+      includeSample: bool('是否把自己的简历内容作为样例一起分享，默认 false'),
+      author: str('作者署名，默认用设置里的作者'),
+    },
+    output: {
+      schema: { type: 'object', additionalProperties: true },
+      render: (_args, value) =>
+        textResult([
+          `投稿文件：${value.repoPath}`,
+          `新文件链接：${value.newFileUrl}`,
+          `Issue 链接：${value.issueUrl}`,
+          '把 json 字段的内容贴进新文件/Issue 即可（CSS 和示例数据都已在里面）。',
+        ]),
+    },
+    async execute(args) {
+      const input = args || {};
+      if (!input.resumeId) throw new Error('resume_publish_public 需要 resumeId');
+      const result = await githubMarket.publishPayload(input);
+      return {
+        repo: result.repo,
+        branch: result.branch,
+        filename: result.filename,
+        repoPath: result.repoPath,
+        issueUrl: result.issueUrl,
+        newFileUrl: result.newFileUrl,
+        json: result.json,
+      };
     },
   });
 

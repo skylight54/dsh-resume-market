@@ -11,6 +11,7 @@
 import { buildHtml, templateById } from './shared/doc.js';
 import { createChatService } from './chat.js';
 import { resolveFormat, revealExport, saveRenderedPdf, writeResumeExport } from './export-file.js';
+import { createGithubMarket } from './github-market.js';
 import { StoreError } from './store.js';
 
 export const PREFIX = '/resume-market/api';
@@ -147,6 +148,7 @@ function sendHtml(res, status, html, downloadName) {
 /** 构造路由处理器（纯函数，方便 tests/smoke.mjs 直接驱动）。 */
 export function createHandler({ ctx, store }) {
   const chatService = createChatService({ store, log: (message) => logWarn(ctx, message) });
+  const githubMarket = createGithubMarket({ store, log: (message) => logWarn(ctx, message) });
 
   async function dispatch(req) {
     const url = new URL(req.url || '/', 'http://localhost');
@@ -276,6 +278,65 @@ export function createHandler({ ctx, store }) {
       return { status: 200, body: ok({ settings: await store.updateSettings(body || {}) }) };
     }
 
+    // 公共市场（GitHub 仓库当市场）：读 index、安装模板、本地点赞、生成投稿内容。
+    if (suffix === '/github/state' && method === 'GET') {
+      const settings = store.settings();
+      const force = query.get('force') === '1';
+      let index;
+      try {
+        index = await githubMarket.loadIndex({ force });
+      } catch (error) {
+        return {
+          status: 200,
+          body: ok({
+            repo: settings.githubRepo,
+            branch: settings.githubBranch,
+            items: [],
+            likes: store.githubState().likes,
+            fetchedAt: '',
+            stale: true,
+            error: { code: (error && error.code) || 'github/offline', message: messageOf(error) },
+          }),
+        };
+      }
+      return {
+        status: 200,
+        body: ok({
+          ...index,
+          repo: settings.githubRepo,
+          branch: settings.githubBranch,
+          likes: store.githubState().likes,
+        }),
+      };
+    }
+
+    if (suffix === '/github/refresh' && method === 'POST') {
+      const settings = store.settings();
+      const index = await githubMarket.loadIndex({ force: true });
+      return {
+        status: 200,
+        body: ok({ ...index, repo: settings.githubRepo, branch: settings.githubBranch, likes: store.githubState().likes }),
+      };
+    }
+
+    if (suffix === '/github/install' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.id) return { status: 400, body: fail('http/bad-request', '缺少模板 id') };
+      return { status: 200, body: ok({ template: await githubMarket.install(String(body.id)) }) };
+    }
+
+    if (suffix === '/github/like' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.id) return { status: 400, body: fail('http/bad-request', '缺少模板 id') };
+      return { status: 200, body: ok(await store.likeGithub(String(body.id))) };
+    }
+
+    if (suffix === '/github/publish' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.resumeId) return { status: 400, body: fail('http/bad-request', '缺少 resumeId') };
+      return { status: 200, body: ok(await githubMarket.publishPayload(body)) };
+    }
+
     // AI 对话：把用户历史消息（可选带上当前简历）转发给 DeepSeek，返回纯文本回复。
     // 面板负责解析回复里的 ```json 代码块并渲染「应用到当前简历」。
     if (suffix === '/chat' && method === 'POST') {
@@ -374,9 +435,11 @@ export function createHandler({ ctx, store }) {
       }
       sendJson(res, result.status, result.body);
     } catch (error) {
-      const status = typeof error.status === 'number' ? error.status : 500;
-      if (status >= 500) logWarn(ctx, error);
       const code = (error && error.code) || 'http/internal';
+      const explicit = typeof error.status === 'number' ? error.status : null;
+      const status =
+        explicit || (code === 'github/not-found' || code === 'github/bad-id' ? 404 : /^github\//.test(code) ? 502 : 500);
+      if (status >= 500) logWarn(ctx, error);
       sendJson(res, status, fail(code, messageOf(error)));
     }
   };

@@ -29,7 +29,11 @@
   需要先在「设置」页填自己的 DeepSeek API Key。
 - **模板市场**：把简历版式发布到本地市场（可勾选是否携带自己的内容），其他用户「安装」后可直接用；
   支持点赞、下架、自建远端市场服务器同步。
-- **AI 协作**：给「大肥鱼」提供 6 个工具，直接用结构化数据生成/修改/导出/发布简历。
+- **公共市场（GitHub）**：市场页可在「本地面板」和「公共市场 · GitHub」之间切换。公共市场直接读
+  本仓库 `market/index.json`，不需要服务器和账号；安装时只拉那一套模板的 JSON，10 分钟内走本地缓存，
+  GitHub 不可达时退回上次缓存。发布弹窗勾选「同时生成 GitHub 公共投稿」会生成规范 JSON + Issue /
+  新建文件链接，提交 PR 合并进 `market/` 即对所有用户上架。
+- **AI 协作**：给「大肥鱼」提供 9 个工具，直接用结构化数据生成/修改/导出/发布简历，浏览与安装公共市场模板。
 
 > 文档：[安装说明](docs/INSTALL.md) · [发布步骤](docs/RELEASE.md) · [贡献指南](CONTRIBUTING.md) ·
 > [更新日志](CHANGELOG.md) · [MIT License](LICENSE)
@@ -80,6 +84,39 @@ dsh plugin add file:<本目录绝对路径>
 - 发布到市场默认**只分享版式**，样张使用示例候选人；只有发布弹窗里勾选「附带我的简历内容」才分享真实数据。
 - HTTP API 只监听本机，带 loopback + Host/Origin 围栏，跨站请求一律 403。
 
+## 公共市场（GitHub）
+
+不需要自建服务器：本仓库的 `market/` 就是一个公共模板市场。
+
+```
+market/index.json                 轻量元数据列表（id / 名称 / 标签 / 作者 / accent / cls / 文件）
+market/templates/<id>.json        单套模板的完整内容（css + sample 示例数据）
+market/validate.mjs               投稿前校验：字段、id 与文件对应、cls 根选择器、隐私
+market/README.md                  投稿规范（字段表、审核标准、维护者流程）
+docs/MARKET.md                    使用与投稿的用户向说明
+```
+
+插件读取链路：
+
+1. 「模板市场」页切到「公共市场 · GitHub」→ `GET raw.githubusercontent.com/<repo>/<branch>/market/index.json`；
+2. 10 分钟内直接用本机缓存，过期才重新拉；仓库改名/改分支在「设置」页改；
+3. 一个地址失败会依次回退：加速前缀（设置页可填，如 `https://gh-proxy.com/`）→ 官方 raw →
+   `cdn.jsdelivr.net/gh/<repo>@<branch>/`，成功后记住可用源；
+4. 点「安装」只下载 `market/templates/<id>.json`，存进本地模板库（之后离线可用）；
+5. GitHub 不可达且本地有缓存时，界面显示「离线缓存」并继续可用。
+
+> 国内直连 `raw.githubusercontent.com` 经常被重置；如果公共市场显示离线，到「设置」页
+> 把「GitHub 加速前缀」填成你常用的加速站（例如 `https://gh-proxy.com/`）再刷新即可。
+
+投稿（两种都行，改完提交 PR 即可）：
+
+1. 在插件里「发布到市场」→ 勾选「同时生成 GitHub 公共投稿」→ 弹窗里「打开 Issue」，把 JSON 贴进去提交；
+2. 或点「新建模板文件」，文件名和路径已带好，直接提交 PR。
+
+合并进 `market/` 后，所有装了插件的人在公共市场里就能看到并安装。投稿规范见
+[`market/README.md`](market/README.md)；只想给自己团队用时，在「设置」页把公共市场仓库改成
+自己的 `owner/repo` 即可——读的是同一个目录结构。
+
 ## 自建模板市场（可选，零依赖）
 
 `server/` 是一个独立的零依赖 Node 服务，提供公开的模板市场 API 和画廊页面：
@@ -100,10 +137,12 @@ RM_TOKEN=secret node server/market-server.js   # 开启发布/删除鉴权
 node build/build.mjs     # 把 src/client/*.js + src/shared/doc.js 拼成 lib/client.js
 node tools/check.mjs     # 包形状检查（exports / dsh.bundle / dsh.client / locale / icon / patch）
 node tests/smoke.mjs     # Host 侧冒烟测试（路由 / 导出 / 市场 / 工具 / 安全围栏）
+node tests/github-market.mjs # 公共市场契约测试（index / 模板安装 / 投稿 JSON / 工具）
 node tests/render.mjs    # 客户端 bundle 渲染测试（侧栏图标 + 面板首屏）
 node tests/pdf.mjs       # 客户端 PDF 生成器测试（xref / A4 页面 / 图片流）
 node tests/mount.mjs     # jsdom 挂载测试（真实数据流：编辑 / 预览 / 模板库 / 市场 / 设置 / 发布弹窗）
 node tools/previews.mjs  # 生成 9 套模板的静态预览 → previews/index.html
+node market/validate.mjs # 校验公共市场 market/ 目录（index / 模板文件 / cls / 隐私）
 node server/smoke.mjs    # 市场服务 43 项测试
 ```
 

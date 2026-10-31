@@ -102,6 +102,29 @@ const fetchCalls = [];
 globalThis.fetch = async (url, init = {}) => {
   const target = String(url);
   fetchCalls.push((init.method || 'GET') + ' ' + target);
+  if (target.includes('/github/state') || target.includes('/github/refresh')) {
+    return json({
+      repo: 'skylight54/dsh-resume-market',
+      branch: 'main',
+      fetchedAt: new Date().toISOString(),
+      stale: false,
+      items: [
+        {
+          id: 'rm-academia',
+          name: '学术科研',
+          tagline: '衬线字与双线分割',
+          tags: ['学术'],
+          author: '大肥鱼',
+          accent: '#6f6880',
+          cls: 'rm-t-academia',
+          file: 'templates/rm-academia.json',
+          installs: 2,
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      likes: {},
+    });
+  }
   if (target.endsWith('/state')) return json(state);
   if (target.includes('/resume/duplicate')) return json({ resume: { ...resume, id: 'r_copy' } });
   if (target.includes('/resume/revisions')) {
@@ -265,6 +288,20 @@ await act(async () => {
 const marketCards = container.querySelectorAll('.rm-stage .rm-tpl');
 check(marketCards.length === 3, 'expected 3 seeded market cards, got ' + marketCards.length);
 check(text().includes('大肥鱼'), 'market author 大肥鱼 missing');
+
+// --- 公共市场（GitHub）切换 ----------------------------------------------
+await act(async () => {
+  byText('.rm-seg-btn', '公共市场').click();
+  await sleep(90);
+});
+const pubCards = container.querySelectorAll('.rm-stage .rm-tpl');
+check(pubCards.length === 1, 'expected 1 public market card, got ' + pubCards.length);
+check(text().includes('公共市场 · GitHub'), 'public market title missing');
+check(text().includes('学术科研'), 'public market item name missing');
+check(
+  fetchCalls.some((call) => call.includes('/github/state')),
+  'github state was not fetched'
+);
 
 // --- 我的简历 tab：列表 + 回收站 -----------------------------------------
 await act(async () => {

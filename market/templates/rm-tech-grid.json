@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "id": "rm-tech-grid",
+  "name": "科技网格",
+  "en": "Tech Grid",
+  "tagline": "蓝黑网格与等宽小标签，克制、精确，研发与数据岗的舒适区。",
+  "tags": [
+    "研发",
+    "数据",
+    "算法"
+  ],
+  "author": "简历市场",
+  "accent": "#2c5f96",
+  "cls": "rm-t-tech",
+  "templateId": "mkt-tech-grid",
+  "css": "\n.rm-t-tech{padding:48px 54px 44px;color:#16202e;background:linear-gradient(180deg,#fbfdff 0%,#ffffff 260px);}\n.rm-t-tech .rm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;padding-bottom:16px;border-bottom:2px solid #14233a;}\n.rm-t-tech .rm-name{font-size:31px;font-weight:600;letter-spacing:.06em;color:#10213a;}\n.rm-t-tech .rm-role{margin:6px 0 0;font-size:12.5px;color:#3d6ea8;}\n.rm-t-tech .rm-contact{flex:0 0 338px;grid-template-columns:1fr 1fr;gap:4px 16px;margin:0;}\n.rm-t-tech .rm-k{font-family:Consolas,\"SFMono-Regular\",monospace;font-size:9.5px;color:#5d7fa8;letter-spacing:.06em;}\n.rm-t-tech .rm-v{font-size:11.5px;color:#1d3350;}\n.rm-t-tech .rm-sec{margin-top:19px;}\n.rm-t-tech .rm-sec-h{margin:0 0 8px;padding-bottom:5px;border-bottom:1px solid #d9e3f0;gap:8px;}\n.rm-t-tech .rm-sec-t{font-size:12px;font-weight:700;letter-spacing:.14em;color:#133a63;}\n.rm-t-tech .rm-sec-t::before{content:\"#\";color:#7ba7d8;margin-right:4px;font-family:Consolas,monospace;}\n.rm-t-tech .rm-tag{border-color:#cddff2;background:#f4f9ff;color:#2c5f96;font-size:11px;}\n.rm-t-tech .rm-date{font-family:Consolas,\"SFMono-Regular\",monospace;font-size:11px;color:#6889ae;}\n.rm-t-tech .rm-skill-row{grid-template-columns:104px minmax(0,1fr);}\n.rm-t-tech .rm-item-t{color:#10213a;}\n",
+  "sample": {
+    "basics": {
+      "name": "林知夏",
+      "role": "高级产品经理 · 8 年 B 端产品经验",
+      "phone": "138 0013 8000",
+      "email": "zhixia.lin@example.com",
+      "city": "上海",
+      "wechat": "linzhixia-pm",
+      "github": "github.com/linzhixia",
+      "website": "zhixia.design",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle"
+    },
+    "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
+    "experience": [
+      {
+        "company": "星野科技",
+        "role": "高级产品经理",
+        "period": "2021.06 — 至今",
+        "location": "上海",
+        "bullets": [
+          "负责企业协作平台产品线，MAU 从 12 万提升至 58 万，续费率 **+18%**。",
+          "重构权限与工作流引擎，交付周期缩短 40%，支撑 200+ 企业客户的自定义配置。",
+          "搭建产品数据看板，把需求评审到上线的平均周期从 21 天压缩到 12 天。"
+        ]
+      },
+      {
+        "company": "云枢网络",
+        "role": "产品经理",
+        "period": "2018.03 — 2021.05",
+        "location": "杭州",
+        "bullets": [
+          "从 0 到 1 设计客户成功 SaaS，首年签约 120 家企业，ARR 突破 1800 万。",
+          "主导移动端改版，核心任务完成率提升 27%，客服咨询量下降 22%。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "企业工作流引擎 2.0",
+        "role": "产品负责人",
+        "period": "2022.03 — 2022.11",
+        "bullets": [
+          "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+          "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "华东师范大学",
+        "degree": "硕士",
+        "major": "信息管理",
+        "period": "2015.09 — 2018.01",
+        "gpa": "3.8 / 4.0"
+      }
+    ],
+    "skills": [
+      {
+        "group": "产品能力",
+        "items": "需求分析、产品规划、数据驱动、用户研究"
+      },
+      {
+        "group": "工具",
+        "items": "Axure、Figma、SQL、Mixpanel、Jira"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳产品奖",
+        "date": "2023.12",
+        "desc": "星野科技"
+      },
+      {
+        "title": "中国 SaaS 产品创新大赛 银奖",
+        "date": "2020.09",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-10-31T12:00:00.000Z"
+}

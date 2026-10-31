@@ -40,7 +40,30 @@ const SETTINGS_DEFAULTS = {
   chatApiKey: '',
   chatModel: 'deepseek-chat',
   chatBaseUrl: 'https://api.deepseek.com',
+  // 公共市场：把一个 GitHub 仓库当作模板市场（市场内容是仓库里的 market/ 目录）。
+  githubRepo: 'skylight54/dsh-resume-market',
+  githubBranch: 'main',
+  // 国内直连 raw.githubusercontent.com 常常被重置；可填一个 GitHub 加速前缀（如 https://gh-proxy.com/）。
+  githubProxy: '',
 };
+
+/** 公共市场缓存条目（来自仓库 market/index.json，只存轻量元数据）。 */
+function normalizeGithubItem(raw) {
+  const item = raw && typeof raw === 'object' ? raw : {};
+  return {
+    id: String(item.id || '').slice(0, 60),
+    name: String(item.name || '未命名模板').slice(0, 40),
+    en: String(item.en || '').slice(0, 40),
+    tagline: String(item.tagline || '').slice(0, 160),
+    tags: Array.isArray(item.tags) ? item.tags.slice(0, 6).map((t) => String(t).slice(0, 12)) : [],
+    author: String(item.author || '匿名').slice(0, 40),
+    accent: /^#[0-9a-fA-F]{3,8}$/.test(String(item.accent || '')) ? String(item.accent) : '#2f6fde',
+    cls: /^rm-t-[a-z0-9-]{1,40}$/.test(String(item.cls || '')) ? String(item.cls) : '',
+    file: String(item.file || '').slice(0, 200),
+    installs: Number(item.installs) || 0,
+    updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : '',
+  };
+}
 
 export class StoreError extends Error {
   /**
@@ -121,6 +144,19 @@ function sanitizeSettings(input) {
   if (typeof input.chatBaseUrl === 'string' && /^https?:\/\//.test(input.chatBaseUrl.trim())) {
     out.chatBaseUrl = input.chatBaseUrl.trim().replace(/\/+$/, '').slice(0, 300);
   }
+  // 公共市场仓库：owner/repo，避免把任意 URL 拼进 raw.githubusercontent.com。
+  if (typeof input.githubRepo === 'string' && /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(input.githubRepo.trim())) {
+    out.githubRepo = input.githubRepo.trim().slice(0, 120);
+  }
+  if (typeof input.githubBranch === 'string' && /^[A-Za-z0-9_./-]{1,80}$/.test(input.githubBranch.trim())) {
+    out.githubBranch = input.githubBranch.trim();
+  }
+  // 加速前缀：可留空；填了就必须是 http(s) 地址，用完后拼在原始 GitHub 地址前面。
+  if (typeof input.githubProxy === 'string') {
+    const proxy = input.githubProxy.trim().replace(/\/+$/, '');
+    if (!proxy) out.githubProxy = '';
+    else if (/^https?:\/\/[^\s]{1,200}$/.test(proxy)) out.githubProxy = proxy.slice(0, 200);
+  }
   return out;
 }
 
@@ -137,6 +173,7 @@ function freshState() {
     resumes: [],
     templates: [],
     market: seedMarket(),
+    github: { fetchedAt: '', items: [], likes: {} },
   };
 }
 
@@ -145,6 +182,18 @@ function reconcile(raw) {
   const state = freshState();
   if (!raw || typeof raw !== 'object') return state;
   state.settings = sanitizeSettings(raw.settings);
+  if (raw.github && typeof raw.github === 'object') {
+    const likes = raw.github.likes && typeof raw.github.likes === 'object' ? raw.github.likes : {};
+    state.github = {
+      fetchedAt: typeof raw.github.fetchedAt === 'string' ? raw.github.fetchedAt : '',
+      items: Array.isArray(raw.github.items) ? raw.github.items.slice(0, 500).map(normalizeGithubItem) : [],
+      likes: Object.fromEntries(
+        Object.entries(likes)
+          .slice(0, 500)
+          .map(([key, value]) => [String(key).slice(0, 120), Number(value) || 0]),
+      ),
+    };
+  }
   if (Array.isArray(raw.resumes)) {
     state.resumes = raw.resumes
       .filter((r) => r && typeof r === 'object')
@@ -329,6 +378,7 @@ export function openStore(options = {}) {
         ),
         templates: clone(state.templates),
         market: clone(state.market),
+        github: clone(state.github),
       };
     },
 
@@ -616,6 +666,29 @@ export function openStore(options = {}) {
         const entry = findEntry(entryId);
         entry.likes = (Number(entry.likes) || 0) + 1;
         return { id: entry.id, likes: entry.likes };
+      });
+    },
+
+    /** 公共市场缓存（index.json 的元数据 + 本地点赞数）。 */
+    githubState() {
+      return clone(state.github);
+    },
+
+    /** 用刚拉到的 index 覆盖缓存，并把时间戳写进去。 */
+    setGithubItems(items) {
+      return mutate(() => {
+        state.github.items = Array.isArray(items) ? items.slice(0, 500).map(normalizeGithubItem) : [];
+        state.github.fetchedAt = nowIso();
+        return clone({ fetchedAt: state.github.fetchedAt, count: state.github.items.length });
+      });
+    },
+
+    /** GitHub 模式下没有服务端计数，点赞只记在本地。 */
+    likeGithub(id) {
+      return mutate(() => {
+        const key = String(id || '').slice(0, 120);
+        state.github.likes[key] = (Number(state.github.likes[key]) || 0) + 1;
+        return { id: key, likes: state.github.likes[key] };
       });
     },
 

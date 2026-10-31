@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-resume-market",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "免费简历模板市场：6 套内置模板、按字段分栏的个人信息编辑、A4 实时预览、一键导出 PDF，可把简历发布到市场分享给其他用户。",
@@ -27,7 +27,7 @@
   "scripts": {
     "build": "node build/build.mjs",
     "check": "node tools/check.mjs",
-    "test": "node tests/smoke.mjs && node tests/pdf.mjs"
+    "test": "node tests/smoke.mjs && node tests/github-market.mjs && node tests/pdf.mjs"
   },
   "exports": {
     ".": "./src/index.js",

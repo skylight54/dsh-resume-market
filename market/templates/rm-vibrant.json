@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "id": "rm-vibrant",
+  "name": "活力橙",
+  "en": "Vibrant",
+  "tagline": "暖橙色圆角页眉，友好但不轻浮。适合运营、增长与内容岗位。",
+  "tags": [
+    "运营",
+    "增长",
+    "内容"
+  ],
+  "author": "大肥鱼",
+  "accent": "#f2711c",
+  "cls": "rm-t-vibrant",
+  "templateId": "mkt-vibrant",
+  "css": "\n.rm-t-vibrant{padding:50px 56px 46px;color:#2b2420;}\n.rm-t-vibrant .rm-head{padding:22px 26px;border-radius:14px;background:linear-gradient(120deg,#fff2e8 0%,#ffe3cf 60%,#ffd6b8 100%);}\n.rm-t-vibrant .rm-name{font-size:33px;font-weight:800;letter-spacing:.02em;color:#7a3812;line-height:1.2;}\n.rm-t-vibrant .rm-role{margin:6px 0 0;font-size:13px;color:#b4571f;font-weight:600;}\n.rm-t-vibrant .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 14px;margin-top:16px;}\n.rm-t-vibrant .rm-k{font-size:10px;color:#b8612b;font-weight:600;}\n.rm-t-vibrant .rm-v{font-size:12px;color:#4a3629;}\n.rm-t-vibrant .rm-sec{margin-top:20px;}\n.rm-t-vibrant .rm-sec-h{margin:0 0 9px;gap:6px;}\n.rm-t-vibrant .rm-sec-t{font-size:13px;font-weight:800;letter-spacing:.08em;color:#8a3d12;}\n.rm-t-vibrant .rm-sec-h::after{content:\"\";flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,#f2711c,#ffc27a);align-self:center;margin-left:8px;}\n.rm-t-vibrant .rm-tag{border-color:#ffd2ad;background:#fff7ef;color:#a64d16;}\n.rm-t-vibrant .rm-bullets li::marker{color:#f2711c;}\n.rm-t-vibrant .rm-skill-row{grid-template-columns:96px minmax(0,1fr);}\n",
+  "sample": {
+    "basics": {
+      "name": "林知夏",
+      "role": "高级产品经理 · 8 年 B 端产品经验",
+      "phone": "138 0013 8000",
+      "email": "zhixia.lin@example.com",
+      "city": "上海",
+      "wechat": "linzhixia-pm",
+      "github": "github.com/linzhixia",
+      "website": "zhixia.design",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle"
+    },
+    "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
+    "experience": [
+      {
+        "company": "星野科技",
+        "role": "高级产品经理",
+        "period": "2021.06 — 至今",
+        "location": "上海",
+        "bullets": [
+          "负责企业协作平台产品线，MAU 从 12 万提升至 58 万，续费率 **+18%**。",
+          "重构权限与工作流引擎，交付周期缩短 40%，支撑 200+ 企业客户的自定义配置。",
+          "搭建产品数据看板，把需求评审到上线的平均周期从 21 天压缩到 12 天。"
+        ]
+      },
+      {
+        "company": "云枢网络",
+        "role": "产品经理",
+        "period": "2018.03 — 2021.05",
+        "location": "杭州",
+        "bullets": [
+          "从 0 到 1 设计客户成功 SaaS，首年签约 120 家企业，ARR 突破 1800 万。",
+          "主导移动端改版，核心任务完成率提升 27%，客服咨询量下降 22%。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "企业工作流引擎 2.0",
+        "role": "产品负责人",
+        "period": "2022.03 — 2022.11",
+        "bullets": [
+          "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+          "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "华东师范大学",
+        "degree": "硕士",
+        "major": "信息管理",
+        "period": "2015.09 — 2018.01",
+        "gpa": "3.8 / 4.0"
+      }
+    ],
+    "skills": [
+      {
+        "group": "产品能力",
+        "items": "需求分析、产品规划、数据驱动、用户研究"
+      },
+      {
+        "group": "工具",
+        "items": "Axure、Figma、SQL、Mixpanel、Jira"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳产品奖",
+        "date": "2023.12",
+        "desc": "星野科技"
+      },
+      {
+        "title": "中国 SaaS 产品创新大赛 银奖",
+        "date": "2020.09",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-09-26T13:05:00.000Z"
+}

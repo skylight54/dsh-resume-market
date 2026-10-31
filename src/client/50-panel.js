@@ -73,6 +73,7 @@ function PublishDialog(props) {
     desc: '',
     includeSample: !!props.includeSampleDefault,
     remote: !!props.canRemote,
+    publishPublic: false,
   });
   var form = first[0];
   var setForm = first[1];
@@ -93,6 +94,7 @@ function PublishDialog(props) {
       desc: form.desc.trim(),
       includeSample: !!form.includeSample,
       remote: !!form.remote,
+      publishPublic: !!form.publishPublic,
     });
   }
   return h(
@@ -126,6 +128,12 @@ function PublishDialog(props) {
                 '同时发布到远端市场：' + props.remoteHost
               )
             : null,
+          h(
+            'label',
+            { className: 'rm-check' },
+            h('input', { type: 'checkbox', checked: !!form.publishPublic, onChange: function (event) { set('publishPublic')(event.target.checked); } }),
+            '同时生成 GitHub 公共投稿（公开到所有人的公共市场，由仓库维护者合并上架）'
+          ),
           h('div', { className: 'rm-hint' }, '发布后，任何安装了本插件的用户都能在市场里安装这套模板。用户数据不会被上传。')
         )
       ),
@@ -134,6 +142,50 @@ function PublishDialog(props) {
         { className: 'rm-modal-f' },
         h('button', { type: 'button', className: 'rm-btn', onClick: props.onClose, disabled: props.busy }, '取消'),
         h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: submit, disabled: props.busy }, props.busy ? '发布中…' : '发布')
+      )
+    )
+  );
+}
+
+function PublicSubmitDialog(props) {
+  var info = props.info || {};
+  function copy() {
+    rmCopyText(info.json || '').then(
+      function () { props.onToast('已复制投稿 JSON'); },
+      function (err) { props.onToast('复制失败：' + rmErrText(err), true); }
+    );
+  }
+  return h(
+    'div',
+    { className: 'rm-modal', onMouseDown: function (event) { if (event.target === event.currentTarget) props.onClose(); } },
+    h(
+      'div',
+      { className: 'rm-modal-card rm-modal-wide' },
+      h(
+        'div',
+        { className: 'rm-modal-h' },
+        h('h3', null, '公共投稿已生成'),
+        h('span', { className: 'rm-muted', style: { marginLeft: 'auto', fontSize: '11px' } }, '合并进仓库后，所有装了本插件的人都能在公共市场安装')
+      ),
+      h(
+        'div',
+        { className: 'rm-modal-b' },
+        h(
+          'div',
+          { className: 'rm-col' },
+          h('div', { className: 'rm-hint' }, '目标文件：', h('code', { className: 'rm-mono' }, info.repoPath || '')),
+          h('div', { className: 'rm-hint' }, '方式一：点「打开 Issue」把下面的 JSON 贴进去提交，仓库维护者合并后上架。'),
+          h('div', { className: 'rm-hint' }, '方式二：点「新建模板文件」直接发起 PR，文件名和位置已经带在链接里。'),
+          h('textarea', { className: 'rm-pub-json', readOnly: true, rows: 10, value: info.json || '' })
+        )
+      ),
+      h(
+        'div',
+        { className: 'rm-modal-f' },
+        h('button', { type: 'button', className: 'rm-btn', onClick: copy }, '复制 JSON'),
+        h('button', { type: 'button', className: 'rm-btn', onClick: function () { window.open(info.issueUrl || '', '_blank'); } }, '打开 Issue'),
+        h('button', { type: 'button', className: 'rm-btn', onClick: function () { window.open(info.newFileUrl || '', '_blank'); } }, '新建模板文件'),
+        h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: props.onClose }, '知道了')
       )
     )
   );
@@ -149,6 +201,9 @@ function SettingsView(props) {
     chatApiKey: settings.chatApiKey || '',
     chatModel: settings.chatModel || 'deepseek-chat',
     chatBaseUrl: settings.chatBaseUrl || 'https://api.deepseek.com',
+    githubRepo: settings.githubRepo || 'skylight54/dsh-resume-market',
+    githubBranch: settings.githubBranch || 'main',
+    githubProxy: settings.githubProxy || '',
   });
   var form = first[0];
   var setForm = first[1];
@@ -168,6 +223,9 @@ function SettingsView(props) {
       chatApiKey: form.chatApiKey.trim(),
       chatModel: form.chatModel.trim() || 'deepseek-chat',
       chatBaseUrl: form.chatBaseUrl.trim() || 'https://api.deepseek.com',
+      githubRepo: form.githubRepo.trim() || 'skylight54/dsh-resume-market',
+      githubBranch: form.githubBranch.trim() || 'main',
+      githubProxy: form.githubProxy.trim(),
     });
   }
   return h(
@@ -183,6 +241,9 @@ function SettingsView(props) {
         h(Field, { label: '我的署名（发布时显示）', value: form.author, placeholder: '大肥鱼', onChange: set('author') }),
         h(Field, { label: '远端市场地址（可选）', value: form.marketUrl, placeholder: 'http://127.0.0.1:8787', onChange: set('marketUrl') }),
         h(Field, { label: '发布密钥（远端市场需要时）', value: form.marketToken, type: 'password', placeholder: '可留空', onChange: set('marketToken') }),
+        h(Field, { label: '公共市场仓库（GitHub）', value: form.githubRepo, placeholder: 'skylight54/dsh-resume-market', onChange: set('githubRepo') }),
+        h(Field, { label: '公共市场分支', value: form.githubBranch, placeholder: 'main', onChange: set('githubBranch') }),
+        h(Field, { label: 'GitHub 加速前缀（国内可填）', value: form.githubProxy, placeholder: '例如 https://gh-proxy.com/', onChange: set('githubProxy') }),
         h(
           'label',
           { className: 'rm-check' },
@@ -273,6 +334,15 @@ function ResumePanel() {
   var revState = useState({ open: false, resume: null, loading: false, revisions: [] });
   var rev = revState[0];
   var setRev = revState[1];
+  var ghState = useState({ loading: false, items: [], likes: {}, stale: false, error: null, fetchedAt: '', repo: '' });
+  var gh = ghState[0];
+  var setGh = ghState[1];
+  var marketSourceState = useState('local');
+  var marketSource = marketSourceState[0];
+  var setMarketSource = marketSourceState[1];
+  var publicSubmissionState = useState(null);
+  var publicSubmission = publicSubmissionState[0];
+  var setPublicSubmission = publicSubmissionState[1];
 
   var saveTimer = useRef(null);
   var toastTimer = useRef(null);
@@ -717,6 +787,25 @@ function ResumePanel() {
       function (entry) {
         setBusy('');
         setPublishOpen(false);
+        if (payload.publishPublic) {
+          rmApi('/github/publish', {
+            method: 'POST',
+            body: {
+              resumeId: payload.resumeId,
+              name: payload.title,
+              tagline: payload.tagline,
+              tags: payload.tags,
+              includeSample: payload.includeSample,
+            },
+          }).then(
+            function (value) {
+              setPublicSubmission(value);
+            },
+            function (err) {
+              flash('公共投稿生成失败：' + rmErrText(err), true);
+            }
+          );
+        }
         if (payload.remote && boot.settings && boot.settings.marketUrl) {
           var base = remoteBase();
           var headers = { 'content-type': 'application/json' };
@@ -757,6 +846,66 @@ function ResumePanel() {
       function (err) {
         setBusy('');
         flash('发布失败：' + rmErrText(err), true);
+      }
+    );
+  }
+
+  function loadGithub(force) {
+    setGh(function (prev) { return Object.assign({}, prev, { loading: true }); });
+    var opts = force ? { method: 'POST' } : {};
+    rmApi(force ? '/github/refresh' : '/github/state', opts).then(
+      function (value) {
+        setGh({
+          loading: false,
+          items: value.items || [],
+          likes: value.likes || {},
+          stale: !!value.stale,
+          error: value.error || null,
+          fetchedAt: value.fetchedAt || '',
+          repo: value.repo || '',
+        });
+      },
+      function (err) {
+        setGh(function (prev) {
+          return Object.assign({}, prev, { loading: false, error: { code: 'github/offline', message: rmErrText(err) } });
+        });
+      }
+    );
+  }
+
+  function installGithub(item) {
+    if (busy) return;
+    setBusy('gh:' + item.id);
+    rmApi('/github/install', { method: 'POST', body: { id: item.id } }).then(
+      function (value) {
+        return value.template;
+      }
+    ).then(
+      function (template) {
+        setBusy('');
+        return reload().then(function () {
+          setTab('templates');
+          flash('已安装公共模板：' + (template.name || item.name) + '，在「模板库」里可用');
+        });
+      },
+      function (err) {
+        setBusy('');
+        flash('安装失败：' + rmErrText(err), true);
+      }
+    );
+  }
+
+  function likeGithub(item) {
+    rmApi('/github/like', { method: 'POST', body: { id: item.id } }).then(
+      function (value) {
+        setGh(function (prev) {
+          var likes = Object.assign({}, prev.likes);
+          likes[item.id] = value.likes;
+          return Object.assign({}, prev, { likes: likes });
+        });
+      },
+      function (err) {
+        flash('点赞失败：' + rmErrText(err), true);
       }
     );
   }
@@ -874,11 +1023,26 @@ function ResumePanel() {
     // 切到市场页时顺带拉一次远端清单
   }, [tab]);
 
+  useEffect(function () {
+    if (tab === 'market' && marketSource === 'public' && !gh.fetchedAt && !gh.loading) loadGithub(false);
+    // 切到「公共市场」时拉一次 GitHub index（10 分钟内走本地缓存）
+  }, [tab, marketSource]);
+
 
   var template = draft ? rmResolveTemplate(draft.templateId, boot.templates) : null;
   var installedTemplateIds = (boot.templates || []).map(function (item) {
     return item.id;
   });
+  // 公共市场的 index 里没有模板 id，按名字判断是否已安装（安装后模板会带 source:'custom'）。
+  var ghInstalledIds = (gh.items || [])
+    .filter(function (item) {
+      return (boot.templates || []).some(function (t) {
+        return t.source === 'custom' && t.name === item.name;
+      });
+    })
+    .map(function (item) {
+      return item.id;
+    });
   var canRemote = !!(boot.settings && boot.settings.marketUrl);
   var remoteHost = canRemote ? String(boot.settings.marketUrl).replace(/^https?:\/\//, '') : '';
 
@@ -923,6 +1087,14 @@ function ResumePanel() {
       onUnpublish: unpublishEntry,
       onLike: likeEntry,
       onRefresh: loadRemote,
+      source: marketSource,
+      onSourceChange: setMarketSource,
+      gh: gh,
+      ghInstalledIds: ghInstalledIds,
+      repo: gh.repo || (boot.settings && boot.settings.githubRepo) || '',
+      onGhInstall: installGithub,
+      onGhLike: likeGithub,
+      onGhRefresh: function () { loadGithub(true); },
     });
     if (remote.error) {
       body = h('div', null, body, h('div', { className: 'rm-hint', style: { padding: '0 18px 14px' } }, '远端市场暂不可用：' + remote.error + '（本地市场照常可用）'));
@@ -1099,6 +1271,13 @@ function ResumePanel() {
           remoteHost: remoteHost,
           onClose: function () { setPublishOpen(false); },
           onSubmit: submitPublish,
+        })
+      : null,
+    publicSubmission
+      ? h(PublicSubmitDialog, {
+          info: publicSubmission,
+          onClose: function () { setPublicSubmission(null); },
+          onToast: flash,
         })
       : null,
     h(Toast, { toast: toast })

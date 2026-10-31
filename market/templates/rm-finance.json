@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "id": "rm-finance",
+  "name": "金融投行",
+  "en": "Finance",
+  "tagline": "深海军蓝色块 + 紧凑行距，把「能扛住加班」写在版面上。",
+  "tags": [
+    "金融",
+    "投行",
+    "咨询"
+  ],
+  "author": "大肥鱼",
+  "accent": "#0f2b46",
+  "cls": "rm-t-finance",
+  "templateId": "mkt-finance",
+  "css": "\n.rm-t-finance{padding:46px 52px 40px;color:#12212f;font-size:12.5px;line-height:1.55;}\n.rm-t-finance .rm-head{padding-bottom:14px;border-bottom:3px solid #0f2b46;}\n.rm-t-finance .rm-name{font-size:30px;font-weight:700;letter-spacing:.02em;color:#0f2b46;}\n.rm-t-finance .rm-role{margin:5px 0 0;font-size:12px;color:#3d5a75;letter-spacing:.08em;text-transform:uppercase;}\n.rm-t-finance .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 18px;margin-top:12px;padding:9px 12px;background:#f2f5f8;border-left:3px solid #0f2b46;}\n.rm-t-finance .rm-k{font-size:9.5px;letter-spacing:.1em;color:#7a8ea1;text-transform:uppercase;}\n.rm-t-finance .rm-v{font-size:11.5px;color:#1b3348;}\n.rm-t-finance .rm-sec{margin-top:18px;}\n.rm-t-finance .rm-sec-h{margin:0 0 8px;padding-bottom:3px;border-bottom:1px solid #cfd9e3;}\n.rm-t-finance .rm-sec-t{font-size:11.5px;font-weight:700;letter-spacing:.22em;color:#0f2b46;text-transform:uppercase;}\n.rm-t-finance .rm-item-t{color:#0f2b46;font-weight:700;}\n.rm-t-finance .rm-item-role{color:#3d5a75;}\n.rm-t-finance .rm-tag{border-radius:2px;border-color:#d3dde7;background:#f7f9fb;color:#2b4761;font-size:11px;}\n.rm-t-finance .rm-date{color:#5b7288;}\n.rm-t-finance .rm-skill-row{grid-template-columns:96px minmax(0,1fr);gap:8px;margin-bottom:4px;}\n",
+  "sample": {
+    "basics": {
+      "name": "沈砚",
+      "role": "投资银行部分析师 · 消费与零售组",
+      "phone": "138 0013 8000",
+      "email": "yan.shen@example.com",
+      "city": "深圳",
+      "wechat": "",
+      "github": "",
+      "website": "",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle"
+    },
+    "summary": "3 年投行经验，参与 6 单 IPO 与 2 单并购项目，累计交易规模约 48 亿元。熟悉消费行业财务模型与尽调流程。",
+    "experience": [
+      {
+        "company": "某证券投资银行部",
+        "role": "分析师",
+        "period": "2022.07 — 至今",
+        "location": "深圳",
+        "bullets": [
+          "参与 3 单消费类 IPO 项目，负责财务核查与招股书财务章节撰写。",
+          "搭建 DCF 与可比公司估值模型，支持 2 单并购交易的定价讨论。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "企业工作流引擎 2.0",
+        "role": "产品负责人",
+        "period": "2022.03 — 2022.11",
+        "bullets": [
+          "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+          "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "华东师范大学",
+        "degree": "硕士",
+        "major": "信息管理",
+        "period": "2015.09 — 2018.01",
+        "gpa": "3.8 / 4.0"
+      }
+    ],
+    "skills": [
+      {
+        "group": "专业能力",
+        "items": "财务建模、尽职调查、估值分析、招股书撰写"
+      },
+      {
+        "group": "工具",
+        "items": "Excel（VBA）、Wind、Bloomberg、PPT"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳产品奖",
+        "date": "2023.12",
+        "desc": "星野科技"
+      },
+      {
+        "title": "中国 SaaS 产品创新大赛 银奖",
+        "date": "2020.09",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-09-18T09:40:00.000Z"
+}
