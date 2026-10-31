@@ -119,6 +119,12 @@ globalThis.fetch = async (url, init = {}) => {
           author: '大肥鱼',
           accent: '#6f6880',
           cls: 'rm-t-academia',
+          templateId: 'pub-rm-academia',
+          css: '.rm-t-academia{padding:60px 66px;color:#23202b}',
+          sample: {
+            basics: { name: '周慕云', role: '社会学博士', email: 'zhou@example.com', phone: '138 0013 8000' },
+            summary: '研究城市与记忆。',
+          },
           file: 'templates/rm-academia.json',
           installs: 2,
           updatedAt: new Date().toISOString(),
@@ -358,6 +364,12 @@ check(
   fetchCalls.some((call) => call.includes('/github/state')),
   'github state was not fetched'
 );
+// 公共市场卡片必须是真实 A4 缩略预览（index 内联 css + sample），不是色块兜底
+const pubThumb = pubCards[0].querySelector('.rm-tpl-thumb .rm-scaled');
+check(!!pubThumb, 'public market card is missing real A4 thumbnail');
+const pubPaper = pubThumb && pubThumb.querySelector('.rm-paper.rm-t-academia');
+check(!!pubPaper, 'public market thumbnail is not using template cls');
+check(!!(pubPaper && pubPaper.querySelector('.rm-contact')), 'public market thumbnail sample resume missing');
 
 // --- 我的简历 tab：列表 + 回收站 -----------------------------------------
 await act(async () => {
