@@ -8,10 +8,10 @@ function Toast(props) {
   return h('div', { className: 'rm-toast' + (props.toast.isErr ? ' is-err' : '') }, props.toast.msg);
 }
 
-var EXPORT_LABEL = { html: 'HTML', doc: 'Word 文档', pdf: 'PDF' };
+var EXPORT_LABEL = { html: 'HTML', doc: 'Word 文档 (.docx)', pdf: 'PDF' };
 var EXPORT_HINT = {
   html: 'HTML 文件：双击用浏览器打开，Ctrl/Cmd+P 也能再存成 PDF。',
-  doc: 'Word 文档：双击用 Word / WPS 打开，在 Word 里「另存为 .docx」即可得到正式 Word 文件。',
+  doc: 'Word 文档：真正的 .docx，双击用 Word / WPS 打开即可，版式（页眉色带 / 模块标题色块 / 左右对齐）都已还原。',
   pdf: 'PDF：按 A4 排版、已在本地生成好，可以直接投递或打印。',
 };
 
@@ -1035,25 +1035,26 @@ function ResumePanel(props) {
 
   function applyTemplateAnalysis(analysis) {
     var style = rmStyleFromAnalysis(analysis);
-    var name = '图片生成初稿';
+    var fromFile = !!(analysis && analysis.sample);
+    var name = (analysis && analysis.name) || (fromFile ? '文件生成初稿' : '图片生成初稿');
     var cls = rmNewStyleClass(name);
     setTemplateImportOpen(false);
     setTemplateEditor({
       key: 'import-' + Date.now(),
-      title: '新建模板（图片初稿）',
+      title: fromFile ? '新建模板（文件初稿）' : '新建模板（图片初稿）',
       initial: {
         name: name,
         en: '',
-        tagline: '从图片取色生成的初稿',
+        tagline: (analysis && analysis.tagline) || (fromFile ? '从文件解析生成的初稿' : '从图片取色生成的初稿'),
         tags: [],
         cls: cls,
         css: rmStyleToCss(style, cls),
         style: style,
-        sample: DEMO_RESUME_DATA,
+        sample: (analysis && analysis.sample) || DEMO_RESUME_DATA,
       },
       error: '',
     });
-    flash('已按图片主色生成初稿，可以继续微调');
+    flash(fromFile ? '已按文件解析结果生成初稿，可以继续微调' : '已按图片主色生成初稿，可以继续微调');
   }
 
   function saveTemplate(payload, publish) {
@@ -1704,7 +1705,7 @@ function ResumePanel(props) {
                       { className: 'rm-menu' },
                       [
                         ['html', '导出 HTML'],
-                        ['doc', '导出 Word (.doc)'],
+                        ['doc', '导出 Word (.docx)'],
                         ['pdf', '导出 PDF'],
                       ].map(function (pair) {
                         return h(

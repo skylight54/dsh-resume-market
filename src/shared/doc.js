@@ -885,9 +885,37 @@ function wordStyleOf(template) {
   };
 }
 
-/** Word 里的「空行」：1px 高的占位表行比 margin 更可靠。 */
+/** Word 里的「空行」：带固定行高的空段落比 margin 可靠（Word 的 HTML 导入会丢 margin）。 */
 function wordGap(px) {
-  return '<div style="height:' + px + 'px;font-size:1px;line-height:1px;">&nbsp;</div>';
+  return (
+    '<p class="rm-gap" style="margin:0;font-size:1pt;line-height:1pt;height:' +
+    wordPt(px, 1) + ';mso-line-height-rule:exactly;">&#160;</p>'
+  );
+}
+
+/** CSS px → Word pt（96dpi 下 1px = 0.75pt），并保留半磅精度。 */
+function wordPt(px, min) {
+  const n = Number(px);
+  const pt = Number.isFinite(n) && n > 0 ? n * 0.75 : 9;
+  return (Math.max(min || 0.5, Math.round(pt * 2) / 2)) + 'pt';
+}
+
+/**
+ * 页头配色：按页眉底色实际亮度决定前景色。
+ * 之前固定用浅灰字配浅灰底，Word 里几乎看不清 —— 这里全部从 bandBg 反推。
+ */
+function wordHeadTone(st) {
+  const bg = st.bandBg;
+  const dark = wordLum(bg) < 0.62;
+  const base = dark ? '#ffffff' : '#1d2430';
+  return {
+    dark: dark,
+    on: base,
+    role: wordMix(base, bg, dark ? 0.24 : 0.34),
+    label: wordMix(base, bg, dark ? 0.34 : 0.48),
+    value: dark ? '#ffffff' : '#1d2430',
+    rule: wordMix(bg, st.accent, 0.42),
+  };
 }
 
 function wordPhotoHtml(data) {
@@ -895,17 +923,20 @@ function wordPhotoHtml(data) {
   if (!b.photo) return '';
   const shape = b.photoShape === 'square' ? 'square' : 'circle';
   const style =
-    'width:96px;height:96px;' +
-    (shape === 'circle' ? 'border-radius:48px;' : 'border-radius:4px;') +
-    'border:1px solid #e3e7ee;';
+    'width:86px;height:86px;' +
+    (shape === 'circle' ? 'border-radius:43px;' : 'border-radius:3px;') +
+    'border:1px solid #dfe5ec;';
   return (
     '<img class="rm-photo rm-photo-' + shape + '" alt="" src="' + esc(b.photo) +
-    '" width="96" height="96" style="' + style + '">'
+    '" width="86" height="86" style="' + style + '">'
   );
 }
 
-/** 联系方式：Word 用 2 列（或侧栏 1 列）表格，不用 grid。 */
-function wordContactTable(data, L, st) {
+/**
+ * 联系方式：Word 只能用 table 排两列。
+ * 每列 48%，标签固定宽度，避免「电话 173…」与「邮箱 …」挤成一团或换行错位。
+ */
+function wordContactTable(data, L, st, tone) {
   const b = data.basics || {};
   const fields = [];
   for (let i = 0; i < CONTACT_FIELDS.length; i++) {
@@ -915,9 +946,10 @@ function wordContactTable(data, L, st) {
   if (!fields.length) return '';
   const dark = st.layout === 'sidebar';
   const cols = dark || st.contactCols === 1 ? 1 : 2;
-  const labelColor = dark ? '#d7e2ec' : '#8b929c';
-  const valueColor = dark ? '#ffffff' : '#333941';
-  const width = cols === 2 ? '50%' : '100%';
+  const t = tone || wordHeadTone(st);
+  const labelColor = dark ? wordMix('#ffffff', st.bandBg, 0.32) : t.label;
+  const valueColor = dark ? '#ffffff' : t.value;
+  const width = cols === 2 ? '48%' : '100%';
   const rows = [];
   for (let r = 0; r < fields.length; r += cols) {
     const tds = [];
@@ -928,9 +960,11 @@ function wordContactTable(data, L, st) {
         continue;
       }
       tds.push(
-        '<td class="rm-c rm-c-' + f.key + '" style="width:' + width + ';padding:2px 12px 2px 0;">' +
-          '<span class="rm-k" style="font-size:10.5px;color:' + labelColor + ';">' + esc(f.label) + '</span>&nbsp;' +
-          '<span class="rm-v" style="font-size:12.5px;color:' + valueColor + ';">' + esc(f.value) + '</span>' +
+        '<td class="rm-c rm-c-' + f.key + '" style="width:' + width +
+          ';padding:1.5pt ' + (c === 0 ? '14pt' : '0') + ' 1.5pt 0;vertical-align:top;">' +
+          '<span class="rm-k" style="font-size:8pt;letter-spacing:.08em;color:' + labelColor + ';">' +
+          esc(f.label) + '</span>&nbsp;&nbsp;' +
+          '<span class="rm-v" style="font-size:9.5pt;color:' + valueColor + ';">' + esc(f.value) + '</span>' +
           '</td>'
       );
     }
@@ -938,37 +972,43 @@ function wordContactTable(data, L, st) {
   }
   return (
     '<table class="rm-contact" style="width:100%;border-collapse:collapse;margin-top:' +
-    (dark ? '16' : '14') + 'px;">' + rows.join('') + '</table>'
+    wordPt(dark ? 14 : 10) + ';' + (cols === 2 ? '' : 'max-width:100%;') + '">' +
+    rows.join('') + '</table>'
   );
 }
 
-/** 页头：信息列 + 照片列（照片用 table cell，形状交给 border-radius，Word 会退化）。 */
+/** 页头：信息列 + 照片列；配色全部由底色反推，字号统一用 pt。 */
 function wordHeadBlock(data, L, st) {
   const b = data.basics || {};
+  const tone = wordHeadTone(st);
   const align = st.headerAlign === 'center' ? 'center' : 'left';
   const idHtml =
     '<div class="rm-id">' +
-    '<div class="rm-name" style="font-size:' + st.nameSize + 'px;line-height:1.2;font-weight:700;' +
-    'letter-spacing:.1em;color:' + st.nameColor + ';">' + esc(b.name || L.namePlaceholder) + '</div>' +
+    '<div class="rm-name" style="font-size:' + wordPt(Math.min(34, st.nameSize), 14) +
+    ';line-height:1.16;font-weight:700;letter-spacing:.12em;color:' + tone.on + ';">' +
+    esc(b.name || L.namePlaceholder) + '</div>' +
     (b.role
-      ? '<div class="rm-role" style="margin-top:6px;font-size:13px;color:' +
-        wordMix(st.bodyColor, '#ffffff', 0.35) + ';">' + esc(b.role) + '</div>'
+      ? '<div class="rm-role" style="margin-top:4pt;font-size:9.5pt;letter-spacing:.06em;color:' +
+        tone.role + ';">' + esc(b.role) + '</div>'
       : '') +
     '</div>';
-  const contact = wordContactTable(data, L, st);
+  const contact = wordContactTable(data, L, st, tone);
   const photo = wordPhotoHtml(data);
   if (st.headerStyle === 'split') {
     return (
       '<table class="rm-head" style="width:100%;border-collapse:collapse;"><tr>' +
-      '<td style="width:52%;vertical-align:bottom;text-align:' + align + ';">' + idHtml + '</td>' +
+      '<td style="width:58%;vertical-align:bottom;text-align:' + align + ';">' + idHtml + '</td>' +
       '<td style="vertical-align:bottom;text-align:right;">' + contact + '</td>' +
-      '</tr></table>' + wordGap(6)
+      '</tr></table>'
     );
   }
   if (photo) {
     const left = b.photoSide === 'left';
-    const photoCell = '<td style="width:112px;vertical-align:top;text-align:' + (left ? 'left' : 'right') + ';">' + photo + '</td>';
-    const mainCell = '<td style="vertical-align:top;text-align:' + align + ';">' + idHtml + contact + '</td>';
+    const photoCell =
+      '<td style="width:100px;vertical-align:top;text-align:' + (left ? 'left' : 'right') + ';padding:0 0 0 ' +
+      (left ? '0' : '10pt') + ';">' + photo + '</td>';
+    const mainCell =
+      '<td style="vertical-align:top;text-align:' + align + ';">' + idHtml + contact + '</td>';
     return (
       '<table class="rm-head" style="width:100%;border-collapse:collapse;"><tr>' +
       (left ? photoCell + mainCell : mainCell + photoCell) +
@@ -978,61 +1018,66 @@ function wordHeadBlock(data, L, st) {
   return '<div class="rm-head" style="text-align:' + align + ';">' + idHtml + contact + '</div>';
 }
 
-/** 模块标题：用表格模拟色块/竖条/圆点/下划线，Word 都能画出来。 */
+/** 模块标题：表格模拟色块/竖条/圆点/下划线，Word 都能画出来。 */
 function wordSectionTitle(title, st) {
   const color = st.headingColor;
-  const size = st.headingSize;
+  const size = wordPt(st.headingSize, 8);
   const textStyle =
-    'font-size:' + size + 'px;font-weight:700;letter-spacing:.16em;color:' + color + ';';
+    'font-size:' + size + ';font-weight:700;letter-spacing:.14em;color:' + color + ';';
   const label = esc(title);
-  if (st.headingStyle === 'tab' || st.headingStyle === 'pill' || st.headingStyle === 'bar' || st.headingStyle === 'banner') {
+  if (
+    st.headingStyle === 'tab' || st.headingStyle === 'pill' ||
+    st.headingStyle === 'bar' || st.headingStyle === 'banner'
+  ) {
     const fill = st.accent;
     const radius = st.headingStyle === 'pill' ? 'border-radius:8px;' : '';
     return (
       '<table style="width:100%;border-collapse:collapse;"><tr>' +
       '<td style="width:1%;white-space:nowrap;background:' + fill + ';color:' + wordOn(fill) +
-      ';padding:5px 16px;' + radius + 'font-size:' + size + 'px;font-weight:700;letter-spacing:.18em;">' +
-      label + '</td>' +
-      '<td style="border-bottom:1px solid ' + st.accent + ';font-size:1px;line-height:1px;">&nbsp;</td>' +
+      ';padding:3.5pt 12pt;' + radius + textStyle + '">' + label + '</td>' +
+      '<td style="border-bottom:1px solid ' + st.accent + ';font-size:1pt;line-height:1pt;">&#160;</td>' +
       '</tr></table>'
     );
   }
   if (st.headingStyle === 'icon') {
     return (
       '<table style="width:100%;border-collapse:collapse;"><tr>' +
-      '<td style="width:22px;vertical-align:middle;">' +
-      '<div style="width:15px;height:15px;background:' + st.accent + ';border-radius:8px;font-size:1px;line-height:1px;">&nbsp;</div>' +
+      '<td style="width:16px;vertical-align:middle;">' +
+      '<div style="width:11px;height:11px;background:' + st.accent +
+      ';border-radius:6px;font-size:1pt;line-height:1pt;">&#160;</div>' +
       '</td>' +
-      '<td style="' + textStyle + 'border-bottom:1px solid ' + st.accent + ';padding-bottom:3px;">' + label + '</td>' +
+      '<td style="' + textStyle + 'border-bottom:1px solid ' + st.accent + ';padding-bottom:2.5pt;">' +
+      label + '</td>' +
       '</tr></table>'
     );
   }
   if (st.headingStyle === 'leftbar') {
     return (
       '<table style="width:100%;border-collapse:collapse;"><tr>' +
-      '<td style="width:4px;background:' + st.accent + ';font-size:1px;line-height:1px;">&nbsp;</td>' +
-      '<td style="' + textStyle + 'padding-left:8px;">' + label + '</td>' +
+      '<td style="width:3px;background:' + st.accent + ';font-size:1pt;line-height:1pt;">&#160;</td>' +
+      '<td style="' + textStyle + 'padding-left:7pt;">' + label + '</td>' +
       '</tr></table>'
     );
   }
   if (st.headingStyle === 'underline') {
-    return '<div style="' + textStyle + 'text-decoration:underline;padding-bottom:2px;">' + label + '</div>';
+    return '<div style="' + textStyle + 'text-decoration:underline;padding-bottom:2pt;">' + label + '</div>';
   }
   if (st.headingStyle === 'plain') {
     return '<div style="' + textStyle + '">' + label + '</div>';
   }
   return (
     '<table style="width:100%;border-collapse:collapse;"><tr>' +
-    '<td style="' + textStyle + 'border-bottom:1px solid ' + st.accent + ';padding-bottom:4px;">' + label + '</td>' +
+    '<td style="' + textStyle + 'border-bottom:1px solid ' + st.accent + ';padding-bottom:3pt;">' +
+    label + '</td>' +
     '</tr></table>'
   );
 }
 
-/** 条目行：左边公司/学校，右边时间（两列表格，Word 里就是标准的左右对齐）。 */
-function wordEntryRow(leftHtml, rightText) {
+/** 条目行：左边公司/学校，右边时间（两列表格 = Word 里的标准左右对齐）。 */
+function wordEntryRow(leftHtml, rightText, muted) {
   const right = rightText
-    ? '<td style="width:1%;white-space:nowrap;text-align:right;padding-left:14px;font-size:11.5px;color:#8b929c;">' +
-      esc(rightText) + '</td>'
+    ? '<td style="width:1%;white-space:nowrap;text-align:right;padding-left:12pt;font-size:9pt;color:' +
+      (muted || '#6b7280') + ';">' + esc(rightText) + '</td>'
     : '';
   return (
     '<table style="width:100%;border-collapse:collapse;"><tr>' +
@@ -1045,24 +1090,24 @@ function wordBullets(bullets) {
   if (!bullets || !bullets.length) return '';
   const lis = [];
   for (let i = 0; i < bullets.length; i++) {
-    lis.push('<li style="margin:2px 0;">' + rich(bullets[i]) + '</li>');
+    lis.push('<li style="margin:1.5pt 0 0;line-height:1.5;">' + rich(bullets[i]) + '</li>');
   }
-  return '<ul style="margin:4px 0 0;padding-left:18px;">' + lis.join('') + '</ul>';
+  return '<ul style="margin:2pt 0 0;padding-left:14pt;">' + lis.join('') + '</ul>';
 }
 
-/** 一个模块：标题 + 内容（card 内容块把标题也收进边框里）。 */
+/** 一个模块：标题 + 间距 + 内容（card 内容块把标题也收进边框里）。 */
 function wordSection(title, inner, st) {
   const head = wordSectionTitle(title, st);
-  const content = head + wordGap(7) + inner;
+  const content = head + wordGap(5) + inner;
   const wrapped =
     st.contentStyle === 'card'
       ? '<table style="width:100%;border-collapse:collapse;"><tr>' +
-        '<td style="border:1px solid ' + wordMix(st.accent, '#ffffff', 0.72) +
-        ';border-radius:4px;padding:9px 12px;background:#ffffff;">' + content + '</td></tr></table>'
+        '<td style="border:1px solid ' + wordMix(st.accent, '#ffffff', 0.74) +
+        ';border-radius:3px;padding:7pt 10pt;background:#ffffff;">' + content + '</td></tr></table>'
       : content;
   return (
     '<table style="width:100%;border-collapse:collapse;"><tr>' +
-    '<td style="padding-top:' + st.sectionGap + 'px;">' + wrapped + '</td>' +
+    '<td style="padding-top:' + wordPt(st.sectionGap, 4) + ';">' + wrapped + '</td>' +
     '</tr></table>'
   );
 }
@@ -1074,21 +1119,28 @@ function wordSkillRows(items) {
     const tags = splitSkills(it.items).join(' · ');
     rows.push(
       '<table style="width:100%;border-collapse:collapse;"><tr>' +
-      '<td style="width:96px;font-size:12.5px;color:#5a616c;">' + esc(it.group || '') + '</td>' +
-      '<td style="font-size:12.5px;color:#3f4753;">' + esc(tags) + '</td>' +
+      '<td style="width:64px;font-size:9.5pt;color:#5a616c;vertical-align:top;">' +
+      esc(it.group || '') + '</td>' +
+      '<td style="font-size:9.5pt;color:#3f4753;">' + esc(tags) + '</td>' +
       '</tr></table>'
     );
   }
-  return rows.join(wordGap(4));
+  return rows.join(wordGap(2));
 }
 
 /** 单个模块的表格化内容；没有数据时返回空串。 */
 function wordSectionFor(id, data, L, st) {
   const items = [];
   let rows;
+  const body = 'font-size:' + wordPt(st.bodySize, 8) + ';line-height:' + st.lineHeight +
+    ';color:' + st.bodyColor + ';';
   if (id === 'summary') {
     if (!data.summary) return '';
-    return wordSection(L.summary, '<p class="rm-summary" style="margin:0;">' + richLines(data.summary) + '</p>', st);
+    return wordSection(
+      L.summary,
+      '<p class="rm-summary" style="margin:0;' + body + '">' + richLines(data.summary) + '</p>',
+      st
+    );
   }
   if (id === 'experience') {
     const list = data.experience || [];
@@ -1096,16 +1148,24 @@ function wordSectionFor(id, data, L, st) {
     for (let i = 0; i < list.length; i++) {
       const it = list[i];
       const left = [
-        it.company ? '<span class="rm-item-t" style="font-weight:600;">' + esc(it.company) + '</span>' : '',
-        it.role ? '<span class="rm-item-role" style="color:#5a616c;font-size:12.5px;">　' + esc(it.role) + '</span>' : '',
+        it.company
+          ? '<span class="rm-item-t" style="font-size:' + wordPt(st.bodySize, 8) +
+            ';font-weight:600;color:' + st.bodyColor + ';">' + esc(it.company) + '</span>'
+          : '',
+        it.role
+          ? '<span class="rm-item-role" style="font-size:9pt;color:#5a616c;">　' + esc(it.role) + '</span>'
+          : '',
       ].join('');
       items.push(
         wordEntryRow(left, it.period) +
-          (it.location ? '<div class="rm-item-sub" style="font-size:12px;color:#6b7280;">' + esc(it.location) + '</div>' : '') +
+          (it.location
+            ? '<p class="rm-item-sub" style="margin:1pt 0 0;font-size:9pt;color:#6b7280;">' +
+              esc(it.location) + '</p>'
+            : '') +
           wordBullets(it.bullets)
       );
     }
-    rows = items.join(wordGap(8));
+    rows = items.join(wordGap(7));
     return wordSection(L.experience, rows, st);
   }
   if (id === 'projects') {
@@ -1114,12 +1174,17 @@ function wordSectionFor(id, data, L, st) {
     for (let i = 0; i < list.length; i++) {
       const it = list[i];
       const left = [
-        it.name ? '<span class="rm-item-t" style="font-weight:600;">' + esc(it.name) + '</span>' : '',
-        it.role ? '<span class="rm-item-role" style="color:#5a616c;font-size:12.5px;">　' + esc(it.role) + '</span>' : '',
+        it.name
+          ? '<span class="rm-item-t" style="font-size:' + wordPt(st.bodySize, 8) +
+            ';font-weight:600;color:' + st.bodyColor + ';">' + esc(it.name) + '</span>'
+          : '',
+        it.role
+          ? '<span class="rm-item-role" style="font-size:9pt;color:#5a616c;">　' + esc(it.role) + '</span>'
+          : '',
       ].join('');
       items.push(wordEntryRow(left, it.period) + wordBullets(it.bullets));
     }
-    return wordSection(L.projects, items.join(wordGap(8)), st);
+    return wordSection(L.projects, items.join(wordGap(7)), st);
   }
   if (id === 'education') {
     const list = data.education || [];
@@ -1128,19 +1193,26 @@ function wordSectionFor(id, data, L, st) {
       const it = list[i];
       const sub = [it.degree, it.major].filter(Boolean).join(' · ');
       const left = [
-        it.school ? '<span class="rm-item-t" style="font-weight:600;">' + esc(it.school) + '</span>' : '',
-        sub ? '<span class="rm-item-role" style="color:#5a616c;font-size:12.5px;">　' + esc(sub) + '</span>' : '',
+        it.school
+          ? '<span class="rm-item-t" style="font-size:' + wordPt(st.bodySize, 8) +
+            ';font-weight:600;color:' + st.bodyColor + ';">' + esc(it.school) + '</span>'
+          : '',
+        sub ? '<span class="rm-item-role" style="font-size:9pt;color:#5a616c;">　' + esc(sub) + '</span>' : '',
       ].join('');
       items.push(
         wordEntryRow(left, it.period) +
           (it.courses
-            ? '<p class="rm-edu-courses" style="margin:2px 0 0;font-size:11.5px;color:#6b7280;">' +
-              '<span class="rm-k" style="color:#8b929c;">' + esc(L.courses) + '</span>　' + esc(it.courses) + '</p>'
+            ? '<p class="rm-edu-courses" style="margin:1.5pt 0 0;font-size:9pt;color:#6b7280;">' +
+              '<span class="rm-k" style="color:#8b929c;">' + esc(L.courses) + '</span>　' +
+              esc(it.courses) + '</p>'
             : '') +
-          (it.gpa ? '<div class="rm-item-sub" style="font-size:12px;color:#6b7280;">GPA ' + esc(it.gpa) + '</div>' : '')
+          (it.gpa
+            ? '<p class="rm-item-sub" style="margin:1pt 0 0;font-size:9pt;color:#6b7280;">GPA ' +
+              esc(it.gpa) + '</p>'
+            : '')
       );
     }
-    return wordSection(L.education, items.join(wordGap(8)), st);
+    return wordSection(L.education, items.join(wordGap(7)), st);
   }
   if (id === 'skills') {
     const list = data.skills || [];
@@ -1153,12 +1225,17 @@ function wordSectionFor(id, data, L, st) {
     for (let i = 0; i < list.length; i++) {
       const it = list[i];
       const left = [
-        it.title ? '<span class="rm-award-t" style="font-weight:600;">' + esc(it.title) + '</span>' : '',
-        it.desc ? '<span class="rm-award-desc" style="color:#6b7280;font-size:12px;">　' + esc(it.desc) + '</span>' : '',
+        it.title
+          ? '<span class="rm-award-t" style="font-size:' + wordPt(st.bodySize, 8) +
+            ';font-weight:600;color:' + st.bodyColor + ';">' + esc(it.title) + '</span>'
+          : '',
+        it.desc
+          ? '<span class="rm-award-desc" style="font-size:9pt;color:#6b7280;">　' + esc(it.desc) + '</span>'
+          : '',
       ].join('');
       items.push(wordEntryRow(left, it.date));
     }
-    return wordSection(L.awards, items.join(wordGap(5)), st);
+    return wordSection(L.awards, items.join(wordGap(4)), st);
   }
   return '';
 }
@@ -1168,29 +1245,35 @@ function wordSideColumn(data, L, st, hasSkills) {
   const b = data.basics || {};
   const parts = [];
   const photo = wordPhotoHtml(data);
-  if (photo) parts.push('<div style="text-align:center;margin-bottom:16px;">' + photo + '</div>');
+  if (photo) parts.push('<div style="text-align:center;margin-bottom:12pt;">' + photo + '</div>');
   parts.push(
-    '<div class="rm-name" style="font-size:' + Math.min(26, st.nameSize) + 'px;line-height:1.2;font-weight:700;' +
-    'letter-spacing:.08em;color:#ffffff;">' + esc(b.name || L.namePlaceholder) + '</div>'
+    '<div class="rm-name" style="font-size:' + wordPt(Math.min(24, st.nameSize), 14) +
+    ';line-height:1.2;font-weight:700;letter-spacing:.06em;color:#ffffff;">' +
+    esc(b.name || L.namePlaceholder) + '</div>'
   );
   if (b.role) {
-    parts.push('<div class="rm-role" style="margin-top:6px;font-size:12.5px;color:#dbe6ef;">' + esc(b.role) + '</div>');
+    parts.push(
+      '<div class="rm-role" style="margin-top:4pt;font-size:9pt;color:#dbe6ef;">' + esc(b.role) + '</div>'
+    );
   }
   parts.push(wordContactTable(data, L, st));
   if (hasSkills) {
     const list = data.skills || [];
     if (list.length) {
-      parts.push(wordGap(18));
+      parts.push(wordGap(14));
       parts.push(
-        '<div style="font-size:' + st.headingSize + 'px;font-weight:700;letter-spacing:.16em;color:#ffffff;' +
-        'border-bottom:1px solid rgba(255,255,255,.45);padding-bottom:4px;">' + esc(L.skills) + '</div>'
+        '<div style="font-size:' + wordPt(st.headingSize, 8) +
+        ';font-weight:700;letter-spacing:.14em;color:#ffffff;border-bottom:1px solid ' +
+        wordMix('#ffffff', st.bandBg, 0.55) + ';padding-bottom:3pt;">' + esc(L.skills) + '</div>'
       );
       const rows = [];
       for (let i = 0; i < list.length; i++) {
         const it = list[i];
         rows.push(
-          '<div style="margin-top:8px;font-size:11.5px;color:#dbe6ef;">' + esc(it.group || '') + '</div>' +
-          '<div style="margin-top:2px;font-size:11.5px;color:#ffffff;">' + esc(splitSkills(it.items).join(' · ')) + '</div>'
+          '<p style="margin:6pt 0 0;font-size:8.5pt;color:' + wordMix('#ffffff', st.bandBg, 0.28) +
+          ';">' + esc(it.group || '') + '</p>' +
+          '<p style="margin:1pt 0 0;font-size:9pt;color:#ffffff;">' +
+          esc(splitSkills(it.items).join(' · ')) + '</p>'
         );
       }
       parts.push(rows.join(''));
@@ -1201,6 +1284,8 @@ function wordSideColumn(data, L, st, hasSkills) {
 
 /**
  * Word 版正文：全部用 <table> + 行内 style，不引用任何 grid/flex CSS。
+ * 页边距交给 @page（Word 认 mso 页面设置），正文不再自己塞 padding，
+ * 这样打开就是正常 A4 版心，不会像之前那样左贴边。
  * @param {object} resume
  * @param {object} [template]
  * @returns {string}
@@ -1215,16 +1300,15 @@ function renderWordBody(resume, template) {
       ? resume.sections
       : SECTION_ORDER;
   const base =
-    'font-family:' + WORD_FONT + ';font-size:' + st.bodySize + 'px;line-height:' + st.lineHeight +
-    ';color:' + st.bodyColor + ';background:' + st.background + ';';
+    'font-family:' + WORD_FONT + ';font-size:' + wordPt(st.bodySize, 8) + ';line-height:' +
+    st.lineHeight + ';color:' + st.bodyColor + ';background:' + st.background + ';';
 
   if (st.layout === 'sidebar') {
     const hasSkills = order.indexOf('skills') !== -1;
     const left =
-      '<table style="width:100%;border-collapse:collapse;"><tr><td style="width:268px;vertical-align:top;' +
-      'background:' + st.bandBg + ';color:' + st.headOn + ';padding:28px 20px;">' +
-      wordSideColumn(data, L, st, hasSkills) + '</td><td style="vertical-align:top;padding:' +
-      st.padY + 'px ' + st.padX + 'px;">';
+      '<table style="width:100%;border-collapse:collapse;"><tr><td style="width:200px;vertical-align:top;' +
+      'background:' + st.bandBg + ';color:#ffffff;padding:20pt 16pt;">' +
+      wordSideColumn(data, L, st, hasSkills) + '</td><td style="vertical-align:top;padding:20pt 0 0 18pt;">';
     const right = [];
     for (let i = 0; i < order.length; i++) {
       const id = order[i];
@@ -1239,25 +1323,23 @@ function renderWordBody(resume, template) {
   }
 
   const head = wordHeadBlock(data, L, st);
+  const tone = wordHeadTone(st);
   const headerStyle = st.headerStyle;
   let headerCell;
-  if (headerStyle === 'band') {
+  if (headerStyle === 'band' || headerStyle === 'ribbon') {
+    const bottom =
+      headerStyle === 'band'
+        ? 'border-bottom:3px solid ' + st.accent + ';'
+        : 'border-top:8pt solid ' + st.accent + ';';
     headerCell =
-      '<td style="background:' + st.bandBg + ';color:' + st.headOn + ';padding:' + st.padY + 'px ' +
-      st.padX + 'px ' + Math.max(16, Math.round(st.padY * 0.55)) + 'px;border-bottom:3px solid ' +
-      st.accent + ';">' + head + '</td>';
-  } else if (headerStyle === 'ribbon') {
-    headerCell =
-      '<td style="padding:' + (st.padY + 14) + 'px ' + st.padX + 'px ' + Math.round(st.padY * 0.5) +
-      'px;border-top:10px solid ' + st.accent + ';">' + head + '</td>';
+      '<td style="background:' + st.bandBg + ';' + bottom +
+      'padding:16pt 18pt 12pt;">' + head + '</td>';
   } else if (headerStyle === 'split') {
     headerCell =
-      '<td style="padding:' + st.padY + 'px ' + st.padX + 'px ' + Math.round(st.padY * 0.5) +
-      'px;border-bottom:2px solid ' + st.accent + ';">' + head + '</td>';
+      '<td style="border-bottom:2px solid ' + st.accent + ';padding:6pt 0 8pt;">' + head + '</td>';
   } else {
     headerCell =
-      '<td style="padding:' + st.padY + 'px ' + st.padX + 'px ' + Math.round(st.padY * 0.5) +
-      'px;border-bottom:1px solid ' + wordMix(st.accent, '#ffffff', 0.62) + ';">' + head + '</td>';
+      '<td style="border-bottom:1px solid ' + tone.rule + ';padding:6pt 0 9pt;">' + head + '</td>';
   }
   const body = [];
   for (let i = 0; i < order.length; i++) {
@@ -1267,7 +1349,8 @@ function renderWordBody(resume, template) {
   return (
     '<table class="rm-word" style="width:100%;border-collapse:collapse;' + base + '">' +
     '<tr>' + headerCell + '</tr>' +
-    '<tr><td style="padding:0 ' + st.padX + 'px ' + st.padY + 'px;">' + body.join('') + '</td></tr>' +
+    '<tr><td style="padding:' + wordPt(Math.max(8, st.sectionGap - 4), 4) + ' 0 0;">' +
+    body.join('') + '</td></tr>' +
     '</table>'
   );
 }
@@ -1276,18 +1359,19 @@ function renderWordBody(resume, template) {
  * Word（.doc）用的页面设置。
  *
  * Word 不认裸 @page{size}，只认带名字的 @page WordSection1 + 一个
- * .WordSection1 容器；套上这一层，打开就是 A4 无边距，跟预览基本一致。
+ * .WordSection1 容器。这里给出真正的 A4 版心边距（之前 margin:0 导致正文左贴边）。
  */
 const WORD_CSS = `
-@page WordSection1{size:21cm 29.7cm;mso-page-orientation:portrait;margin:0;}
+@page WordSection1{size:21cm 29.7cm;mso-page-orientation:portrait;margin:1.15cm 1.45cm 1.2cm 1.45cm;}
 div.WordSection1{page:WordSection1;}
-body{margin:0;padding:0;background:#ffffff;}
+body{margin:0;padding:0;background:#ffffff;font-family:${WORD_FONT};-webkit-font-smoothing:antialiased;}
 table{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;}
-td{padding:0;vertical-align:top;}
+td{padding:0;vertical-align:top;mso-line-height-rule:exactly;}
 p{margin:0;}
-ul{margin:0;padding-left:18px;}
+ul{margin:0;padding-left:14pt;}
 li{margin:0;}
 .rm-word{width:100%;}
+.rm-gap{mso-line-height-rule:exactly;}
 `;
 
 /**
@@ -1340,6 +1424,11 @@ function sanitizeStyle(raw) {
   if (['single', 'sidebar'].indexOf(raw.layout) !== -1) out.layout = raw.layout;
   if (['plain', 'band', 'split', 'ribbon'].indexOf(raw.headerStyle) !== -1) out.headerStyle = raw.headerStyle;
   if (['plain', 'card'].indexOf(raw.contentStyle) !== -1) out.contentStyle = raw.contentStyle;
+  // 左侧栏承载的模块（顺序按白名单归一，去重）——只有 layout==='sidebar' 时才真正生效。
+  if (Array.isArray(raw.sidebarSections)) {
+    const sidebarOrder = ['summary', 'education', 'experience', 'projects', 'skills', 'awards'];
+    out.sidebarSections = sidebarOrder.filter((id) => raw.sidebarSections.indexOf(id) !== -1);
+  }
   if (['sans', 'serif', 'mono'].indexOf(raw.fontFamily) !== -1) out.fontFamily = raw.fontFamily;
   if (['left', 'center'].indexOf(raw.headerAlign) !== -1) out.headerAlign = raw.headerAlign;
   if (raw.headerBand === true) out.headerBand = true;

@@ -258,13 +258,13 @@ export function registerTools(ctx, { store }) {
   add({
     name: 'resume_export',
     description:
-      '把简历导出成本机文件并返回绝对路径。format 可选 html（默认）、doc（Word/WPS 可直接打开，可另存为 .docx）、pdf（用本机 Chrome/Edge 无头打印，直接得到可投递的 PDF）。',
+      '把简历导出成本机文件并返回绝对路径。format 可选 html（默认）、doc（真正的 Word .docx，Word/WPS 都能正确还原版式）、pdf（用本机 Chrome/Edge 无头打印，直接得到可投递的 PDF）。',
     parameters: {
       resumeId: { type: 'string', description: '简历 id', required: true },
       format: {
         type: 'string',
         enum: ['html', 'doc', 'pdf'],
-        description: '导出格式：html | doc（Word 文档）| pdf；不传默认 html',
+        description: '导出格式：html | doc（Word 文档 .docx）| pdf；不传默认 html',
       },
     },
     output: {

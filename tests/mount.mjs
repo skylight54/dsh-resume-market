@@ -559,7 +559,7 @@ await act(async () => {
   await sleep(40);
 });
 check(!!byText('.rm-btn', '+ 新建模板'), '模板库缺少「+ 新建模板」');
-check(!!byText('.rm-btn', '从图片生成'), '模板库缺少「从图片生成」');
+check(!!byText('.rm-btn', '从文件生成'), '模板库缺少「从文件生成」');
 check(!!byText('.rm-btn', '复制为新模板'), '内置模板应提供「复制为新模板」');
 await act(async () => {
   byText('.rm-btn', '+ 新建模板').click();
@@ -588,7 +588,7 @@ check(
 );
 check(!container.querySelector('.rm-tpl-editor-form'), '保存后模板编辑器应关闭');
 await act(async () => {
-  byText('.rm-btn', '从图片生成').click();
+  byText('.rm-btn', '从文件生成').click();
   await sleep(70);
 });
 check(!!container.querySelector('input[type="file"]'), '图片导入弹窗未出现文件选择');
@@ -626,7 +626,7 @@ const menuItems = Array.from(container.querySelectorAll('.rm-menu .rm-menu-item'
 check(menuItems.length === 3, 'export menu should offer 3 formats, got ' + JSON.stringify(menuItems));
 check(menuItems.some((t) => t.includes('HTML')) && menuItems.some((t) => t.includes('Word')) && menuItems.some((t) => t.includes('PDF')), 'export menu labels wrong: ' + JSON.stringify(menuItems));
 await act(async () => {
-  byText('.rm-menu-item', '导出 Word (.doc)').click();
+  byText('.rm-menu-item', '导出 Word (.docx)').click();
   await sleep(80);
 });
 check(!!container.querySelector('.rm-modal .rm-path'), 'export dialog path missing');

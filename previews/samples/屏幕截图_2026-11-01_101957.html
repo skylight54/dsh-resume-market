@@ -48,15 +48,31 @@
 .rm-doc strong{font-weight:650;color:#111827;}
 
 .rm-t-sample{padding:48px 56px;background:#ffffff;color:#1f2937;font-size:13.5px;line-height:1.62;}
-.rm-t-sample{display:grid;grid-template-columns:268px minmax(0,1fr);padding:0;align-items:start;background:linear-gradient(90deg,#254665 0 268px,#ffffff 268px);}
-.rm-t-sample .rm-head{display:block;grid-column:1;grid-row:1;align-self:stretch;padding:48px 24px 54px;background:#254665;color:#ffffff;}
+.rm-t-sample{display:grid;grid-template-columns:268px minmax(0,1fr);padding:0;align-items:start;grid-auto-flow:row dense;background:linear-gradient(90deg,#254665 0 268px,#ffffff 268px);}
+.rm-t-sample .rm-head{display:block;grid-column:1;grid-row:1;align-self:start;padding:48px 24px 54px;background:#254665;color:#ffffff;}
 .rm-t-sample .rm-head .rm-name{color:#ffffff;font-size:26px;letter-spacing:.02em;}
 .rm-t-sample .rm-head .rm-role{color:rgba(255,255,255,0.84);letter-spacing:.06em;}
 .rm-t-sample .rm-head .rm-contact{grid-template-columns:minmax(0,1fr);gap:7px;margin:16px 0 0;}
 .rm-t-sample .rm-head .rm-contact .rm-k{color:rgba(255,255,255,0.6);}
 .rm-t-sample .rm-head .rm-contact .rm-v{color:#ffffff;}
 .rm-t-sample .rm-head .rm-photo{width:84px;height:84px;margin:0 auto 18px;}
-.rm-t-sample .rm-body{grid-column:2;grid-row:1;padding:48px 56px;}
+.rm-t-sample .rm-body{display:contents;}
+.rm-t-sample .rm-sec-summary,.rm-t-sample .rm-sec-experience,.rm-t-sample .rm-sec-projects,.rm-t-sample .rm-sec-education,.rm-t-sample .rm-sec-awards{grid-column:2;grid-row:auto;align-self:start;padding-left:56px;padding-right:56px;}
+.rm-t-sample .rm-sec-summary:first-of-type{padding-top:48px;}
+.rm-t-sample .rm-sec-skills{grid-column:1;grid-row:auto;align-self:start;padding:0 24px;margin-top:18px;color:#ffffff;}
+.rm-t-sample .rm-sec-skills:first-of-type{margin-top:0;}
+.rm-t-sample .rm-sec-skills .rm-sec-h{border-bottom:1px solid rgba(255,255,255,0.34);}
+.rm-t-sample .rm-sec-skills .rm-sec-t{color:#ffffff;}
+.rm-t-sample .rm-sec-skills .rm-sec-h::before{background:rgba(255,255,255,0.92);}
+.rm-t-sample .rm-sec-skills .rm-summary,.rm-t-sample .rm-sec-skills .rm-para,.rm-t-sample .rm-sec-skills .rm-v,.rm-t-sample .rm-sec-skills .rm-item-t{color:#ffffff;}
+.rm-t-sample .rm-sec-skills .rm-item-role,.rm-t-sample .rm-sec-skills .rm-date{color:rgba(255,255,255,0.8);}
+.rm-t-sample .rm-sec-skills .rm-k,.rm-t-sample .rm-sec-skills .rm-skill-k{color:rgba(255,255,255,0.72);}
+.rm-t-sample .rm-sec-skills .rm-tag{border:1px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.1);color:#ffffff;}
+.rm-t-sample .rm-sec-skills .rm-bullets li::marker{color:rgba(255,255,255,0.8);}
+.rm-t-sample .rm-sec-skills .rm-skill-row{display:block;margin:0 0 8px;}
+.rm-t-sample .rm-sec-skills .rm-skill-k{display:block;margin:0 0 3px;letter-spacing:.08em;}
+.rm-t-sample .rm-sec-skills .rm-edu-courses{color:rgba(255,255,255,0.78);}
+.rm-t-sample .rm-sec-skills .rm-bullets{padding-left:16px;}
 .rm-t-sample .rm-name{color:#3c2418;font-size:32px;font-weight:700;letter-spacing:.04em;}
 .rm-t-sample .rm-role{color:#2b3e52;font-size:14.58px;}
 .rm-t-sample .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));color:#1f2937;}

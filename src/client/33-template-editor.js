@@ -5,7 +5,7 @@
  *   1) 模板「元素格式」：颜色 / 字号 / 行距 / 页边距 / 标题样式 / 字体 / 页眉 / 联系信息列数，
  *      任何一项改动都即时重算成一整段模板 CSS（根选择器 .rm-t-<cls>），右侧 A4 实时预览；
  *   2) 保存走 /template/save，发布走 /template/publish（本地市场）或 /github/publish-template（公共投稿）；
- *   3) 从图片生成模板初稿：FileReader + canvas 本地取色/版式推断，不调用任何视觉模型。
+ *   3) 从文件生成模板初稿：Word/PDF 交 Host 解析，图片走 FileReader + canvas 本地取色。
  *
  * style 的字段形状与后端白名单一一对应（多出来的字段服务端会裁掉）：
  *   colors:{accent,nameColor,headingColor,bodyColor,background,bandColor,gold}
@@ -118,6 +118,19 @@ var RM_CONTENT_STYLES = [
   ['card', '卡片'],
 ];
 
+/** 左侧栏布局时，哪些模块搬到左栏（顺序即左栏里的上下顺序）。 */
+var RM_SIDEBAR_SECTIONS = [
+  ['summary', '自我评价'],
+  ['education', '教育背景'],
+  ['experience', '工作经历'],
+  ['projects', '项目经历'],
+  ['skills', '技能特长'],
+  ['awards', '荣誉证书'],
+];
+
+/** doc.js renderBody 里模块的固定顺序（左栏搬移时按它判断左右栏首个模块）。 */
+var RM_SECTION_ORDER = ['summary', 'experience', 'projects', 'education', 'skills', 'awards'];
+
 /** 枚举字段收敛：只认白名单里的值，否则回落到 fallback。 */
 function rmStylePickEnum(value, options, fallback) {
   if (typeof value !== 'string') return fallback;
@@ -125,6 +138,27 @@ function rmStylePickEnum(value, options, fallback) {
     if (options[i][0] === value) return value;
   }
   return fallback;
+}
+
+/** 侧栏模块收敛：只留白名单 id，按白名单顺序去重；不是数组时返回 null（表示沿用原值）。 */
+function rmNormalizeSidebarSections(value) {
+  if (!Array.isArray(value)) return null;
+  var out = [];
+  for (var i = 0; i < RM_SIDEBAR_SECTIONS.length; i++) {
+    var id = RM_SIDEBAR_SECTIONS[i][0];
+    if (value.indexOf(id) >= 0) out.push(id);
+  }
+  return out;
+}
+
+/** sidebarSections → 侧栏模块中文名（导入弹窗文案用）。 */
+function rmSidebarSectionsLabel(value) {
+  var list = Array.isArray(value) ? value : [];
+  var names = [];
+  for (var i = 0; i < RM_SIDEBAR_SECTIONS.length; i++) {
+    if (list.indexOf(RM_SIDEBAR_SECTIONS[i][0]) >= 0) names.push(RM_SIDEBAR_SECTIONS[i][1]);
+  }
+  return names;
 }
 
 var RM_FONT_FAMILIES = [
@@ -170,6 +204,8 @@ function rmStyleDefaults() {
     layout: 'single',
     headerStyle: 'plain',
     contentStyle: 'plain',
+    // 左侧栏布局时左栏承载的模块（默认把技能特长放左栏，和常见「深色侧栏」简历一致）。
+    sidebarSections: ['skills'],
   };
 }
 
@@ -209,7 +245,7 @@ var RM_STYLE_PRESETS = {
     colors: { accent: '#1f3a5f', nameColor: '#0f2540', headingColor: '#1f3a5f', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#f1f5f9', gold: '#c9a227' },
     nameSize: 26, headingSize: 12.5, bodySize: 13, lineHeight: 1.6, padX: 40, padY: 34, sectionGap: 16,
     headingStyle: 'icon', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 1,
-    layout: 'sidebar', headerStyle: 'plain', contentStyle: 'plain',
+    layout: 'sidebar', headerStyle: 'plain', contentStyle: 'plain', sidebarSections: ['skills'],
   },
   'pill-blue': {
     colors: { accent: '#2f6fde', nameColor: '#10213a', headingColor: '#1f3352', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#1f4b7a', gold: '#c9a227' },
@@ -358,6 +394,8 @@ function rmCloneStyle(base) {
   out.layout = rmStylePickEnum(base.layout, RM_LAYOUTS, out.layout);
   out.headerStyle = rmStylePickEnum(base.headerStyle, RM_HEADER_STYLES, out.headerStyle);
   out.contentStyle = rmStylePickEnum(base.contentStyle, RM_CONTENT_STYLES, out.contentStyle);
+  var baseSections = rmNormalizeSidebarSections(base.sidebarSections);
+  if (baseSections) out.sidebarSections = baseSections;
   if (typeof base.headerBand === 'boolean') out.headerBand = base.headerBand;
   else out.headerBand = out.headerStyle === 'band';
   return out;
@@ -398,6 +436,8 @@ function rmStyleMerge(base, patch) {
   out.layout = rmStylePickEnum(patch.layout, RM_LAYOUTS, out.layout);
   out.headerStyle = rmStylePickEnum(patch.headerStyle, RM_HEADER_STYLES, out.headerStyle);
   out.contentStyle = rmStylePickEnum(patch.contentStyle, RM_CONTENT_STYLES, out.contentStyle);
+  var patchSections = rmNormalizeSidebarSections(patch.sidebarSections);
+  if (patchSections) out.sidebarSections = patchSections;
   if (typeof patch.headerBand === 'boolean') out.headerBand = patch.headerBand;
   else if (patch.headerStyle) out.headerBand = out.headerStyle === 'band';
   return out;
@@ -486,11 +526,29 @@ function rmStyleToCss(style, cls) {
   rule(root, rootBody);
 
   // 左侧栏布局：页眉整块搬进左栏，正文在右栏；栏宽固定 268px 保证和 A4 比例合适。
+  var railBg = st.layout === 'sidebar' ? (st.headerStyle === 'band' ? c.bandColor : c.accent) : c.accent;
+  var sideSections = st.layout === 'sidebar' ? rmNormalizeSidebarSections(st.sidebarSections) || [] : [];
+  var rightIds = [];
+  var railIds = [];
+  var si;
+  for (si = 0; si < RM_SECTION_ORDER.length; si++) {
+    if (sideSections.indexOf(RM_SECTION_ORDER[si]) >= 0) railIds.push(RM_SECTION_ORDER[si]);
+    else rightIds.push(RM_SECTION_ORDER[si]);
+  }
+  function rmSecSel(list) {
+    var parts = [];
+    for (var k2 = 0; k2 < list.length; k2++) parts.push(root + ' .rm-sec-' + list[k2]);
+    return parts.join(',');
+  }
+  var railSel = rmSecSel(railIds);
+  var rightSel = rmSecSel(rightIds);
+  var railFirstSel = railIds.length ? root + ' .rm-sec-' + railIds[0] + ':first-of-type' : '';
+  var rightFirstSel = rightIds.length ? root + ' .rm-sec-' + rightIds[0] + ':first-of-type' : '';
   if (st.layout === 'sidebar') {
-    rule(root, 'display:grid;grid-template-columns:268px minmax(0,1fr);padding:0;align-items:start;background:linear-gradient(90deg,' + (st.headerStyle === 'band' ? c.bandColor : c.accent) + ' 0 268px,' + c.background + ' 268px);');
+    rule(root, 'display:grid;grid-template-columns:268px minmax(0,1fr);padding:0;align-items:start;grid-auto-flow:row dense;background:linear-gradient(90deg,' + railBg + ' 0 268px,' + c.background + ' 268px);');
     rule(
       root + ' .rm-head',
-      'display:block;grid-column:1;grid-row:1;align-self:stretch;padding:' + Math.max(24, st.padY) + 'px 24px ' + Math.max(30, st.padY + 6) + 'px;background:' + (st.headerStyle === 'band' ? c.bandColor : c.accent) + ';color:#ffffff;'
+      'display:block;grid-column:1;grid-row:1;align-self:start;padding:' + Math.max(24, st.padY) + 'px 24px ' + Math.max(30, st.padY + 6) + 'px;background:' + railBg + ';color:#ffffff;'
     );
     rule(root + ' .rm-head .rm-name', 'color:#ffffff;font-size:' + Math.max(20, Math.round(st.nameSize * 0.82)) + 'px;letter-spacing:.02em;');
     rule(root + ' .rm-head .rm-role', 'color:' + rmRgba('#ffffff', 0.84) + ';letter-spacing:.06em;');
@@ -498,7 +556,35 @@ function rmStyleToCss(style, cls) {
     rule(root + ' .rm-head .rm-contact .rm-k', 'color:' + rmRgba('#ffffff', 0.6) + ';');
     rule(root + ' .rm-head .rm-contact .rm-v', 'color:#ffffff;');
     rule(root + ' .rm-head .rm-photo', 'width:84px;height:84px;margin:0 auto 18px;');
-    rule(root + ' .rm-body', 'grid-column:2;grid-row:1;padding:' + st.padY + 'px ' + st.padX + 'px;');
+    if (sideSections.length) {
+      // 左栏承载额外模块：.rm-body 拆成 grid 的直接子项，左右两栏各自按列排布。
+      var railInk = rmLuminance(railBg) < 0.62 ? '#ffffff' : c.bodyColor;
+      var railSoft = rmRgba(railInk, 0.78);
+      rule(root + ' .rm-body', 'display:contents;');
+      if (rightSel) {
+        rule(rightSel, 'grid-column:2;grid-row:auto;align-self:start;padding-left:' + st.padX + 'px;padding-right:' + st.padX + 'px;');
+        if (rightFirstSel) rule(rightFirstSel, 'padding-top:' + st.padY + 'px;');
+      }
+      rule(
+        railSel,
+        'grid-column:1;grid-row:auto;align-self:start;padding:0 24px;margin-top:' + Math.max(16, st.sectionGap) + 'px;color:' + railInk + ';'
+      );
+      if (railFirstSel) rule(railFirstSel, 'margin-top:0;');
+      rule(railSel + ' .rm-sec-h', 'border-bottom:1px solid ' + rmRgba(railInk, 0.34) + ';');
+      rule(railSel + ' .rm-sec-t', 'color:' + railInk + ';');
+      rule(railSel + ' .rm-sec-h::before', 'background:' + rmRgba(railInk, 0.92) + ';');
+      rule(railSel + ' .rm-summary,' + railSel + ' .rm-para,' + railSel + ' .rm-v,' + railSel + ' .rm-item-t', 'color:' + railInk + ';');
+      rule(railSel + ' .rm-item-role,' + railSel + ' .rm-date', 'color:' + rmRgba(railInk, 0.8) + ';');
+      rule(railSel + ' .rm-k,' + railSel + ' .rm-skill-k', 'color:' + rmRgba(railInk, 0.72) + ';');
+      rule(railSel + ' .rm-tag', 'border:1px solid ' + rmRgba(railInk, 0.45) + ';background:' + rmRgba(railInk, 0.1) + ';color:' + railInk + ';');
+      rule(railSel + ' .rm-bullets li::marker', 'color:' + rmRgba(railInk, 0.8) + ';');
+      rule(railSel + ' .rm-skill-row', 'display:block;margin:0 0 8px;');
+      rule(railSel + ' .rm-skill-k', 'display:block;margin:0 0 3px;letter-spacing:.08em;');
+      rule(railSel + ' .rm-edu-courses', 'color:' + railSoft + ';');
+      rule(railSel + ' .rm-bullets', 'padding-left:16px;');
+    } else {
+      rule(root + ' .rm-body', 'grid-column:2;grid-row:1;padding:' + st.padY + 'px ' + st.padX + 'px;');
+    }
   }
   rule(root + ' .rm-name', 'color:' + c.nameColor + ';font-size:' + st.nameSize + 'px;font-weight:700;letter-spacing:.04em;');
   rule(root + ' .rm-role', 'color:' + rmMixHex(c.accent, c.nameColor, 0.25) + ';font-size:' + Math.max(11, Math.round(st.bodySize * 108) / 100) + 'px;');
@@ -554,7 +640,7 @@ function rmStyleToCss(style, cls) {
     rule(root + ' .rm-contact', 'max-width:640px;margin-left:auto;margin-right:auto;');
   }
 
-  if (st.headerBand) {
+  if (st.headerBand && st.layout !== 'sidebar') {
     rule(
       root + ' .rm-head',
       'margin:' + -st.padY + 'px ' + -st.padX + 'px ' + Math.max(10, Math.round(st.sectionGap * 0.7)) + 'px;padding:' + st.padY + 'px ' + st.padX + 'px 18px;background:' + c.bandColor + ';border-bottom:1px solid ' + rmRgba(c.accent, 0.24) + ';'
@@ -589,8 +675,11 @@ function rmStyleToCss(style, cls) {
   }
 
   if (st.contentStyle === 'card') {
-    rule(root + ' .rm-sec', 'margin-top:' + st.sectionGap + 'px;border:1px solid ' + rmRgba(c.accent, 0.2) + ';border-radius:6px;padding:10px 14px 12px;background:' + c.background + ';');
-    rule(root + ' .rm-sec-h', 'border-bottom:1px solid ' + rmRgba(c.accent, 0.22) + ';padding-bottom:6px;margin-bottom:9px;');
+    // 左侧栏搬走模块后，卡片只落在右栏（左栏深底上用白字，卡片底色会打架）。
+    var cardSel = st.layout === 'sidebar' && sideSections.length && rightSel ? rightSel : root + ' .rm-sec';
+    var cardHeadSel = st.layout === 'sidebar' && sideSections.length && rightSel ? rightSel + ' .rm-sec-h' : root + ' .rm-sec-h';
+    rule(cardSel, 'margin-top:' + st.sectionGap + 'px;border:1px solid ' + rmRgba(c.accent, 0.2) + ';border-radius:6px;padding:10px 14px 12px;background:' + c.background + ';');
+    rule(cardHeadSel, 'border-bottom:1px solid ' + rmRgba(c.accent, 0.22) + ';padding-bottom:6px;margin-bottom:9px;');
   }
 
   // 斜切色带的页眉强调：底部青→金斜切色带 + 名字右侧金色竖线 + 角色行拉宽字距。
@@ -637,7 +726,11 @@ function rmAnalysisFallback(note) {
       contactCols: 2,
       headingBands: 0,
       fontFamily: 'sans',
+      sidebarSections: [],
+      leftColumn: { width: 0, blockCount: 0, extendsBelowHeader: false },
     },
+    sidebarSections: [],
+    leftColumn: { width: 0, blockCount: 0, extendsBelowHeader: false },
     size: { width: 0, height: 0 },
     note: note || '没有从图片里读到可用颜色，已用默认初稿',
     fallback: true,
@@ -962,6 +1055,55 @@ function rmAnalyzePixels(pixels) {
     accent = rmLuminance(sideColor) > 0.55 ? rmMixHex(sideColor, '#1f2937', 0.4) : sideColor;
     bandColor = rmMixHex(sideColor, '#ffffff', 0.12);
   }
+
+  /* ---- 左栏：页头之后还有几组文字块（决定是否把技能等模块搬进侧栏） ---- */
+  var leftColumn = { width: 0, blockCount: 0, extendsBelowHeader: false };
+  if (layoutMode === 'sidebar' && sideColor) {
+    var railX0 = firstSideX + 2;
+    var railX1 = Math.max(railX0 + 1, lastSideX - 1);
+    var railW = railX1 - railX0 + 1;
+    var railRgb = rmHexToRgb(sideColor) || { r: 0, g: 0, b: 0 };
+    var railRows = new Int32Array(h);
+    var rx;
+    for (y = Math.round(h * 0.03); y < Math.round(h * 0.97); y++) {
+      var railHit = 0;
+      for (rx = railX0; rx <= railX1; rx++) {
+        i = (y * w + rx) * 4;
+        if (data[i + 3] < 24) continue;
+        // 和侧栏底色差得够多就算「这一列有内容」（白字、白底标签、照片都算）。
+        if (Math.abs(data[i] - railRgb.r) + Math.abs(data[i + 1] - railRgb.g) + Math.abs(data[i + 2] - railRgb.b) > 96) railHit++;
+      }
+      railRows[y] = railHit;
+    }
+    var railMinCols = Math.max(3, Math.round(railW * 0.05));
+    var railGapMin = Math.max(5, Math.round(h * 0.012));
+    var railBlockMin = Math.max(5, Math.round(h * 0.005));
+    var railBelowY = Math.round(h * 0.35);
+    var railBlocks = 0;
+    var railInBlock = false;
+    var railBlockStart = 0;
+    var railLastText = 0;
+    for (y = 0; y < h; y++) {
+      if (railRows[y] >= railMinCols) {
+        if (!railInBlock) {
+          railInBlock = true;
+          railBlockStart = y;
+        }
+        railLastText = y;
+      } else if (railInBlock && y - railLastText >= railGapMin) {
+        if (railLastText - railBlockStart + 1 >= railBlockMin && railBlockStart >= railBelowY) railBlocks++;
+        railInBlock = false;
+      }
+    }
+    if (railInBlock && railLastText - railBlockStart + 1 >= railBlockMin && railBlockStart >= railBelowY) railBlocks++;
+    leftColumn = {
+      width: Math.round((railW / Math.max(1, w)) * 1000) / 10,
+      blockCount: railBlocks,
+      extendsBelowHeader: railBlocks >= 2,
+    };
+  }
+  // 左栏在页头之后还排了模块 → 建议把这些模块搬到侧栏（目前只区分「有 / 没有技能类模块」）。
+  var sidebarSections = layoutMode === 'sidebar' && leftColumn.extendsBelowHeader ? ['skills'] : [];
 
   /* ---- 页眉：band / ribbon / split / plain ---- */
   function rmRowFillInfo(rowY, xFrom, xTo) {
@@ -1411,7 +1553,11 @@ function rmAnalyzePixels(pixels) {
       contactCols: 2,
       headingBands: headingBands,
       fontFamily: fontFamily,
+      sidebarSections: sidebarSections,
+      leftColumn: leftColumn,
     },
+    sidebarSections: sidebarSections,
+    leftColumn: leftColumn,
     size: { width: w, height: h },
     note: '',
     fallback: false,
@@ -1465,6 +1611,11 @@ function rmStyleFromAnalysis(analysis) {
   if (layout.layout) st.layout = rmStylePickEnum(layout.layout, RM_LAYOUTS, st.layout);
   if (layout.headerStyle) st.headerStyle = rmStylePickEnum(layout.headerStyle, RM_HEADER_STYLES, st.headerStyle);
   if (layout.contentStyle) st.contentStyle = rmStylePickEnum(layout.contentStyle, RM_CONTENT_STYLES, st.contentStyle);
+  // 左栏承载模块：图片里左栏在页头之后还排了文字块时，把对应模块搬过去。
+  var suggestedSections = rmNormalizeSidebarSections(
+    analysis.sidebarSections != null ? analysis.sidebarSections : layout.sidebarSections
+  );
+  if (suggestedSections) st.sidebarSections = suggestedSections;
   // 左侧栏的页眉在左栏里自己上色，不再叠加整宽色带。
   if (st.layout === 'sidebar') st.headerStyle = 'plain';
   st.headerBand = st.headerStyle === 'band';
@@ -1636,6 +1787,15 @@ function TemplateEditor(props) {
     patchStyle({ colors: colors });
   }
 
+  // 侧栏模块多选：点一下把一个模块搬进左栏 / 搬回右栏。
+  function toggleSidebarSection(id) {
+    var list = (Array.isArray(style.sidebarSections) ? style.sidebarSections : []).slice();
+    var at = list.indexOf(id);
+    if (at >= 0) list.splice(at, 1);
+    else list.push(id);
+    patchStyle({ sidebarSections: list });
+  }
+
   function changeCls(value) {
     setCls(value);
     if (!manual) setCssText(rmStyleToCss(style, value));
@@ -1772,6 +1932,31 @@ function TemplateEditor(props) {
               ),
               h('span', { className: 'rm-field-k' }, '布局'),
               h(rmChipRow, { options: RM_LAYOUTS, value: style.layout, onPick: function (v) { patchStyle({ layout: v }); } }),
+              style.layout === 'sidebar'
+                ? h(
+                    'div',
+                    { className: 'rm-col' },
+                    h('span', { className: 'rm-field-k' }, '侧栏模块（搬到左栏）'),
+                    h(
+                      'div',
+                      { className: 'rm-sec-chips' },
+                      RM_SIDEBAR_SECTIONS.map(function (item) {
+                        var on = (style.sidebarSections || []).indexOf(item[0]) >= 0;
+                        return h(
+                          'button',
+                          {
+                            key: item[0],
+                            type: 'button',
+                            className: 'rm-chip' + (on ? ' is-on' : ''),
+                            onClick: function () { toggleSidebarSection(item[0]); },
+                          },
+                          item[1]
+                        );
+                      })
+                    ),
+                    h('span', { className: 'rm-hint' }, '选中的模块会搬进左侧深色栏，右栏自动跳过；一个都不选时左栏只放姓名、角色和联系方式。')
+                  )
+                : null,
               h('span', { className: 'rm-field-k' }, '页眉'),
               h(rmChipRow, { options: RM_HEADER_STYLES, value: style.headerStyle, onPick: function (v) { patchStyle({ headerStyle: v }); } }),
               h('span', { className: 'rm-field-k' }, '内容块'),
@@ -1873,12 +2058,212 @@ function TemplateEditor(props) {
   );
 }
 
-/* ---------------- 从图片生成模板初稿 ---------------- */
+/* ---------------- 从文件 / 图片生成模板初稿 ---------------- */
+
+/** 「从文件生成」接受的格式：图片在本机取色，Word / PDF 交给 Host 解析。 */
+var RM_IMPORT_ACCEPT = 'image/*,.doc,.docx,.pdf';
+var RM_IMPORT_MAX = 8 * 1024 * 1024;
+var RM_IMPORT_ROLE_LABELS = {
+  name: '姓名',
+  subtitle: '职位',
+  contact: '联系方式',
+  heading: '模块标题',
+  bullet: '列表项',
+  body: '正文',
+};
+
+function rmImportKindOfFile(file) {
+  var name = String((file && file.name) || '').toLowerCase();
+  var type = String((file && file.type) || '').toLowerCase();
+  if (/^image\//.test(type) || /\.(png|jpe?g|webp|gif|bmp)$/.test(name)) return 'image';
+  if (/\.(docx|doc|pdf)$/.test(name)) return 'document';
+  if (/pdf|msword|officedocument/.test(type)) return 'document';
+  return 'unsupported';
+}
+
+function rmReadFileBase64(file, onDone, onFail) {
+  // Host 里面板可能跑在没有全局 FileReader 的沙箱里，优先回落到 window.FileReader。
+  var ReaderCtor =
+    typeof FileReader === 'function'
+      ? FileReader
+      : typeof window !== 'undefined' && window && typeof window.FileReader === 'function'
+        ? window.FileReader
+        : null;
+  if (!ReaderCtor) {
+    onFail(new Error('当前环境不支持读取本地文件'));
+    return;
+  }
+  var reader = new ReaderCtor();
+  reader.onload = function () {
+    var text = String(reader.result || '');
+    var comma = text.indexOf(',');
+    onDone(comma >= 0 ? text.slice(comma + 1) : '');
+  };
+  reader.onerror = function () {
+    onFail(new Error('读取文件失败，请重试'));
+  };
+  reader.readAsDataURL(file);
+}
+
+function rmImportKindLabel(kind) {
+  if (kind === 'docx') return 'Word 文档';
+  if (kind === 'doc') return 'Word HTML 文档';
+  if (kind === 'pdf') return 'PDF 文档';
+  if (kind === 'image') return '图片';
+  return '文件';
+}
+
+/** style → 弹窗展示用的版式摘要（字段与图片分析结果保持一致，便于共用渲染）。 */
+function rmLayoutFromStyle(style) {
+  var st = rmNormalizeStyle(style);
+  return {
+    layout: st.layout,
+    headerStyle: st.headerStyle,
+    headerBand: st.headerStyle === 'band' ? true : !!st.headerBand,
+    contentStyle: st.contentStyle,
+    headerAlign: st.headerAlign,
+    contactCols: st.contactCols,
+    headingStyle: st.headingStyle,
+    fontFamily: st.fontFamily,
+    sidebarSections: st.sidebarSections,
+  };
+}
+
+/** Host `/template/import` 的返回值 → 弹窗与编辑器共用的 analysis 结构。 */
+function rmImportAnalysisFromValue(value, fileName) {
+  var model = (value && value.model) || {};
+  var draft = (value && value.draft) || {};
+  var style = rmNormalizeStyle(draft.style);
+  return {
+    document: true,
+    sourceKind: model.kind || 'doc',
+    sourceName: model.sourceName || fileName || '',
+    fileName: fileName || '',
+    style: style,
+    palette: style.colors,
+    layout: rmLayoutFromStyle(style),
+    blocks: Array.isArray(model.blocks) ? model.blocks : [],
+    model: model,
+    page: model.page || null,
+    size: model.page || null,
+    sample: draft.sample || null,
+    name: draft.name || '',
+    tagline: draft.tagline || '',
+    note: model.note || '',
+  };
+}
+
+/** 把 AI 优化返回的 style / demoText 合并进程序初稿（不修改传入对象）。 */
+function rmApplyRefined(base, refined) {
+  if (!base || !refined) return base;
+  var style = rmStyleMerge(rmStyleFromAnalysis(base), refined.style);
+  var out = Object.assign({}, base, {
+    style: style,
+    palette: style.colors,
+    layout: rmLayoutFromStyle(style),
+    aiNotes: refined.notes || '',
+  });
+  var demo = refined.demoText && typeof refined.demoText === 'object' ? refined.demoText : null;
+  if (demo && out.sample) {
+    var basics = Object.assign({}, out.sample.basics || {});
+    if (demo.name && !String(basics.name || '').trim()) basics.name = String(demo.name);
+    if (demo.role && !String(basics.role || '').trim()) basics.role = String(demo.role);
+    out.sample = Object.assign({}, out.sample, { basics: basics });
+  }
+  return out;
+}
+
+/**
+ * 给 `/template/refine` 挑文本块：页眉区与各模块标题行优先保留，其余按原文顺序补足。
+ * AI 判断版式（单栏/左侧栏、页眉色带、模块标题位置）主要靠这两类块。
+ */
+function rmPickRefineBlocks(all, limit) {
+  var max = limit || 120;
+  var source = Array.isArray(all) ? all : [];
+  var chosen = {};
+  var picked = 0;
+  function want(index) {
+    if (picked >= max || chosen[index]) return;
+    var block = source[index];
+    if (!block) return;
+    chosen[index] = {
+      text: String(block.text || '').slice(0, 160),
+      role: block.role || 'body',
+      size: block.size,
+      bold: !!block.bold,
+      color: block.color,
+      left: block.left,
+      top: block.top,
+      width: block.width,
+    };
+    picked += 1;
+  }
+  // 1) 页眉区：前 24 块（姓名 / 职位 / 联系方式 / 色带文字都在这里）
+  for (var i = 0; i < source.length && i < 24; i += 1) want(i);
+  // 2) 所有模块标题行
+  for (var h = 0; h < source.length; h += 1) {
+    if (source[h] && source[h].role === 'heading') want(h);
+  }
+  // 3) 其余按原文顺序补足，保证阅读顺序尽量完整
+  for (var k = 0; k < source.length; k += 1) want(k);
+  return Object.keys(chosen)
+    .map(Number)
+    .sort(function (a, b) {
+      return a - b;
+    })
+    .map(function (index) {
+      return chosen[index];
+    });
+}
+
+/** 正文文本截到 6000 字时，把模块标题补进尾部，避免 AI 看不到章节结构。 */
+function rmRefineText(model, all) {
+  var text = String((model && model.text) || '');
+  if (text.length <= 6000) return text;
+  var source = Array.isArray(all) ? all : [];
+  var heads = [];
+  for (var i = 0; i < source.length && heads.length < 24; i += 1) {
+    var block = source[i];
+    if (!block || block.role !== 'heading') continue;
+    var line = String(block.text || '')
+      .replace(/\s+/g, ' ')
+      .slice(0, 60);
+    if (line && heads.indexOf(line) < 0) heads.push(line);
+  }
+  if (!heads.length) return text.slice(0, 6000);
+  var tail = '\n【模块标题】' + heads.join(' / ');
+  if (tail.length >= 1200) return text.slice(0, 4800) + tail.slice(0, 1200);
+  return text.slice(0, 6000 - tail.length) + tail;
+}
+
+/** 组装 `/template/refine` 需要的 source（模型主要靠 text 判断模块与侧栏）。 */
+function rmSourceForRefine(analysis) {
+  var model = (analysis && analysis.model) || {};
+  var blocks = rmPickRefineBlocks(model.blocks, 120);
+  var fonts = Array.isArray(model.fonts) ? model.fonts : [];
+  return {
+    kind: (analysis && analysis.sourceKind) || model.kind || 'image',
+    sourceName: (analysis && analysis.sourceName) || model.sourceName || '',
+    page: model.page || null,
+    blocks: blocks,
+    colors: (analysis && analysis.palette) || {},
+    fonts: fonts[0] || ((analysis && analysis.style && analysis.style.fontFamily) || 'sans'),
+    text: rmRefineText(model, model.blocks),
+  };
+}
+
+/* ---------------- 从文件生成模板初稿 ---------------- */
 
 function TemplateImportDialog(props) {
   var analysisState = useState(null);
   var analysis = analysisState[0];
   var setAnalysis = analysisState[1];
+  var remoteState = useState(null);
+  var remote = remoteState[0];
+  var setRemote = remoteState[1];
+  var refinedState = useState(null);
+  var refined = refinedState[0];
+  var setRefined = refinedState[1];
   var errState = useState('');
   var error = errState[0];
   var setError = errState[1];
@@ -1888,26 +2273,103 @@ function TemplateImportDialog(props) {
   var fileState = useState('');
   var fileName = fileState[0];
   var setFileName = fileState[1];
+  var aiBusyState = useState(false);
+  var aiBusy = aiBusyState[0];
+  var setAiBusy = aiBusyState[1];
+  var aiErrorState = useState('');
+  var aiError = aiErrorState[0];
+  var setAiError = aiErrorState[1];
+
+  function resetResult() {
+    setAnalysis(null);
+    setRemote(null);
+    setRefined(null);
+    setAiError('');
+  }
 
   function pickFile(event) {
     var file = event.target.files && event.target.files[0];
+    event.target.value = '';
     if (!file) return;
-    setFileName(file.name || '已选择图片');
+    var kind = rmImportKindOfFile(file);
+    setFileName(file.name || '已选择文件');
     setError('');
+    setAiError('');
+    if (kind === 'unsupported') {
+      setError('只支持 .doc / .docx / .pdf 或图片文件');
+      return;
+    }
+    resetResult();
     setBusy(true);
-    rmAnalyzeImageFile(
+    if (kind === 'image') {
+      rmAnalyzeImageFile(
+        file,
+        function (result) {
+          setBusy(false);
+          setAnalysis(result);
+        },
+        function (err) {
+          setBusy(false);
+          setError((err && err.message) || '图片分析失败');
+        }
+      );
+      return;
+    }
+    if (file.size > RM_IMPORT_MAX) {
+      setBusy(false);
+      setError('文件大于 8MB，请压缩后再试');
+      return;
+    }
+    rmReadFileBase64(
       file,
-      function (result) {
-        setBusy(false);
-        setAnalysis(result);
+      function (data) {
+        if (!data) {
+          setBusy(false);
+          setError('读取文件失败，请重试');
+          return;
+        }
+        rmApi('/template/import', { method: 'POST', body: { name: file.name, data: data } })
+          .then(function (value) {
+            setBusy(false);
+            setRemote(rmImportAnalysisFromValue(value, file.name));
+          })
+          .catch(function (err) {
+            setBusy(false);
+            setError(rmErrText(err) || '文件解析失败');
+          });
       },
       function (err) {
         setBusy(false);
-        setError((err && err.message) || '图片分析失败');
+        setError((err && err.message) || '读取文件失败');
       }
     );
-    event.target.value = '';
   }
+
+  /** 程序初稿 → AI 优化（local Host 接口，失败时保留程序初稿）。 */
+  function refine() {
+    if (!shown || aiBusy) return;
+    setAiBusy(true);
+    setAiError('');
+    rmApi('/template/refine', {
+      method: 'POST',
+      body: { source: rmSourceForRefine(shown), draft: { style: rmStyleFromAnalysis(shown) } },
+    })
+      .then(function (value) {
+        setAiBusy(false);
+        setRefined({
+          style: (value && value.style) || null,
+          notes: (value && value.notes) || '',
+          demoText: (value && value.demoText) || null,
+        });
+      })
+      .catch(function (err) {
+        setAiBusy(false);
+        setAiError(rmErrText(err) || 'AI 优化失败，可以继续使用程序初稿');
+      });
+  }
+
+  var baseAnalysis = remote || analysis;
+  var shown = rmApplyRefined(baseAnalysis, refined);
 
   var paletteLabels = [
     ['accent', '强调色'],
@@ -1918,25 +2380,31 @@ function TemplateImportDialog(props) {
     ['bandColor', '色带'],
     ['gold', '金色'],
   ];
-  var layoutText = analysis
+  var palette = shown ? shown.palette || {} : {};
+  var sideNames = shown
+    ? rmSidebarSectionsLabel(shown.layout.sidebarSections)
+    : [];
+  var layoutText = shown
     ? '版式初判：' +
-      (analysis.layout.layout === 'sidebar' ? '左侧栏布局' : '单栏布局') +
+      (shown.layout.layout === 'sidebar'
+        ? '左侧栏布局' + (sideNames.length ? '（左栏放' + sideNames.join('、') + '）' : '')
+        : '单栏布局') +
       ' · ' +
-      (analysis.layout.headerStyle === 'band'
+      (shown.layout.headerStyle === 'band'
         ? '整宽页眉色带'
-        : analysis.layout.headerStyle === 'split'
+        : shown.layout.headerStyle === 'split'
           ? '页眉左右分栏'
-          : analysis.layout.headerStyle === 'ribbon'
+          : shown.layout.headerStyle === 'ribbon'
             ? '左上角斜标签'
-            : analysis.layout.headerBand ? '有页眉色带' : '无页眉色带') +
-      (analysis.layout.contentStyle === 'card' ? ' · 内容块带边框' : '') +
+            : shown.layout.headerBand ? '有页眉色带' : '无页眉色带') +
+      (shown.layout.contentStyle === 'card' ? ' · 内容块带边框' : '') +
       ' · ' +
-      (analysis.layout.headerAlign === 'center' ? '页眉居中' : '页眉左对齐') +
+      (shown.layout.headerAlign === 'center' ? '页眉居中' : '页眉左对齐') +
       ' · 联系信息 ' +
-      analysis.layout.contactCols +
+      shown.layout.contactCols +
       ' 列 · 标题样式 ' +
-      rmHeadingStyleLabel(analysis.layout.headingStyle) +
-      (analysis.layout.fontFamily === 'serif' ? ' · 衬线大标题' : '')
+      rmHeadingStyleLabel(shown.layout.headingStyle) +
+      (shown.layout.fontFamily === 'serif' ? ' · 衬线大标题' : '')
     : '';
 
   return h(
@@ -1945,19 +2413,24 @@ function TemplateImportDialog(props) {
     h(
       'div',
       { className: 'rm-modal-card rm-modal-wide' },
-      h('div', { className: 'rm-modal-h' }, h('h3', null, '从图片生成模板初稿'), h('span', { className: 'rm-muted', style: { fontSize: '11px' } }, '本地取色，不上传图片')),
+      h(
+        'div',
+        { className: 'rm-modal-h' },
+        h('h3', null, '从文件生成模板初稿'),
+        h('span', { className: 'rm-muted', style: { fontSize: '11px' } }, '文件只交给本机插件解析')
+      ),
       h(
         'div',
         { className: 'rm-modal-b rm-col' },
         h(
           'span',
           { className: 'rm-hint' },
-          '上传一张喜欢的简历截图或排版参考图：本机会读取主色、姓名色、底色，并判断页眉样式、是否左侧栏、标题装饰和内容块。生成的是初稿，颜色和版式可以在编辑器里继续调整。'
+          '选择一个简历文件（Word / PDF），也可以直接拖入或粘贴一张喜欢的简历截图/排版参考图：Word、PDF 会解析出真实文本、字号和配色，图片则在本机取色。生成的是初稿，颜色和版式可以在编辑器里继续调整。'
         ),
         h(
           'div',
           { className: 'rm-row', style: { flexWrap: 'wrap', gap: '8px' } },
-          h('span', { className: 'rm-field-k' }, '没有参考图？'),
+          h('span', { className: 'rm-field-k' }, '没有参考文件？'),
           h(
             'button',
             {
@@ -1970,11 +2443,11 @@ function TemplateImportDialog(props) {
             '直接套用「青金斜切」'
           )
         ),
-        h('input', { className: 'rm-input', type: 'file', accept: 'image/*', onChange: pickFile }),
+        h('input', { className: 'rm-input', type: 'file', accept: RM_IMPORT_ACCEPT, onChange: pickFile }),
         fileName ? h('span', { className: 'rm-muted', style: { fontSize: '11px' } }, '已选择：' + fileName) : null,
-        busy ? h('span', { className: 'rm-hint' }, '正在本地分析图片…') : null,
+        busy ? h('span', { className: 'rm-hint' }, '正在解析文件…') : null,
         error ? h('span', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, error) : null,
-        analysis
+        shown
           ? h(
               'div',
               { className: 'rm-col' },
@@ -1985,17 +2458,53 @@ function TemplateImportDialog(props) {
                   return h(
                     'div',
                     { className: 'rm-swatch', key: item[0] },
-                    h('span', { className: 'rm-swatch-chip', style: { background: analysis.palette[item[0]] } }),
+                    h('span', { className: 'rm-swatch-chip', style: { background: palette[item[0]] } }),
                     h('span', null, item[1]),
-                    h('span', { className: 'rm-color-val' }, analysis.palette[item[0]])
+                    h('span', { className: 'rm-color-val' }, palette[item[0]])
                   );
                 })
               ),
               h('span', { className: 'rm-hint' }, layoutText),
-              analysis.note ? h('span', { className: 'rm-hint' }, analysis.note) : null,
-              analysis.size && analysis.size.width
-                ? h('span', { className: 'rm-muted', style: { fontSize: '11px' } }, '原图 ' + analysis.size.width + ' × ' + analysis.size.height)
-                : null
+              shown.note ? h('span', { className: 'rm-hint' }, shown.note) : null,
+              shown.document
+                ? h(
+                    'span',
+                    { className: 'rm-muted', style: { fontSize: '11px' } },
+                    rmImportKindLabel(shown.sourceKind) +
+                      '「' +
+                      (shown.sourceName || shown.fileName) +
+                      '」· ' +
+                      shown.blocks.length +
+                      ' 个文本块' +
+                      (shown.model && shown.model.text ? ' · 全文 ' + shown.model.text.length + ' 字' : '')
+                  )
+                : shown.size && shown.size.width
+                  ? h('span', { className: 'rm-muted', style: { fontSize: '11px' } }, '原图 ' + shown.size.width + ' × ' + shown.size.height)
+                  : null,
+              shown.model && Array.isArray(shown.model.fonts) && shown.model.fonts.length
+                ? h('span', { className: 'rm-hint' }, '识别到字体：' + shown.model.fonts.slice(0, 4).join(' / '))
+                : null,
+              shown.document && shown.blocks && shown.blocks.length
+                ? h(
+                    'details',
+                    { className: 'rm-col' },
+                    h('summary', { className: 'rm-hint', style: { cursor: 'pointer' } }, '查看解析出的文本块'),
+                    h(
+                      'div',
+                      { className: 'rm-col', style: { maxHeight: '170px', overflow: 'auto', gap: '2px' } },
+                      shown.blocks.slice(0, 30).map(function (block, index) {
+                        return h(
+                          'span',
+                          { key: 'block-' + index, className: 'rm-mono', style: { fontSize: '11px' } },
+                          (RM_IMPORT_ROLE_LABELS[block.role] || '正文') + ' · ' + String(block.text || '').slice(0, 60)
+                        );
+                      })
+                    )
+                  )
+                : null,
+              shown.aiNotes ? h('span', { className: 'rm-hint' }, 'AI 说明：' + shown.aiNotes) : null,
+              aiError ? h('span', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, aiError) : null,
+              h('span', { className: 'rm-hint' }, '生成的是初稿，颜色和版式可以在编辑器里继续调整。')
             )
           : null
       ),
@@ -2007,10 +2516,28 @@ function TemplateImportDialog(props) {
           'button',
           {
             type: 'button',
-            className: 'rm-btn rm-btn-primary',
-            disabled: !analysis || busy,
+            className: 'rm-btn',
+            disabled: !shown || busy || aiBusy,
+            title: shown ? '让 AI 对照源文件再调整一次配色与版式' : '先选择文件或图片',
             onClick: function () {
-              if (analysis && props.onGenerated) props.onGenerated(analysis);
+              if (refined) {
+                setRefined(null);
+                setAiError('');
+                return;
+              }
+              refine();
+            },
+          },
+          aiBusy ? 'AI 正在比对…' : refined ? '恢复程序初稿' : 'AI 优化'
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            className: 'rm-btn rm-btn-primary',
+            disabled: !shown || busy,
+            onClick: function () {
+              if (shown && props.onGenerated) props.onGenerated(shown);
             },
           },
           '生成模板初稿'

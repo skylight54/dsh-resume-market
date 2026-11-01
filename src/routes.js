@@ -14,6 +14,8 @@ import { installPlugin, listStatus } from './compat.js';
 import { resolveFormat, revealExport, saveRenderedPdf, writeResumeExport } from './export-file.js';
 import { createGithubMarket } from './github-market.js';
 import { StoreError } from './store.js';
+import { IMPORT_MAX_BYTES, importTemplateFile } from './template-import.js';
+import { refineTemplate } from './template-ai.js';
 
 export const PREFIX = '/resume-market/api';
 const MAX_BODY_BYTES = 12 * 1024 * 1024;
@@ -254,6 +256,45 @@ export function createHandler({ ctx, store }) {
       }
       if (!body || !body.id) return { status: 400, body: fail('http/bad-request', '缺少市场条目 id') };
       return { status: 200, body: ok({ template: await store.installFromMarket(String(body.id)) }) };
+    }
+
+    if (suffix === '/template/import' && method === 'POST') {
+      const body = await readJsonBody(req);
+      const name = body && body.name ? String(body.name).slice(0, 160) : '导入模板';
+      if (!body || typeof body.data !== 'string' || !body.data.trim()) {
+        return { status: 400, body: fail('import/missing-data', '缺少文件内容（data 应为 base64 字符串）') };
+      }
+      let buffer;
+      try {
+        buffer = Buffer.from(body.data, 'base64');
+      } catch {
+        return { status: 400, body: fail('import/bad-base64', '文件内容不是合法的 base64') };
+      }
+      if (!buffer.length) return { status: 400, body: fail('import/empty', '文件内容为空') };
+      if (buffer.length > IMPORT_MAX_BYTES) {
+        return { status: 413, body: fail('import/too-large', '文件超过 8MB 上限，请压缩或截取需要的部分') };
+      }
+      try {
+        const parsed = importTemplateFile({ name, buffer });
+        return { status: 200, body: ok({ model: parsed.model, draft: parsed.draft }) };
+      } catch (error) {
+        const status = typeof error.status === 'number' ? error.status : 422;
+        const code = error && error.code ? error.code : 'import/parse-failed';
+        return { status, body: fail(code, messageOf(error)) };
+      }
+    }
+
+    // 模板 AI 优化：程序初版（解析/识别）已经拿到，再让当前模型比对源文档与初稿。
+    if (suffix === '/template/refine' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || typeof body !== 'object' || Array.isArray(body)) {
+        return { status: 400, body: fail('template/bad-request', '请求体必须是 JSON 对象') };
+      }
+      if (!body.source || typeof body.source !== 'object') {
+        return { status: 400, body: fail('template/no-source', '缺少 source（文件/图片解析结果）') };
+      }
+      const refined = await refineTemplate({ ctx, source: body.source, draft: body.draft || {} });
+      return { status: 200, body: ok(refined) };
     }
 
     if (suffix === '/template' && method === 'DELETE') {

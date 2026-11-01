@@ -133,7 +133,7 @@ function TemplatesView(props) {
         'div',
         { className: 'rm-row' },
         props.onCreate ? h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: props.onCreate }, '+ 新建模板') : null,
-        props.onImport ? h('button', { type: 'button', className: 'rm-btn', onClick: props.onImport }, '从图片生成') : null
+        props.onImport ? h('button', { type: 'button', className: 'rm-btn', onClick: props.onImport }, '从文件生成') : null
       )
     ),
     h(

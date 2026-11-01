@@ -3,6 +3,15 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.10.0 — 2026-11-01
+
+- 修复「导出 doc 还是没有预期格式」：v0.9.0 的 Word 兼容 HTML 在真实 Word 里仍会走样（页眉浅灰字配浅灰底看不清、正文贴边、模块标题与内容粘连）。这一版彻底换方案：新增 `src/word-docx.js`，零依赖手写 OOXML（Node 内置 `zlib` 打 zip + XML），直接产出**真正的 .docx**。A4 页边距、页眉色带、模块标题色块（banner/tab/pill/bar/icon/leftbar 各自近似）、左栏侧边栏、联系方式两列、条目左右对齐、照片内嵌 `word/media/`，Word / WPS 都能正确还原；生成失败才回退旧的 `.doc`。导出格式 id 仍是 `doc`，文件名后缀变为 `.docx`。`tests/smoke.mjs` 增加 zip 签名 + `word/document.xml` + A4 `w:sectPr` 断言，新增 `tests/docx.mjs`（19 组）。
+- 模板生成不再只吃图片：新增 `src/template-import.js`（零依赖解析）——`.docx` 解 zip 读 `word/document.xml` 抽段落与 run 样式；Word 兼容 HTML 的 `.doc` 按 HTML 解析；`.pdf` 解对象表 + FlateDecode 内容流按坐标聚行。统一成 `{model, draft}`，路由 `POST /template/import`（base64、≤8MB），客户端「从图片生成」升级为「**从文件生成**」（accept 图片/`.doc`/`.docx`/`.pdf`），解析结果直接进初稿预览。新增 `tests/import.mjs`（65 组断言）。已知限制：加密 PDF / 扫描件 / 旧版二进制 .doc 会明确报错。
+- 初稿接 AI 二次优化：新增 `src/template-ai.js` + 路由 `POST /template/refine`，把程序初稿（style）与源文件摘要（文本块、字号、颜色、栏位）发给当前 DSH 模型，让它在合法枚举内修正版式、补 `sidebarSections`、调字号与颜色，返回 `style` + `notes`；界面上「AI 优化」有 loading / 说明 / 「恢复程序初稿」。宿主没配模型或调用失败时保留初稿，不影响使用。新增 `tests/ai.mjs`（7 组）。
+- 侧栏布局支持模块进左栏：`style.sidebarSections`（默认 `['skills']`，可选 summary / education / experience / projects / skills / awards），模板编辑器侧栏布局下出现「侧栏模块」多选；图片识别新增 `leftColumn`（栏宽 / 块数 / 是否延伸到页头以下），识别到左栏承载多组文字时自动建议（样例图 `101957` 识别出 9 组块 → 自动勾上）。
+- 上架材料：新增 `docs/MARKET.md`（awesome-dsh-plugin 收录要求对照表、可粘贴 YAML 条目、fork → `data/plugins/*.yml` → `node scripts/generate-readme.mjs` → PR 流程、CI 三关、npm 发布清单）；`package.json` 移除 `"private": true` 并补齐 description；README 安装段、导出说明、模板创作流程全部同步。
+- 测试补强：`tests/docx.mjs` / `tests/import.mjs` / `tests/ai.mjs` 三个新测试，`tests/smoke.mjs` 的 Word 断言从 HTML 版式改为 docx 结构，`tests/mount.mjs` 导出菜单文案改为「导出 Word (.docx)」。
+
 ## v0.9.0 — 2026-11-01
 
 - 修复「导出 Word(.doc) 后格式全没了」：以前 `buildWordHtml()` 把 BASE_CSS + 模板 CSS + PRINT_CSS 全塞进 `<style>`，Word/WPS 的 HTML 导入会整段丢掉 `display:grid/flex`、`gap`、`clip-path`、`transform`，只剩裸文字。新增 `renderWordBody()`：纯 `<table>` + 行内 style 重排页头（含照片两列）/联系方式两列/模块标题（按 banner·tab·pill·icon·leftbar·rule 近似上色）/条目左右对齐/`<ul>` 要点/sidebar 两栏；`WORD_CSS` 只留 `@page` A4 与表格基础样式；内置 7 套模板没有结构化 style 时从模板 CSS 嗅探页眉与标题样式。已知退化：斜切角退化成矩形填充、胶囊圆角变直角、渐变变纯色。

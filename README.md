@@ -13,8 +13,9 @@
 - **模板库**：7 套内置（商务极简 / 静奢蓝灰 / 清新创意 / 紧凑单栏 / 时间轴 / 科技网格 / 青金分栏），
   可重命名后使用；模板缩略图为真实 A4 渲染，不是示意图。
 - **在模板库里创作模板**：「模板库」里可以「+ 新建模板」或复制内置模板，在编辑器里调颜色、
-  字号、行距、页边距、标题样式、页眉色带等元素格式，右侧 A4 实时预览；也可以「从图片生成」——
-  选一张喜欢的简历截图，插件用 canvas 取色 + 版式启发式生成一版初稿，再手动微调。
+  字号、行距、页边距、标题样式、页眉色带等元素格式，右侧 A4 实时预览；也可以「从文件生成」——
+  丢一张简历截图、一份 Word（.doc/.docx）或 PDF 进去，插件先在本地解析出颜色 / 版式 / 文本块
+  跑一版初稿，再让 AI 对着原文件和初稿比对、补全版式细节（AI 不可用时保留初稿，一样能用）。
   保存后可一键「发布」到本地市场（可选是否携带示例内容）或生成 GitHub 公共投稿。
 - **结构化编辑器**：基本信息 8 字段两列网格；工作经历 / 项目 / 教育 / 技能 / 奖项均为
   可排序、可增删的条目列表，自动保存（900ms 防抖）；教育背景可选填「主修课程」，导出时单独
@@ -26,11 +27,12 @@
   仍留在列表里。顺序与显隐实时驱动预览和导出（如把「教育背景」挪到「项目经历」前面）。
 - **A4 实时预览**：右侧按 794×1123 等比缩放预览；内容超过一页时自动分页（虚线页线 + 「第 N 页」），
   工具条可缩放：[−][百分比][+][适合宽度][100%]，40%–200%、10% 一档。
-- **三格式导出**：工具栏「导出 ▾」可选 HTML / Word(.doc) / PDF。三种都由 Host 直接写文件到
+- **三格式导出**：工具栏「导出 ▾」可选 HTML / Word(.docx) / PDF。三种都由 Host 直接写文件到
   `~/.dsh/resume-market/exports/`，导出对话框给出完整路径 + 「打开所在文件夹」。
-  Word 版式用表格 + 行内样式重排（Word/WPS 不支持 grid/flex/clip-path，以前会退化成裸文字）；
-  PDF 由面板在本机渲染，自动按页数切片生成**多页 PDF**（不需要打印对话框，也不依赖系统装
-  Chrome/LibreOffice；浏览器渲染失败时才退回打印视图）。
+  Word 导出现在是**真正的 OOXML .docx**（零依赖手写 zip + XML，Word / WPS 都能正确还原：
+  A4 页边距、页眉色带、模块标题色块、左栏侧边栏、联系方式两列、条目左右对齐），不再是 Word
+  兼容 HTML；生成失败才回退 .doc。PDF 由面板在本机渲染，自动按页数切片生成**多页 PDF**
+  （不需要打印对话框，也不依赖系统装 Chrome/LibreOffice；浏览器渲染失败时才退回打印视图）。
 - **我的简历 / 回收站 / 历史版本**：「我的简历」标签页可切换、重命名、复制、删除；删除进回收站可恢复；
   每次编辑超过 3 分钟自动留一个历史快照，随时可以「恢复到这里」找回旧内容。
 - **AI 对话填写（浮动窗）**：编辑界面右下角有「● AI 对话」胶囊按钮，点开是浮动对话面板，
@@ -66,6 +68,10 @@ dsh plugin add file:<本目录绝对路径>
 ```
 
 安装后重启 / 刷新 DSH Web 页面，侧栏会出现「简历市场」。
+
+发布到 npm 之后也可以像其他插件一样从 **DSH 内置插件市场** 搜索安装（`dsh-plugin-resume-market`）。
+想把这个插件收录进官方插件市场（awesome-dsh-plugin / awesome-dsh-plugin.com），
+收录要求、可直接粘贴的注册表条目和提 PR 步骤见 [`docs/MARKET.md`](docs/MARKET.md)。
 
 ## 兼容插件
 
@@ -141,14 +147,15 @@ dsh plugin add file:<本目录绝对路径>
 ```
 + 新建模板     从空白开始，默认继承当前主题色和标准版式
 复制为新模板   在任一内置模板上点「复制」——保留它的 CSS 根类名和版式，再微调
-从图片生成     选一张简历截图，自动取色 + 识别版式并生成初稿（不依赖视觉模型，纯本地 canvas）
+从文件生成     丢进简历截图 / Word(.doc/.docx) / PDF：图片走本地 canvas 取色 + 版式识别，
+               Word / PDF 由 Host 解析出文本块、字号、颜色和栏位，先出一版程序初稿
 ```
 
 编辑器里能改的「元素格式」：强调色 / 姓名色 / 区块标题色 / 正文色 / 纸张底色 / 页眉色带 / 金色辅助色、
 姓名字号 / 标题字号 / 正文字号 / 行距 / 左右与上下页边距 / 区块间距、字体（sans / serif / mono）、
 页眉对齐、联系信息列数。
 
-### 从图片生成能识别什么
+### 图片 / 文件生成能识别什么
 
 识别只看像素，不联网、不上传，纯本地 canvas：
 
@@ -161,7 +168,26 @@ dsh plugin add file:<本目录绝对路径>
 | 颜色 | accent / nameColor / headingColor / bodyColor / background / bandColor / gold | 从图中取主色、深色、底色、暖色（金色） |
 | 字体倾向 | sans / serif / mono | 依据大标题笔画粗细与行高判断 |
 
-识别结果直接落到编辑器里，可以继续改任意一项再保存。仓库还带了 `tools/analyze-samples.mjs`：
+识别结果直接落到编辑器里，可以继续改任意一项再保存。
+
+侧栏布局还能选「侧栏模块」：把技能特长 / 语言能力 / 兴趣爱好这些模块放进深色左栏，右栏只留
+正文（默认放技能特长；识别到左栏在页头之后还有多组文字时会自动勾上）。
+
+### 从文件生成：程序初稿 → AI 优化
+
+1. 模板库点「从文件生成」，选图片 / Word / PDF（单文件 ≤8MB）。
+2. Host 先解析：图片用 canvas 取色与版式启发式；Word 解 `word/document.xml` 抽段落与 run 样式；
+   PDF 解对象表 + FlateDecode 内容流，按坐标把文字聚成行。输出统一的 `model`（页面尺寸、文本块、
+   颜色、字体）和 `draft`（模板名、卖点、style、sample）。
+3. 弹窗里能看到取色板、版式摘要（布局 / 页眉 / 标题 / 内容块）、可折叠的文本块。
+4. 点「AI 优化」：把 model 摘要 + 程序初稿发给当前 DSH 模型，让它在合法枚举内修正版式、
+   补 `sidebarSections`、调字号与颜色，返回 `style` 与 `notes`；不满意可「恢复程序初稿」。
+   宿主没配模型或调用失败时保留初稿，不影响继续用。
+5. 「套用初稿」进模板编辑器，再手动微调、保存、发布。
+
+后端接口：`POST /template/import`（base64 → `{model,draft}`，错误码 `import/*`）、
+`POST /template/refine`（`{source,draft}` → `{style,notes}`，错误码 `template/no-source`、
+`template/bad-json`、`chat/no-key`）。解析失败会明确报错（加密 PDF、旧版二进制 .doc、扫描件无文本层）。仓库还带了 `tools/analyze-samples.mjs`：
 给一段截图目录，批量识别并输出 `previews/samples/*.html` 预览（开发调试用）。
 右侧是真实 A4 实时预览；保存后回到模板库，点「发布」发到市场（本地）或生成 GitHub 投稿。
 
@@ -177,7 +203,7 @@ market/index.json                 元数据列表 + 内联 css / sample（卡片
 market/templates/<id>.json        单套模板的完整内容（css + sample 示例数据）
 market/validate.mjs               投稿前校验：字段、id 与文件对应、cls 根选择器、隐私
 market/README.md                  投稿规范（字段表、审核标准、维护者流程）
-docs/MARKET.md                    使用与投稿的用户向说明
+docs/MARKET.md                    上架 DSH 插件市场的收录指南 + 公共模板市场使用与投稿说明
 ```
 
 插件读取链路：
@@ -224,7 +250,10 @@ node tools/check.mjs     # 包形状检查（exports / dsh.bundle / dsh.client /
 node tests/smoke.mjs     # Host 侧冒烟测试（路由 / 导出 / 市场 / 工具 / 安全围栏）
 node tests/github-market.mjs # 公共市场契约测试（index / 模板安装 / 投稿 JSON / 工具）
 node tests/render.mjs    # 客户端 bundle 渲染测试（侧栏图标 + 面板首屏）
-node tests/pdf.mjs       # 客户端 PDF 生成器测试（xref / A4 页面 / 图片流）
+node tests/pdf.mjs       # 客户端 PDF 生成器测试（xref / A4 页面 / 图片流 / 多页切片）
+node tests/docx.mjs      # Word .docx 生成器测试（zip 结构 / OOXML / 7 套模板）
+node tests/import.mjs    # 多来源解析测试（docx / Word HTML / PDF / 路由 / 初稿映射）
+node tests/ai.mjs        # AI 优化测试（JSON 解析 / 枚举收敛 / 错误码）
 node tests/mount.mjs     # jsdom 挂载测试（真实数据流：编辑 / 预览 / 模板库 / 市场 / 设置 / 发布弹窗）
 node tools/previews.mjs  # 生成 9 套模板的静态预览 → previews/index.html
 node market/validate.mjs # 校验公共市场 market/ 目录（index / 模板文件 / cls / 隐私）
@@ -253,6 +282,9 @@ src/
   seed.js             「大肥鱼」内置市场条目
   tools.js            resume_* 工具
   shared/doc.js       文档渲染层（Host / Client 共用：模板 CSS + HTML 渲染）
+  word-docx.js        Word .docx 生成器（手写 OOXML + zip，零依赖）
+  template-import.js  模板文件解析（docx / Word HTML / PDF → 统一文档模型）
+  template-ai.js      AI 优化初稿（调宿主模型修正 style）
   client/             面板（React，零构建依赖，拼接后由 __ModuleLoader__ 加载）
 server/               独立市场服务（零依赖）
 lib/client.js         构建产物

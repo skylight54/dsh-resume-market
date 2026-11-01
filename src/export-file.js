@@ -1,5 +1,5 @@
 /**
- * 把简历导出成真正落盘的文件：HTML / Word(.doc) / PDF。
+ * 把简历导出成真正落盘的文件：HTML / Word(.docx) / PDF。
  *
  * 为什么不靠浏览器下载：DSH 是 Electron 壳，面板里 window.open + Content-Disposition
  * 不一定触发下载（会被吞掉），用户点完「导出」找不到文件。由 Host 直接写文件、
@@ -21,8 +21,8 @@ const requireFromHere = createRequire(import.meta.url);
 
 export const EXPORT_FORMATS = ['html', 'doc', 'pdf'];
 
-const FORMAT_EXT = { html: 'html', doc: 'doc', pdf: 'pdf' };
-const FORMAT_LABEL = { html: 'HTML', doc: 'Word 文档', pdf: 'PDF' };
+const FORMAT_EXT = { html: 'html', doc: 'docx', pdf: 'pdf' };
+const FORMAT_LABEL = { html: 'HTML', doc: 'Word 文档 (.docx)', pdf: 'PDF' };
 const PDF_TIMEOUT_MS = 60 * 1000;
 
 /** 最近一次 Electron 打印失败的原因，用于把真实错误带回面板。 */
@@ -268,6 +268,44 @@ export async function saveRenderedPdf(payload) {
   return { path: target, name: basename(target), dir, format: 'pdf' };
 }
 
+/** 缓存 .docx 生成器；模块不存在时记住失败，避免每次导出都重复 import。 */
+let docxBuilder;
+async function loadDocxBuilder() {
+  if (docxBuilder !== undefined) return docxBuilder;
+  try {
+    const mod = await import('./word-docx.js');
+    const fn = (mod && (mod.buildDocx || (mod.default && mod.default.buildDocx))) || null;
+    docxBuilder = typeof fn === 'function' ? fn : null;
+  } catch {
+    docxBuilder = null;
+  }
+  return docxBuilder;
+}
+
+/**
+ * Word 导出：优先手写 OOXML 的 .docx（Word/WPS 都能正确还原版式）；
+ * 生成器缺失或出错时回退到 Word 兼容 HTML 的 .doc，保证导出永远有产物。
+ */
+async function writeWordExport(resume, template, base) {
+  const buildDocx = await loadDocxBuilder();
+  if (buildDocx) {
+    try {
+      const raw = await buildDocx(resume, template);
+      const buffer = Buffer.isBuffer(raw) ? raw : Buffer.from(raw);
+      if (buffer.length > 1024) {
+        const target = unusedPath(exportsDir(), base, 'docx');
+        await writeFile(target, buffer);
+        return { path: target, name: basename(target), dir: exportsDir(), format: 'doc', ext: 'docx' };
+      }
+    } catch {
+      /* 落到下面的 .doc 回退 */
+    }
+  }
+  const target = unusedPath(exportsDir(), base, 'doc');
+  await writeFile(target, buildWordHtml(resume, template), 'utf8');
+  return { path: target, name: basename(target), dir: exportsDir(), format: 'doc', ext: 'doc' };
+}
+
 /**
  * 写一份导出文件。
  * @param {{format?: 'html'|'doc'|'pdf', autoPrint?: boolean}} options
@@ -279,14 +317,17 @@ export async function writeResumeExport(resume, template, options = {}) {
   await mkdir(dir, { recursive: true });
   const data = (resume && resume.data) || {};
   const base = safeFileName((data.basics && data.basics.name) || (resume && resume.title) || 'resume');
+
+  if (format === 'doc') {
+    return writeWordExport(resume, template, base);
+  }
+
   const ext = FORMAT_EXT[format];
   const target = unusedPath(dir, base, ext);
 
   if (format === 'html') {
     const html = buildHtml(resume, template, { autoPrint: options.autoPrint === true });
     await writeFile(target, html, 'utf8');
-  } else if (format === 'doc') {
-    await writeFile(target, buildWordHtml(resume, template), 'utf8');
   } else {
     await writePdf(buildHtml(resume, template, {}), target);
   }

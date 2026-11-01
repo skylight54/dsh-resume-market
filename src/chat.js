@@ -531,3 +531,65 @@ export function createChatService({ store, log, ctx } = {}) {
 
   return { chat };
 }
+
+/**
+ * 一次性文本生成（给「模板 AI 优化」这类内部功能用）。
+ *
+ * 复用免 Key 通道的宿主 llm 服务：没有宿主模型时抛 chat/no-key，
+ * 上游失败抛 chat/upstream —— 调用方把 code/message 透给前端即可。
+ * @param {{ctx?: object, system: string, user: string, maxTokens?: number, temperature?: number, timeoutMs?: number}} input
+ * @returns {Promise<{text: string, model: string, durationMs: number}>}
+ */
+export async function hostComplete(input) {
+  const { ctx, system, user } = input || {};
+  const support = hostSupport(ctx);
+  if (!support) {
+    throw new ChatError(
+      'chat/no-key',
+      '没有可用的 AI 模型：请到设置页填写 DeepSeek API Key，或确认 DSH 已配置默认模型',
+      400,
+    );
+  }
+  const timeoutMs = Number(input.timeoutMs) > 0 ? Math.min(180000, Number(input.timeoutMs)) : HOST_TIMEOUT_MS;
+  const options = {
+    provider: support.provider,
+    model: support.model,
+    messages: [{ role: 'user', content: [{ type: 'text', text: String(user || '') }] }],
+    system: String(system || ''),
+    temperature: Number.isFinite(Number(input.temperature)) ? Number(input.temperature) : 0.2,
+    maxTokens: Number(input.maxTokens) > 0 ? Math.min(8000, Number(input.maxTokens)) : 2000,
+  };
+  if (support.reasoningEffort) options.reasoningEffort = support.reasoningEffort;
+  const controller = new AbortController();
+  options.signal = controller.signal;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const startedAt = Date.now();
+  let text = '';
+  let failure = null;
+  try {
+    for await (const chunk of support.llm.stream(options)) {
+      if (!chunk || typeof chunk !== 'object') continue;
+      if (chunk.type === 'text-delta' && typeof chunk.text === 'string') text += chunk.text;
+      else if (chunk.type === 'finish') {
+        const reason = chunk.reason && typeof chunk.reason === 'object' ? chunk.reason : null;
+        if (reason && (reason.kind === 'error' || reason.kind === 'aborted')) {
+          failure = reason.failure && typeof reason.failure === 'object' ? reason.failure : {};
+        }
+      }
+    }
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new ChatError('chat/upstream', '宿主模型请求超时（' + Math.round(timeoutMs / 1000) + ' 秒），请重试', 502);
+    }
+    throw new ChatError('chat/upstream', '宿主模型调用失败：' + short(messageOf(error), 120), 502);
+  } finally {
+    clearTimeout(timer);
+  }
+  if (failure) {
+    const detail = typeof failure.message === 'string' && failure.message ? failure.message : '未知原因';
+    throw new ChatError('chat/upstream', '宿主模型报错：' + short(detail, 160), 502);
+  }
+  const value = text.trim();
+  if (!value) throw new ChatError('chat/upstream', '宿主模型没有返回内容，请重试', 502);
+  return { text: value, model: support.model, durationMs: Date.now() - startedAt };
+}

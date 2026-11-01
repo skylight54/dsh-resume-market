@@ -9,6 +9,28 @@ import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { inflateRawSync } from 'node:zlib';
+
+/** 从 zip（.docx）里读一个条目的文本：够验证用，中央目录 + stored/deflate 两种编码。 */
+function unzipEntry(buffer, wanted) {
+  for (let i = 0; i + 46 <= buffer.length; i += 1) {
+    if (buffer.readUInt32LE(i) !== 0x02014b50) continue;
+    const method = buffer.readUInt16LE(i + 10);
+    const compSize = buffer.readUInt32LE(i + 20);
+    const nameLen = buffer.readUInt16LE(i + 28);
+    const localOffset = buffer.readUInt32LE(i + 42);
+    if (!localOffset || localOffset + 30 > buffer.length) continue;
+    const name = buffer.toString('utf8', i + 46, i + 46 + nameLen);
+    if (name !== wanted) continue;
+    if (buffer.readUInt32LE(localOffset) !== 0x04034b50) return null;
+    const start = localOffset + 30 + buffer.readUInt16LE(localOffset + 26) + buffer.readUInt16LE(localOffset + 28);
+    const data = buffer.subarray(start, start + compSize);
+    if (method === 0) return data.toString('utf8');
+    if (method === 8) return inflateRawSync(data).toString('utf8');
+    return null;
+  }
+  return null;
+}
 
 const dir = await mkdtemp(join(tmpdir(), 'resume-market-smoke-'));
 process.env.RESUME_MARKET_FILE = join(dir, 'store.json');
@@ -283,23 +305,39 @@ assert.equal(existsSync(exportedPath), true, '导出文件应真实写到磁盘'
 assert.match(await readFile(exportedPath, 'utf8'), /rm-contact/);
 assert.match(await readFile(exportedPath, 'utf8'), /主修课程/, '落盘 HTML 应带主修课程');
 
-// 5c-2) Word(.doc) 导出：Word 兼容 HTML，A4 页面设置 + 模板样式都在
+// 5c-2) Word 导出：优先真正的 OOXML .docx（Word/WPS 能正确还原版式），
+// 生成器不可用时回退 Word 兼容 HTML 的 .doc —— 两条路径都要能落盘。
 res = await call('POST', '/export', { id: resumeId, format: 'doc' });
 assert.equal(res.status, 200, res.body);
 const docPath = res.json.value.path;
 assert.equal(res.json.value.format, 'doc');
-assert.ok(docPath.endsWith('.doc'), 'doc 导出应为 .doc 文件');
-const docText = await readFile(docPath, 'utf8');
-assert.match(docText, /xmlns:w="urn:schemas-microsoft-com:office:word"/);
-assert.match(docText, /WordSection1/);
-assert.match(docText, /rm-contact/);
-assert.match(docText, /class="rm-edu-courses"/, 'Word 导出也应带主修课程行');
-assert.match(docText, /数据结构、计量经济学/);
-// Word 导入不支持 grid/flex/clip-path，产物必须是表格 + 行内样式版式，否则「格式全没了」
-assert.match(docText, /<table/, 'Word 导出应使用 table 版式');
-assert.match(docText, /style="[^"]*color:/, 'Word 导出关键样式应行内化');
-assert.doesNotMatch(docText, /display:\s*grid|display:\s*flex|clip-path|transform:|gap:/, 'Word 导出不应残留 Word 不支持的 CSS');
-assert.match(docText, /工作经历/, 'Word 导出正文模块丢失');
+assert.match(docPath, /\.docx?$/, 'doc 导出应为 .docx（回退 .doc）');
+if (docPath.endsWith('.docx')) {
+  const docx = await readFile(docPath);
+  assert.equal(docx[0], 0x50, 'docx 应以 zip 魔数 PK 开头');
+  assert.equal(docx[1], 0x4b);
+  assert.ok(docx.length > 3072, 'docx 体积太小，可能没写正文');
+  const documentXml = unzipEntry(docx, 'word/document.xml');
+  assert.ok(documentXml, 'docx 里必须有 word/document.xml');
+  assert.match(documentXml, /<w:document/, 'document.xml 根节点应为 w:document');
+  assert.match(documentXml, /<w:sectPr/, 'docx 必须带页面设置（否则 Word 打开会报损坏）');
+  assert.match(documentXml, /w:w="11906"/, 'docx 页面宽度应为 A4（11906 twips）');
+  assert.match(documentXml, /教育背景/, 'docx 正文应包含简历模块标题');
+  assert.match(documentXml, /工作经历/, 'docx 正文模块丢失');
+  assert.match(documentXml, /数据结构、计量经济学/, 'docx 也应带主修课程');
+} else {
+  const docText = await readFile(docPath, 'utf8');
+  assert.match(docText, /xmlns:w="urn:schemas-microsoft-com:office:word"/);
+  assert.match(docText, /WordSection1/);
+  assert.match(docText, /rm-contact/);
+  assert.match(docText, /class="rm-edu-courses"/, 'Word 导出也应带主修课程行');
+  assert.match(docText, /数据结构、计量经济学/);
+  // Word 导入不支持 grid/flex/clip-path，产物必须是表格 + 行内样式版式，否则「格式全没了」
+  assert.match(docText, /<table/, 'Word 导出应使用 table 版式');
+  assert.match(docText, /style="[^"]*color:/, 'Word 导出关键样式应行内化');
+  assert.doesNotMatch(docText, /display:\s*grid|display:\s*flex|clip-path|transform:|gap:/, 'Word 导出不应残留 Word 不支持的 CSS');
+  assert.match(docText, /工作经历/, 'Word 导出正文模块丢失');
+}
 
 // 5c-3) PDF 导出（Host 兜底路径）：能转换就出文件，不能转换也要给明确的错误码
 res = await call('POST', '/export', { id: resumeId, format: 'pdf' });
