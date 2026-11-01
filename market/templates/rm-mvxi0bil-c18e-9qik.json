@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "id": "rm-mvxi0bil-c18e-9qik",
+  "name": "左侧栏",
+  "en": "Business Minimal",
+  "tagline": "左右分隔",
+  "tags": [],
+  "author": "我",
+  "accent": "#254665",
+  "cls": "rm-t-my-mvxi0bil-c18e",
+  "templateId": "pub-mvxi0bil-c18e-9qik",
+  "css": ".rm-t-my-mvxi0bil-c18e{padding:48px 56px;background:#ffffff;color:#1f2937;font-size:13.5px;line-height:1.62;}\n.rm-t-my-mvxi0bil-c18e{display:grid;grid-template-columns:268px minmax(0,1fr);padding:0;align-items:start;grid-auto-flow:row dense;background:linear-gradient(90deg,#254665 0 268px,#ffffff 268px);}\n.rm-t-my-mvxi0bil-c18e .rm-head{display:block;grid-column:1;grid-row:1;align-self:start;padding:48px 24px 54px;background:#254665;color:#ffffff;}\n.rm-t-my-mvxi0bil-c18e .rm-head .rm-name{color:#ffffff;font-size:26px;letter-spacing:.02em;}\n.rm-t-my-mvxi0bil-c18e .rm-head .rm-role{color:rgba(255,255,255,0.84);letter-spacing:.06em;}\n.rm-t-my-mvxi0bil-c18e .rm-head .rm-contact{grid-template-columns:minmax(0,1fr);gap:7px;margin:16px 0 0;}\n.rm-t-my-mvxi0bil-c18e .rm-head .rm-contact .rm-k{color:rgba(255,255,255,0.6);}\n.rm-t-my-mvxi0bil-c18e .rm-head .rm-contact .rm-v{color:#ffffff;}\n.rm-t-my-mvxi0bil-c18e .rm-head .rm-photo{width:84px;height:84px;margin:0 auto 18px;}\n.rm-t-my-mvxi0bil-c18e .rm-body{display:contents;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-summary,.rm-t-my-mvxi0bil-c18e .rm-sec-experience,.rm-t-my-mvxi0bil-c18e .rm-sec-projects,.rm-t-my-mvxi0bil-c18e .rm-sec-education,.rm-t-my-mvxi0bil-c18e .rm-sec-awards{grid-column:2;grid-row:auto;align-self:start;padding-left:56px;padding-right:56px;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-summary:first-of-type{padding-top:48px;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills{grid-column:1;grid-row:auto;align-self:start;padding:0 24px;margin-top:18px;color:#ffffff;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills:first-of-type{margin-top:0;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-sec-h{border-bottom:1px solid rgba(255,255,255,0.34);}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-sec-t{color:#ffffff;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-sec-h::before{background:rgba(255,255,255,0.92);}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-summary,.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-para,.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-v,.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-item-t{color:#ffffff;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-item-role,.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-date{color:rgba(255,255,255,0.8);}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-k,.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-skill-k{color:rgba(255,255,255,0.72);}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-tag{border:1px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.1);color:#ffffff;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-bullets li::marker{color:rgba(255,255,255,0.8);}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-skill-row{display:block;margin:0 0 8px;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-skill-k{display:block;margin:0 0 3px;letter-spacing:.08em;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-edu-courses{color:rgba(255,255,255,0.78);}\n.rm-t-my-mvxi0bil-c18e .rm-sec-skills .rm-bullets{padding-left:16px;}\n.rm-t-my-mvxi0bil-c18e .rm-name{color:#3c2418;font-size:32px;font-weight:700;letter-spacing:.04em;}\n.rm-t-my-mvxi0bil-c18e .rm-role{color:#2b3e52;font-size:14.58px;}\n.rm-t-my-mvxi0bil-c18e .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));color:#1f2937;}\n.rm-t-my-mvxi0bil-c18e .rm-c .rm-k{color:#7d838b;}\n.rm-t-my-mvxi0bil-c18e .rm-v{color:#1f2937;}\n.rm-t-my-mvxi0bil-c18e .rm-item-t{color:#3c2418;}\n.rm-t-my-mvxi0bil-c18e .rm-item-role,.rm-t-my-mvxi0bil-c18e .rm-date{color:#31353f;}\n.rm-t-my-mvxi0bil-c18e .rm-edu-courses .rm-k,.rm-t-my-mvxi0bil-c18e .rm-skill-k{color:#59453b;}\n.rm-t-my-mvxi0bil-c18e .rm-sec{margin-top:18px;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-t{color:#3c2418;font-size:12.5px;font-weight:700;letter-spacing:.14em;}\n.rm-t-my-mvxi0bil-c18e .rm-tag{border:1px solid rgba(37,70,101,0.34);background:rgba(37,70,101,0.06);color:#233d57;}\n.rm-t-my-mvxi0bil-c18e .rm-bullets li::marker{color:#254665;}\n.rm-t-my-mvxi0bil-c18e .rm-summary{color:#1f2937;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-h{position:relative;padding-left:34px;border-bottom:1px solid rgba(37,70,101,0.42);padding-bottom:3px;}\n.rm-t-my-mvxi0bil-c18e .rm-sec-h::before{content:\"\";position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:#254665;}",
+  "style": {
+    "accent": "#254665",
+    "nameColor": "#3c2418",
+    "headingColor": "#3c2418",
+    "bodyColor": "#1f2937",
+    "background": "#ffffff",
+    "bandColor": "#3f5c77",
+    "gold": "#c8b077",
+    "nameSize": 32,
+    "headingSize": 12.5,
+    "bodySize": 13.5,
+    "lineHeight": 1.62,
+    "padX": 56,
+    "padY": 48,
+    "sectionGap": 18,
+    "contactCols": 2,
+    "headingStyle": "icon",
+    "layout": "sidebar",
+    "headerStyle": "plain",
+    "contentStyle": "plain",
+    "sidebarSections": [
+      "skills"
+    ],
+    "fontFamily": "sans",
+    "headerAlign": "left"
+  },
+  "sample": {
+    "basics": {
+      "name": "林知夏",
+      "role": "高级产品经理 · 8 年 B 端产品经验",
+      "phone": "138 0013 8000",
+      "email": "zhixia.lin@example.com",
+      "city": "上海",
+      "wechat": "linzhixia-pm",
+      "github": "github.com/linzhixia",
+      "website": "zhixia.design",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover"
+    },
+    "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
+    "experience": [
+      {
+        "company": "星野科技",
+        "role": "高级产品经理",
+        "period": "2021.06 — 至今",
+        "location": "上海",
+        "bullets": [
+          "负责企业协作平台产品线，MAU 从 12 万提升至 58 万，续费率 **+18%**。",
+          "重构权限与工作流引擎，交付周期缩短 40%，支撑 200+ 企业客户的自定义配置。",
+          "搭建产品数据看板，把需求评审到上线的平均周期从 21 天压缩到 12 天。"
+        ]
+      },
+      {
+        "company": "云枢网络",
+        "role": "产品经理",
+        "period": "2018.03 — 2021.05",
+        "location": "杭州",
+        "bullets": [
+          "从 0 到 1 设计客户成功 SaaS，首年签约 120 家企业，ARR 突破 1800 万。",
+          "主导移动端改版，核心任务完成率提升 27%，客服咨询量下降 22%。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "企业工作流引擎 2.0",
+        "role": "产品负责人",
+        "period": "2022.03 — 2022.11",
+        "bullets": [
+          "抽象 5 类可视化节点，让非技术人员也能自己配置审批流。",
+          "上线 6 个月覆盖 78% 付费客户，相关工单下降 63%。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "华东师范大学",
+        "degree": "硕士",
+        "major": "信息管理",
+        "period": "2015.09 — 2018.01",
+        "gpa": "3.8 / 4.0",
+        "courses": ""
+      }
+    ],
+    "skills": [
+      {
+        "group": "产品能力",
+        "items": "需求分析、产品规划、数据驱动、用户研究"
+      },
+      {
+        "group": "工具",
+        "items": "Axure、Figma、SQL、Mixpanel、Jira"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳产品奖",
+        "date": "2023.12",
+        "desc": "星野科技"
+      },
+      {
+        "title": "中国 SaaS 产品创新大赛 银奖",
+        "date": "2020.09",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-11-01T07:18:37.637Z"
+}
