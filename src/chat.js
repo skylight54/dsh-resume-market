@@ -15,7 +15,15 @@ const MAX_MESSAGES = 40;
 const MAX_CONTENT_CHARS = 8000;
 const REQUEST_TIMEOUT_MS = 60 * 1000;
 /** 当前简历作为上下文时的最大字符数（完整简历 JSON 可能很大，截断即可）。 */
-const MAX_RESUME_CONTEXT_CHARS = 6000;
+/** 当前简历作为上下文时的最大字符数。 */
+const MAX_RESUME_CONTEXT_CHARS = 16000;
+/** 单条要点 / 单个字段进上下文时的最大长度。 */
+const MAX_BULLET_CHARS = 240;
+const MAX_FIELD_CHARS = 400;
+const MAX_SUMMARY_CHARS = 1200;
+/** 每个列表最多带多少条、每条经历最多带几条要点（再多就只写进概览）。 */
+const MAX_LIST_ITEMS = 16;
+const MAX_BULLETS_PER_ITEM = 12;
 /** 走宿主 llm（DSH 当前模型）时的超时：流式回复比一次性 HTTP 慢，给宽松一点。 */
 const HOST_TIMEOUT_MS = 120 * 1000;
 /** 两条路径共用同一组生成参数，保证「免 Key」和「填 Key」的回复风格一致。 */
@@ -111,18 +119,102 @@ function normalizeMessages(messages) {
   return list.length > MAX_MESSAGES ? list.slice(-MAX_MESSAGES) : list;
 }
 
-/** system 消息 = 固定顾问提示 + （可选）当前简历 JSON 上下文。 */
+function clipText(value, max) {
+  const text = typeof value === 'string' ? value : value == null ? '' : String(value);
+  if (!text) return '';
+  return text.length > max ? text.slice(0, max) + '…' : text;
+}
+
+/**
+ * 把简历收敛成模型可读的紧凑结构。
+ *
+ * 之前直接把整份 resume JSON 塞进 system，6000 字上限先被 basics.photo（dataURL 动辄几十 KB）
+ * 吃掉，模型只能看到基本信息、看不到项目经历——这是「AI 读不到正在编辑的简历」的真正原因。
+ * 现在：照片只留占位、字段/要点各自截断、列表限条数，再配合模块概览保证结构信息不丢。
+ * @param {object} resume
+ * @returns {object|null}
+ */
+export function compactResume(resume) {
+  if (!resume || typeof resume !== 'object') return null;
+  const data = resume.data && typeof resume.data === 'object' ? resume.data : null;
+  if (!data) return null;
+  const srcBasics = data.basics && typeof data.basics === 'object' ? data.basics : {};
+  const basics = {};
+  for (const key of ['name', 'role', 'phone', 'email', 'city', 'wechat', 'github', 'website']) {
+    if (srcBasics[key]) basics[key] = clipText(srcBasics[key], 120);
+  }
+  // 照片是 base64 dataURL：塞进上下文只会把后面的经历全挤掉，这里只留一个标记。
+  if (srcBasics.photo) basics.photo = '[已上传照片]';
+
+  const listOf = (value, fields) => {
+    if (!Array.isArray(value)) return [];
+    return value.slice(0, MAX_LIST_ITEMS).map((item) => {
+      const out = {};
+      const record = item && typeof item === 'object' ? item : {};
+      for (const field of fields) {
+        if (field === 'bullets') {
+          if (Array.isArray(record.bullets) && record.bullets.length) {
+            out.bullets = record.bullets
+              .slice(0, MAX_BULLETS_PER_ITEM)
+              .map((line) => clipText(line, MAX_BULLET_CHARS))
+              .filter(Boolean);
+          }
+        } else if (record[field]) {
+          out[field] = clipText(record[field], MAX_FIELD_CHARS);
+        }
+      }
+      return out;
+    });
+  };
+
+  return {
+    title: clipText(resume.title, 120),
+    templateId: resume.templateId || '',
+    data: {
+      basics,
+      summary: clipText(data.summary, MAX_SUMMARY_CHARS),
+      experience: listOf(data.experience, ['company', 'role', 'period', 'location', 'bullets']),
+      projects: listOf(data.projects, ['name', 'role', 'period', 'bullets']),
+      education: listOf(data.education, ['school', 'degree', 'major', 'period', 'gpa', 'courses']),
+      skills: listOf(data.skills, ['group', 'items']),
+      awards: listOf(data.awards, ['title', 'date', 'desc']),
+    },
+  };
+}
+
+/** 模块概览：即使结构化 JSON 被截断，模型也知道「有哪些经历、各是什么」。 */
+function resumeOutline(compact) {
+  const data = compact.data || {};
+  const lines = [];
+  const add = (label, items, describe) => {
+    if (!Array.isArray(items) || !items.length) return;
+    const text = items.map((item) => describe(item)).filter(Boolean).join('；');
+    if (text) lines.push(label + '（' + items.length + '）：' + text);
+  };
+  add('工作经历', data.experience, (item) => [item.company, item.role, item.period].filter(Boolean).join(' / '));
+  add('项目经历', data.projects, (item) => [item.name, item.role, item.period].filter(Boolean).join(' / '));
+  add('教育背景', data.education, (item) => [item.school, item.degree, item.major].filter(Boolean).join(' / '));
+  add('专业技能', data.skills, (item) => item.group || clipText(item.items, 60));
+  add('荣誉奖项', data.awards, (item) => [item.title, item.date].filter(Boolean).join(' / '));
+  return lines;
+}
+
+/** system 消息 = 固定顾问提示 + （可选）当前简历上下文（模块概览 + 紧凑 JSON）。 */
 function buildSystemPrompt(resume) {
-  if (!resume || typeof resume !== 'object') return SYSTEM_PROMPT;
+  const compact = compactResume(resume);
+  if (!compact) return SYSTEM_PROMPT;
+  const outline = resumeOutline(compact);
   let json = '';
   try {
-    json = JSON.stringify(resume);
+    json = JSON.stringify(compact);
   } catch {
     return SYSTEM_PROMPT;
   }
   if (!json || json === '{}' || json === 'null') return SYSTEM_PROMPT;
+  const head = '\n\n当前简历（用户正在编辑的那份；数据可能因长度截断，但下方模块概览是完整的）：\n';
+  const outlineBlock = outline.length ? '【模块概览】\n' + outline.join('\n') + '\n' : '';
   if (json.length > MAX_RESUME_CONTEXT_CHARS) json = json.slice(0, MAX_RESUME_CONTEXT_CHARS) + '…（已截断）';
-  return SYSTEM_PROMPT + '\n\n当前简历（可能不完整，可在此基础上补充）：\n' + json;
+  return SYSTEM_PROMPT + head + outlineBlock + '【结构化数据】\n' + json;
 }
 
 /**

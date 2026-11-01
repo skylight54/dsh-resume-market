@@ -241,6 +241,33 @@ async function serviceTests() {
   assert.equal(sentMany.messages[1].content, 'm10', '最早的消息应被裁掉');
   assert.equal(sentMany.messages[40].content, 'm49', '最后一条应保留');
 
+  // 8.1) 简历上下文要带完整经历、且不能把照片 dataURL 塞进去（曾因 6000 字上限被照片吃满）
+  stubFetch(() => jsonResponse(completion('ok')));
+  const photo = 'data:image/jpeg;base64,' + 'A'.repeat(40000);
+  await upstream.chat({
+    messages: [{ role: 'user', content: '帮我看看项目经历' }],
+    resume: {
+      title: '后端开发_北京_程好',
+      templateId: 'banner-exec',
+      data: {
+        basics: { name: '程好', role: '后端开发', photo, photoFit: 'cover' },
+        summary: '在校生，方向为后端开发与 Agent 应用开发。',
+        experience: [{ company: '程好科技', role: '后端实习', period: '2025.06 — 2025.09', bullets: ['把工单查询耗时从 800ms 降到 120ms'] }],
+        projects: [{ name: 'TicketFlow Agent', role: '个人项目', period: '2025.03 — 2025.08', bullets: ['实现 LangGraph 状态图与工具调用循环'] }],
+        education: [{ school: '北京交通大学', degree: '本科', major: '计算机科学与技术', period: '2024 — 2028' }],
+        skills: [{ group: '编程语言', items: 'Python、C/C++' }],
+      },
+    },
+  });
+  const context = JSON.parse(calls[0].init.body).messages[0].content;
+  assert.ok(context.includes('程好科技'), '简历上下文必须包含工作经历里的公司名');
+  assert.ok(context.includes('TicketFlow Agent'), '简历上下文必须包含项目名');
+  assert.ok(context.includes('800ms'), '简历上下文必须包含要点原文');
+  assert.ok(context.includes('【模块概览】'), '要有模块概览，防止 JSON 截断后结构信息丢失');
+  assert.ok(!context.includes('data:image'), '照片 dataURL 不能塞进上下文（会挤掉经历）');
+  assert.ok(context.includes('[已上传照片]'), '照片应替换成占位标记');
+  assert.ok(context.length < 20000, '上下文长度要收敛，不能无上限');
+
   // 9) resume 是空对象时不加上下文
   stubFetch(() => jsonResponse(completion('ok')));
   await upstream.chat({ messages: [{ role: 'user', content: 'hi' }], resume: {} });
