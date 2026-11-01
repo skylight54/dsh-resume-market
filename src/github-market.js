@@ -257,9 +257,11 @@ export function createGithubMarket({ store, log, fetchImpl }) {
     const previewName = payload.id + '-preview.png';
     const repoPath = 'market/templates/' + filename;
     const style = payload.style || {};
+    const cssText = String(payload.css || '');
+    const headBandCss = /\.rm-head\s*\{[^}]*background\s*:/.test(cssText);
     const layoutBits = [
       style.layout === 'sidebar' ? '左侧栏' : '单栏',
-      style.headerStyle === 'band' || (!style.headerStyle && style.headerBand) ? '整宽页眉色带' : style.headerStyle === 'split' ? '页眉左右分栏' : style.headerStyle === 'ribbon' ? '左上角斜标签' : '无页眉色带',
+      style.headerStyle === 'band' || (!style.headerStyle && (style.headerBand || headBandCss)) ? '整宽页眉色带' : style.headerStyle === 'split' ? '页眉左右分栏' : style.headerStyle === 'ribbon' ? '左上角斜标签' : '无页眉色带',
       style.headingStyle ? '标题 ' + style.headingStyle : '',
       style.contentStyle === 'card' ? '内容块带边框' : '',
     ].filter(Boolean);
