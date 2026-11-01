@@ -13,6 +13,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const PKG = JSON.parse(await readFile(join(ROOT, 'package.json'), 'utf8'));
 
+// 产物必须可复现：CI 会重新构建并比对 git 差异，所以 meta 里不放时间戳。
+
 /** 客户端文件顺序：doc.js 的共享层在视图之前，入口最后。 */
 const FILES = [
   'src/shared/doc.js',
@@ -91,7 +93,6 @@ await writeFile(
       files: seen,
       sha256: hash.digest('hex'),
       bytes: Buffer.byteLength(bundle, 'utf8'),
-      builtAt: new Date().toISOString(),
     },
     null,
     2
