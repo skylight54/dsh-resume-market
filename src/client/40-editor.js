@@ -117,25 +117,16 @@ function rmReadPhoto(file, fit, onDone, onFail) {
     var img = new Image();
     img.onerror = function () { if (onFail) onFail('这张图片无法识别'); };
     img.onload = function () {
-      var max = 480;
-      var scale = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
-      var w = Math.max(1, Math.round((img.width || 1) * scale));
-      var hh = Math.max(1, Math.round((img.height || 1) * scale));
-      // cover：以短边为正方形边长，居中裁切；contain：画布保持原始比例。
-      var square = fit !== 'contain';
-      var side = Math.min(w, hh);
-      var outW = square ? side : w;
-      var outH = square ? side : hh;
-      var sx = square ? Math.round((w - side) / 2) : 0;
-      var sy = square ? Math.round((hh - side) / 2) : 0;
+      // cover：以短边为正方形边长、居中裁切；contain：保持原始比例。源矩形必须用原图像素。
+      var box = photoCropRect(img.width, img.height, fit, 480);
       try {
         var canvas = document.createElement('canvas');
-        canvas.width = outW;
-        canvas.height = outH;
+        canvas.width = box.dw;
+        canvas.height = box.dh;
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, outW, outH);
-        ctx.drawImage(img, sx, sy, outW, outH, 0, 0, outW, outH);
+        ctx.fillRect(0, 0, box.dw, box.dh);
+        ctx.drawImage(img, box.sx, box.sy, box.sw, box.sh, 0, 0, box.dw, box.dh);
         onDone(canvas.toDataURL('image/jpeg', 0.85));
       } catch (err) {
         if (onFail) onFail('图片处理失败，换一张试试');

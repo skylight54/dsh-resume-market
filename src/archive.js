@@ -116,6 +116,21 @@ export async function tailorArchive({ ctx, store, archiveId, jd, title }) {
   const size = Buffer.byteLength(JSON.stringify(archive.data || {}), 'utf8');
   if (size > MAX_ARCHIVE_DATA) throw fail('archive/too-large', '档案内容太大了，请精简后再试', 400);
 
+/**
+ * 档案进提示词前的收敛：照片是 base64 dataURL，塞进去既烧 token 又可能被模型改坏，
+ * 这里只留占位；定制完成后再把原照片贴回新简历。
+ */
+function digestData(data) {
+  const plain = JSON.parse(JSON.stringify(data && typeof data === 'object' ? data : {}));
+  if (plain.basics && typeof plain.basics === 'object') {
+    if (plain.basics.photo) plain.basics.photo = '[已上传照片]';
+    delete plain.basics.photoFit;
+    delete plain.basics.photoShape;
+    delete plain.basics.photoSide;
+  }
+  return plain;
+}
+
   const user = [
     '目标岗位 JD：',
     '"""',
@@ -123,7 +138,7 @@ export async function tailorArchive({ ctx, store, archiveId, jd, title }) {
     '"""',
     '',
     '个人档案（JSON）：',
-    JSON.stringify(archive.data, null, 1),
+    JSON.stringify(digestData(archive.data), null, 1),
     title ? '\n期望的简历标题：' + title : '',
   ].join('\n');
 
@@ -143,6 +158,13 @@ export async function tailorArchive({ ctx, store, archiveId, jd, title }) {
     throw fail('archive/bad-json', 'AI 返回的内容不是可用的 JSON，请再试一次', 502);
   }
   const data = normalizeData(parsed.data);
+  // 照片/照片设置以档案里的原始值为准：模型不参与，也就不可能被改成坏图。
+  const archiveBasics = (archive.data && archive.data.basics) || {};
+  data.basics = data.basics || {};
+  if (archiveBasics.photo) data.basics.photo = archiveBasics.photo;
+  for (const key of ['photoFit', 'photoShape', 'photoSide']) {
+    if (archiveBasics[key]) data.basics[key] = archiveBasics[key];
+  }
   const basics = data.basics || {};
   const resume = {
     id: null,

@@ -205,10 +205,21 @@ function safeCss(css) {
   return text;
 }
 
+function plainBasics(basics) {
+  const src = basics && typeof basics === 'object' ? basics : {};
+  const out = {};
+  for (const key of BASIC_FIELDS) {
+    if (src[key]) out[key] = short(src[key], 160);
+  }
+  // 照片是 base64 dataURL：绝不能进提示词，会把上下文撑爆，也可能被模型改坏。
+  if (src.photo) out.photo = '[已上传照片]';
+  return out;
+}
+
 function buildContext(resume, descriptor, instruction) {
   const data = (resume && resume.data) || {};
   const plain = {
-    basics: data.basics || {},
+    basics: plainBasics(data.basics),
     summary: short(data.summary, 400),
     experience: (Array.isArray(data.experience) ? data.experience : []).map((item) => ({
       company: short(item.company, 60),

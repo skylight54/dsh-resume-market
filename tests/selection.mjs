@@ -47,7 +47,14 @@ function baseResume() {
     lang: 'zh',
     sections: ['summary', 'experience', 'education', 'skills'],
     data: {
-      basics: { name: '程好', role: '后端开发', phone: '13800000000', email: 'a@b.com', city: '北京' },
+      basics: {
+        name: '程好',
+        role: '后端开发',
+        phone: '13800000000',
+        email: 'a@b.com',
+        city: '北京',
+        photo: 'data:image/png;base64,' + 'A'.repeat(6000),
+      },
       summary: '原来的简介',
       experience: [
         { company: 'A 公司', role: '实习生', period: '2024-2025', bullets: ['做了甲', '做了乙'] },
@@ -107,6 +114,8 @@ async function main() {
     assert.ok(seen.length === 1, '应调用一次模型');
     assert.match(String(seen[0].system || ''), /kind="text"/);
     assert.match(String(seen[0].messages[0].content[0].text || ''), /写具体一点/);
+    assert.equal(String(seen[0].messages[0].content[0].text || '').indexOf('data:image'), -1, '提示词不能带照片 dataURL');
+    assert.match(String(seen[0].messages[0].content[0].text || ''), /\[已上传照片\]/, '照片应换成占位');
   }
 
   // 2) 样式级：第一阶段只返回 stylePatch，不落盘

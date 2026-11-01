@@ -3,6 +3,12 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.11.2 — 2026-11-01
+
+- 修「上传照片只显示左上角」：`src/client/40-editor.js` 的 `rmReadPhoto()` 先把图片按 `480/max(w,h)` 缩放，却拿**缩放后**的尺寸当源矩形去 `drawImage(img, sx, sy, outW, outH, …)`——源坐标本该是原图像素，结果等于从原图左上角抠了一块约 480px 的角落放大显示。新增 `photoCropRect(width, height, fit, maxSide)`（`src/shared/doc.js` 导出）统一算裁剪：正方形模式按短边居中裁 `min(w,h)` 再缩到 480；等比模式整图缩放到最长边 480。旧照片在浏览器里已经被裁坏，需要重新上传。
+- 同一类隐患一并修掉：`src/archive.js` 的 `tailorArchive()` 和 `src/selection-edit.js` 的 `buildContext()` 之前把 `basics.photo` 的 base64 dataURL 整块塞进提示词（烧 token 且可能被模型改坏）。现在提示词里照片只留 `[已上传照片]` 占位，按 JD 定制完成后再把**档案原照片**（含 `photoFit/photoShape/photoSide`）贴回新简历，模型始终不接触图片数据。
+- 测试：新增 `tests/photo.mjs`（`photoCropRect` 横图/竖图/等比/小图/回归断言）；`tests/selection.mjs` 与 `tests/archive.mjs` 增加「提示词不含 `data:image`、必须有 `[已上传照片]`、定制后照片原样带回」断言。
+
 ## v0.11.1 — 2026-11-01
 
 - 修「AI 对话读不到正在编辑的简历」：`buildSystemPrompt()` 之前把整份 `resume` 直接 `JSON.stringify` 塞进 system，而上下文上限 6000 字——简历里 `basics.photo` 是几百 KB 的 base64 dataURL，一条就把预算吃光，模型只看得到基本信息，项目/工作/教育全被截掉。现在新增 `compactResume()`：照片换成「[已上传照片]」占位、每个字段与要点各自截断（要点 240 字、字段 400 字、简介 1200 字）、列表限 16 条/每条 12 条要点；同时前置「模块概览」（工作/项目/教育/技能/奖项的名称与时间线），这样即使 JSON 真的被截断，模型也知道有哪些经历。上限提到 16000 字，够放下一份完整简历。

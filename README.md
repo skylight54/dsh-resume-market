@@ -282,6 +282,7 @@ node tests/import.mjs    # 多来源解析测试（docx / Word HTML / PDF / 路�
 node tests/ai.mjs        # AI 优化测试（JSON 解析 / 枚举收敛 / 错误码）
 node tests/selection.mjs  # 框选 AI 修改测试（两阶段 / 路径白名单 / CSS 消毒 / 错误码）
 node tests/archive.mjs    # 档案与按 JD 定制测试（meta / tailor / score 夹取 / 错误码）
+node tests/photo.mjs      # 照片裁剪测试（正方形居中 / 等比不裁 / 小图不放大）
 node tests/mount.mjs     # jsdom 挂载测试（真实数据流：编辑 / 预览 / 模板库 / 市场 / 设置 / 发布弹窗）
 node tools/previews.mjs  # 生成 9 套模板的静态预览 → previews/index.html
 node market/validate.mjs # 校验公共市场 market/ 目录（index / 模板文件 / cls / 隐私）

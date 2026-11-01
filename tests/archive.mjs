@@ -110,6 +110,7 @@ async function main() {
     };
     const { ctx, seen } = fakeHost(textChunks('```json\n' + JSON.stringify(reply) + '\n```'));
     const archive = { id: 'a_1', name: '后端档案', templateId: 'banner-exec', data: archiveData() };
+    archive.data.basics.photo = 'data:image/png;base64,' + 'A'.repeat(6000);
     const out = await tailorArchive({ ctx, store: fakeStore(archive), archiveId: 'a_1', jd: '招聘后端开发，要求熟悉 Python、FastAPI、SQL，有工单系统经验优先。' });
     assert.equal(out.score, 82);
     assert.equal(out.notes, reply.notes);
@@ -124,6 +125,9 @@ async function main() {
     assert.equal(seen.length, 1);
     assert.match(String(seen[0].system || ''), /不许编造/);
     assert.match(String(seen[0].messages[0].content[0].text || ''), /招聘后端开发/);
+    assert.equal(String(seen[0].messages[0].content[0].text || '').indexOf('data:image'), -1, '提示词不能带照片 dataURL');
+    assert.match(String(seen[0].messages[0].content[0].text || ''), /\[已上传照片\]/);
+    assert.equal(out.resume.data.basics.photo, archive.data.basics.photo, '照片要原样带回新简历');
   }
 
   // 4) score 越界会被夹到 0-100

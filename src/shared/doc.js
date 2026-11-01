@@ -70,6 +70,7 @@ const BASE_CSS = `
 .rm-doc .rm-photo-square{border-radius:6px;}
 /* 等比完整模式：图片按比例缩进方形框内，多出来的部分留浅灰底，不裁切。 */
 .rm-doc .rm-photo.rm-photo-contain-box{background:#f1f3f6;}
+
 .rm-doc .rm-photo img.rm-photo-contain{object-fit:contain;background:#f1f3f6;}
 .rm-doc .rm-head.rm-has-photo .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));flex:none;width:auto;margin-top:12px;}
 .rm-doc .rm-id{min-width:0;}
@@ -108,6 +109,32 @@ const BASE_CSS = `
 .rm-doc .rm-para{margin:0 0 6px;}
 .rm-doc strong{font-weight:650;color:#111827;}
 `;
+/**
+ * 证件照压缩的裁切几何。
+ *
+ * 注意：源图坐标必须用**原始像素**，只有目标画布才按 maxSide 缩放。
+ * 之前的实现把「缩放后的尺寸」当成源矩形，大图就被从左上角切了一小块（预览里只能看到左上角）。
+ *
+ * @param {number} width 原图宽
+ * @param {number} height 原图高
+ * @param {'cover'|'contain'} fit cover=居中裁成正方形，contain=保持比例
+ * @param {number} [maxSide=480] 输出最长边
+ * @returns {{sx:number,sy:number,sw:number,sh:number,dw:number,dh:number}}
+ */
+function photoCropRect(width, height, fit, maxSide) {
+  const w = Math.max(1, Math.round(Number(width) || 1));
+  const h = Math.max(1, Math.round(Number(height) || 1));
+  const max = Math.max(16, Number(maxSide) || 480);
+  const scale = Math.min(1, max / Math.max(w, h));
+  if (fit !== 'contain') {
+    const side = Math.min(w, h);
+    // 正方形输出：短边就是边长，按短边（而不是长边）缩到 maxSide，尽量用满 480。
+    const out = Math.max(1, Math.round(Math.min(side, max)));
+    return { sx: Math.round((w - side) / 2), sy: Math.round((h - side) / 2), sw: side, sh: side, dw: out, dh: out };
+  }
+  return { sx: 0, sy: 0, sw: w, sh: h, dw: Math.max(1, Math.round(w * scale)), dh: Math.max(1, Math.round(h * scale)) };
+}
+
 
 /** 打印/导出专用：A4 无边距，避免内容被分页切开。 */
 const PRINT_CSS = `
@@ -1526,6 +1553,7 @@ function normalizeResume(raw) {
 // 客户端走 build/build.mjs 内联，构建时会把下面这一行也去掉。
 export {
   templateClass,
+  photoCropRect,
   PAPER_W,
   PAPER_H,
   SECTION_ORDER,
