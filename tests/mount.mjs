@@ -360,7 +360,7 @@ check(text().includes('圆形') && text().includes('方形'), 'photo shape toggl
 // --- section order: 教育背景可以移到项目经历前面 -------------------------
 const orderRows = () => [...container.querySelectorAll('.rm-order-row')];
 const rowName = (row) => row.querySelector('.rm-order-name').textContent.trim();
-check(orderRows().length === 6, 'section order rows expected 6, got ' + orderRows().length);
+check(orderRows().length === 8, 'section order rows expected 8, got ' + orderRows().length);
 check(rowName(orderRows()[0]) === '个人简介', 'first section should be 个人简介, got ' + (rowName(orderRows()[0]) || ''));
 for (let i = 0; i < 2; i++) {
   const row = orderRows().find((r) => rowName(r) === '教育背景');
@@ -382,7 +382,7 @@ check(eduIdx >= 0 && projIdx >= 0 && eduIdx < projIdx, 'preview order should fol
 
 // --- 拖动把手：HTML5 draggable + grab 光标 --------------------------------
 const grips = [...container.querySelectorAll('.rm-order-row .rm-order-grip')];
-check(grips.length === 6, 'section rows should each have a drag grip, got ' + grips.length);
+check(grips.length === 8, 'section rows should each have a drag grip, got ' + grips.length);
 check(grips.every((g) => g.getAttribute('draggable') === 'true'), 'visible section grips should be draggable');
 check(
   grips.length > 0 && dom.window.getComputedStyle(grips[0]).cursor === 'grab',
@@ -420,7 +420,7 @@ await act(async () => {
   eyeOf(eduRow).click();
   await sleep(40);
 });
-check(orderRows().length === 6, 'hidden section should stay in the list, got ' + orderRows().length);
+check(orderRows().length === 8, 'hidden section should stay in the list, got ' + orderRows().length);
 const hiddenRow = sectionRow('教育背景');
 check(!!hiddenRow && hiddenRow.className.includes('is-hidden'), 'hidden section row should be greyed (is-hidden)');
 check(!container.querySelector('.rm-preview-col .rm-sec-education'), 'hidden section should leave the preview');

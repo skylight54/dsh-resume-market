@@ -21,7 +21,8 @@ process.env.HOME = dir;
 
 const index = JSON.parse(await readFile(join(marketDir, 'index.json'), 'utf8'));
 assert.ok(Array.isArray(index.templates), 'market/index.json 必须有 templates 数组');
-assert.equal(index.templates.length, 6, 'index 里应有 6 个模板');
+assert.ok(index.templates.length >= 6, 'index 里应至少有 6 个模板');
+assert.ok(index.templates.some((t) => t.id === 'rm-fresh-mint'), 'index 里应包含新增市场模板 rm-fresh-mint');
 
 // 把 GitHub raw URL 映射到本地 market/，其余请求直接失败（避免意外联网）。
 globalThis.fetch = async (input) => {
@@ -125,7 +126,7 @@ function call(method, path, body) {
 // 1) /github/state 强制刷新 → 5 条
 let res = await call('GET', '/github/state?force=1');
 assert.equal(res.status, 200, res.body);
-assert.equal(res.json.value.items.length, 6, '公共市场应有 6 个模板');
+assert.equal(res.json.value.items.length, index.templates.length, '公共市场条目数应与 index 一致');
 assert.equal(res.json.value.stale, false);
 assert.equal(res.json.value.repo, 'skylight54/dsh-resume-market');
 
@@ -151,7 +152,7 @@ for (const item of index.templates) {
 // 3) 安装后模板库 = 6 内置 + 5 公共
 res = await call('GET', '/state');
 assert.equal(res.status, 200);
-assert.equal(res.json.value.templates.length, 13, '模板库应为 7 内置 + 6 公共');
+assert.equal(res.json.value.templates.length, 7 + index.templates.length, '模板库应为 7 内置 + 公共模板');
 const names = res.json.value.templates.map((item) => item.name);
 for (const item of index.templates) assert.ok(names.includes(item.name), '模板库缺少 ' + item.name);
 

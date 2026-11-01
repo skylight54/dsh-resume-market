@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "id": "rm-timeline",
+  "name": "时间轴",
+  "en": "Timeline",
+  "tagline": "左侧时间列加竖线圆点，成长路径一眼看清，产品运营岗首选。",
+  "tags": [
+    "时间轴",
+    "产品",
+    "运营",
+    "成长"
+  ],
+  "author": "简历市场",
+  "accent": "#2563eb",
+  "cls": "rm-t-timeline",
+  "templateId": "mkt-timeline",
+  "css": "\n.rm-t-timeline{padding:0 0 48px;color:#25303f;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;}\n.rm-t-timeline .rm-head{padding:0 56px 24px;background:#f8fafc;border-bottom:1px solid #e2e8f0;}\n.rm-t-timeline .rm-head::before{content:\"\";display:block;height:5px;margin:0 -56px 30px;background:linear-gradient(90deg,#2563eb 0%,#7db0f7 60%,#dbeafe 100%);}\n.rm-t-timeline .rm-name{font-size:36px;font-weight:700;letter-spacing:.02em;line-height:1.15;color:#0f172a;}\n.rm-t-timeline .rm-role{margin:8px 0 0;font-size:12.5px;letter-spacing:.18em;color:#2563eb;}\n.rm-t-timeline .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;margin-top:18px;}\n.rm-t-timeline .rm-k{display:inline-block;padding:1px 7px;border-radius:4px;background:#e8f0fe;color:#3b63a8;font-size:9.5px;letter-spacing:.04em;}\n.rm-t-timeline .rm-v{font-size:11.5px;color:#334155;}\n.rm-t-timeline .rm-body{padding:0 56px;}\n.rm-t-timeline .rm-sec{margin-top:24px;}\n.rm-t-timeline .rm-sec-h{margin:0 0 12px;padding-bottom:6px;border-bottom:1px dashed #c7d7ee;gap:0;}\n.rm-t-timeline .rm-sec-t{font-size:12px;font-weight:700;letter-spacing:.22em;color:#1d4ed8;}\n.rm-t-timeline .rm-items{position:relative;}\n.rm-t-timeline .rm-items::before{content:\"\";position:absolute;left:110px;top:12px;bottom:8px;width:1px;background:#d7e2f3;}\n.rm-t-timeline .rm-item{position:relative;padding-left:128px;margin-bottom:16px;}\n.rm-t-timeline .rm-item::before{content:\"\";position:absolute;left:104px;top:6px;width:8px;height:8px;border-radius:50%;background:#ffffff;border:2px solid #2563eb;box-shadow:0 0 0 3px #e8f0fe;z-index:1;}\n.rm-t-timeline .rm-item::after{display:none;}\n.rm-t-timeline .rm-item:last-child::after{display:none;}\n.rm-t-timeline .rm-row{display:block;}\n.rm-t-timeline .rm-date{position:absolute;left:0;top:2px;width:86px;text-align:right;font-size:10.5px;letter-spacing:.02em;color:#64748b;line-height:1.5;}\n.rm-t-timeline .rm-item-main{display:block;}\n.rm-t-timeline .rm-item-t{display:block;font-size:14px;font-weight:600;color:#0f172a;}\n.rm-t-timeline .rm-item-role{display:inline-block;margin-top:3px;font-size:11.5px;color:#5b6b82;}\n.rm-t-timeline .rm-item-sub{font-size:11.5px;color:#64748b;}\n.rm-t-timeline .rm-edu-courses{font-size:11px;line-height:1.5;color:#64748b;}\n.rm-t-timeline .rm-bullets{margin-top:5px;padding-left:14px;}\n.rm-t-timeline .rm-bullets li{margin:2px 0;font-size:12.5px;color:#3c4a5e;}\n.rm-t-timeline .rm-bullets li::marker{color:#94b3e6;}\n.rm-t-timeline .rm-summary{font-size:13px;line-height:1.75;color:#3c4a5e;}\n.rm-t-timeline .rm-tag{border:1px solid #d3e0f5;background:#f1f6fe;color:#2a4d86;border-radius:4px;font-size:11px;}\n.rm-t-timeline .rm-skill-row{grid-template-columns:88px minmax(0,1fr);gap:10px;margin-bottom:7px;}\n.rm-t-timeline .rm-skill-k{font-size:11px;font-weight:600;letter-spacing:.06em;color:#1d4ed8;}\n.rm-t-timeline .rm-award-row{margin-bottom:6px;}\n.rm-t-timeline .rm-award-t{font-size:12.5px;color:#0f172a;}\n.rm-t-timeline .rm-award-desc{font-size:11px;color:#64748b;}\n.rm-t-timeline .rm-sec-campus .rm-item{padding-left:128px;}\n.rm-t-timeline .rm-sec-hobbies .rm-tags{padding-left:0;}\n",
+  "createdAt": "2026-11-01T12:00:00.000Z",
+  "sample": {
+    "basics": {
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover",
+      "name": "苏禾",
+      "role": "用户增长运营 / 6 年 B 端与 C 端经验",
+      "phone": "138 0013 8000",
+      "email": "su.he@example.com",
+      "city": "杭州",
+      "wechat": "suhe-growth",
+      "github": "github.com/suhe-growth",
+      "website": "suhe.notion.site"
+    },
+    "summary": "6 年增长运营经验，擅长用实验和数据拆解增长问题。做过冷启动、留存提升与私域体系，既写得了方案也能上手跑数据。",
+    "experience": [
+      {
+        "company": "橙屿科技",
+        "role": "用户增长负责人",
+        "period": "2022.05 — 至今",
+        "location": "杭州",
+        "bullets": [
+          "搭建 A/B 实验流程，季度新增注册提升 **64%**，次周留存提升 11 个百分点。",
+          "设计老带新激励体系，裂变贡献占新增的 38%，获客成本下降 27%。"
+        ]
+      },
+      {
+        "company": "拾光互动",
+        "role": "运营经理",
+        "period": "2019.08 — 2022.04",
+        "location": "杭州",
+        "bullets": [
+          "从 0 搭建内容社区，6 个月做到日活 4.2 万，UGC 占比 61%。",
+          "策划 3 场行业直播，单场带来 2600 条有效线索。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "增长实验平台",
+        "role": "业务负责人",
+        "period": "2023.02 — 2023.09",
+        "bullets": [
+          "把实验配置从排期 2 周缩短到 1 天，季度实验量从 6 个提升到 24 个。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "浙江工业大学",
+        "degree": "本科",
+        "major": "市场营销",
+        "period": "2014.09 — 2018.06",
+        "gpa": "3.6 / 4.0",
+        "courses": "消费者行为、数据分析、品牌管理"
+      }
+    ],
+    "campus": [
+      {
+        "name": "校学生会新媒体中心",
+        "role": "内容负责人",
+        "period": "2015.09 — 2017.06",
+        "bullets": [
+          "把公众号从 3000 做到 2.6 万关注，单篇最高阅读 4.8 万。"
+        ]
+      }
+    ],
+    "hobbies": "城市骑行、播客、咖啡探店",
+    "skills": [
+      {
+        "group": "增长",
+        "items": "A/B 实验、漏斗分析、留存体系、私域运营、活动策划"
+      },
+      {
+        "group": "工具",
+        "items": "SQL、神策、Tableau、Figma、飞书多维表"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度增长之星",
+        "date": "2023.12",
+        "desc": "橙屿科技"
+      }
+    ]
+  }
+}

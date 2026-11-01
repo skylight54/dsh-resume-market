@@ -12,7 +12,7 @@
 const PAPER_W = 794;
 const PAPER_H = 1123;
 
-const SECTION_ORDER = ['summary', 'experience', 'projects', 'education', 'skills', 'awards'];
+const SECTION_ORDER = ['summary', 'experience', 'projects', 'education', 'campus', 'skills', 'awards', 'hobbies'];
 
 const LABELS = {
   zh: {
@@ -20,8 +20,10 @@ const LABELS = {
     experience: '工作经历',
     projects: '项目经历',
     education: '教育背景',
+    campus: '校园经历',
     skills: '专业技能',
     awards: '荣誉奖项',
+    hobbies: '兴趣爱好',
     phone: '电话',
     email: '邮箱',
     city: '城市',
@@ -39,8 +41,10 @@ const LABELS = {
     experience: 'EXPERIENCE',
     projects: 'PROJECTS',
     education: 'EDUCATION',
+    campus: 'CAMPUS',
     skills: 'SKILLS',
     awards: 'AWARDS',
+    hobbies: 'INTERESTS',
     phone: 'Phone',
     email: 'Email',
     city: 'Location',
@@ -496,6 +500,14 @@ function normalizeData(raw) {
       // 可选主修课程：一行字符串（用顿号/逗号分隔），空字符串表示不展示。
       courses: str(it.courses, 200),
     })),
+    campus: arr(src.campus, 6).map((it) => ({
+      name: str(it.name, 80),
+      role: str(it.role, 40),
+      period: str(it.period, 40),
+      bullets: list(it.bullets, 8),
+    })),
+    // 可选模块：兴趣爱好。一行字符串，用顿号/逗号分隔，渲染成标签。
+    hobbies: str(src.hobbies, 300),
     skills: arr(src.skills, 10).map((it) => ({
       group: str(it.group, 30),
       items: Array.isArray(it.items) ? str(it.items.join('、'), 300) : str(it.items, 300),
@@ -704,6 +716,46 @@ function renderEducation(data, L) {
   );
 }
 
+function renderCampus(data, L) {
+  const items = data.campus || [];
+  if (!items.length) return '';
+  const rows = items.map(function (it) {
+    const h = ['<div class="rm-item"><div class="rm-row"><div class="rm-item-main">'];
+    if (it.name) h.push('<span class="rm-item-t">' + esc(it.name) + '</span>');
+    if (it.role) h.push('<span class="rm-item-role">' + esc(it.role) + '</span>');
+    h.push('</div>');
+    if (it.period) h.push('<div class="rm-date">' + esc(it.period) + '</div>');
+    h.push('</div>');
+    if (it.bullets && it.bullets.length) {
+      h.push('<ul class="rm-bullets">');
+      for (let i = 0; i < it.bullets.length; i++) h.push('<li>' + rich(it.bullets[i]) + '</li>');
+      h.push('</ul>');
+    }
+    h.push('</div>');
+    return h.join('');
+  });
+  return (
+    '<section class="rm-sec rm-sec-campus"><h2 class="rm-sec-h"><span class="rm-sec-t">' +
+    esc(L.campus) +
+    '</span></h2><div class="rm-items">' + rows.join('') + '</div></section>'
+  );
+}
+
+function renderHobbies(data, L) {
+  const text = String(data.hobbies || '').trim();
+  if (!text) return '';
+  const tags = splitSkills(text)
+    .map(function (s) {
+      return '<span class="rm-tag">' + esc(s) + '</span>';
+    })
+    .join('');
+  return (
+    '<section class="rm-sec rm-sec-hobbies"><h2 class="rm-sec-h"><span class="rm-sec-t">' +
+    esc(L.hobbies) +
+    '</span></h2><div class="rm-items"><div class="rm-tags">' + tags + '</div></div></section>'
+  );
+}
+
 function splitSkills(text) {
   return String(text || '')
     .split(/[、,，/|]+/)
@@ -769,8 +821,10 @@ function renderBody(resume) {
     else if (id === 'experience') body.push(renderExperience(data, L));
     else if (id === 'projects') body.push(renderProjects(data, L));
     else if (id === 'education') body.push(renderEducation(data, L));
+    else if (id === 'campus') body.push(renderCampus(data, L));
     else if (id === 'skills') body.push(renderSkills(data, L));
     else if (id === 'awards') body.push(renderAwards(data, L));
+    else if (id === 'hobbies') body.push(renderHobbies(data, L));
   }
   html.push('<div class="rm-body">' + body.join('') + '</div>');
   return html.join('');
@@ -1485,6 +1539,15 @@ function sanitizeStyle(raw) {
   if (['sans', 'serif', 'mono'].indexOf(raw.fontFamily) !== -1) out.fontFamily = raw.fontFamily;
   if (['left', 'center'].indexOf(raw.headerAlign) !== -1) out.headerAlign = raw.headerAlign;
   if (raw.headerBand === true) out.headerBand = true;
+  if (['line', 'dashed', 'double', 'accent', 'none'].indexOf(raw.sectionDivider) !== -1) out.sectionDivider = raw.sectionDivider;
+  if (['dot', 'dash', 'square', 'ring'].indexOf(raw.bulletStyle) !== -1) out.bulletStyle = raw.bulletStyle;
+  if (['left', 'center'].indexOf(raw.nameAlign) !== -1) out.nameAlign = raw.nameAlign;
+  if (['grid', 'inline', 'pills'].indexOf(raw.contactStyle) !== -1) out.contactStyle = raw.contactStyle;
+  if (['pill', 'plain', 'underline'].indexOf(raw.tagStyle) !== -1) out.tagStyle = raw.tagStyle;
+  if (['left', 'right', 'circle', 'none'].indexOf(raw.photoFrame) !== -1) out.photoFrame = raw.photoFrame;
+  if (Number.isFinite(Number(raw.photoSize))) out.photoSize = Math.min(160, Math.max(56, Number(raw.photoSize)));
+  if (Number.isFinite(Number(raw.itemGap))) out.itemGap = Math.min(40, Math.max(0, Number(raw.itemGap)));
+  if (Number.isFinite(Number(raw.titleGap))) out.titleGap = Math.min(40, Math.max(0, Number(raw.titleGap)));
   return Object.keys(out).length ? out : undefined;
 }
 

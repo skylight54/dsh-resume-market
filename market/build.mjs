@@ -12,7 +12,7 @@
  *
  * 注意：手动改 market/templates/*.json 之后不要再跑本脚本，会被覆盖。
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -103,6 +103,9 @@ const entries = [
   fromBuiltin('banner-exec', 'rm-banner-exec', '大肥鱼'),
 ];
 
+const extraEntries = await loadExtra(join(here, 'extra'));
+entries.push(...extraEntries);
+
 const index = {
   schema: 1,
   updatedAt: MARKET_UPDATED_AT,
@@ -125,6 +128,31 @@ const index = {
     updatedAt: entry.createdAt,
   })),
 };
+
+
+/**
+ * 市场里「非内置」的自由模板：放在 market/extra/*.json，由这里合并进 index.json。
+ * 这些模板不进插件包，只在公共市场里可选；社区/维护者可以直接往 extra 里加。
+ */
+async function loadExtra(extraDir) {
+  let files = [];
+  try {
+    files = (await readdir(extraDir)).filter((name) => name.endsWith('.json')).sort();
+  } catch {
+    return [];
+  }
+  const entries = [];
+  for (const file of files) {
+    const raw = JSON.parse(await readFile(join(extraDir, file), 'utf8'));
+    const list = Array.isArray(raw) ? raw : [raw];
+    for (const entry of list) {
+      if (!entry || typeof entry !== 'object' || !entry.id) throw new Error('market/extra/' + file + ' 缺少 id');
+      if (!/^rm-[a-z0-9-]{1,40}$/.test(entry.id)) throw new Error('market/extra/' + file + ' 的 id 必须以 rm- 开头');
+      entries.push(Object.assign({}, entry, { createdAt: entry.createdAt || MARKET_UPDATED_AT }));
+    }
+  }
+  return entries;
+}
 
 async function writeJson(file, value) {
   await mkdir(dirname(file), { recursive: true });

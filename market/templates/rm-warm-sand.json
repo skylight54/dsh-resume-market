@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "id": "rm-warm-sand",
+  "name": "暖沙",
+  "en": "Warm Sand",
+  "tagline": "米白底配棕金与衬线标题，温和有质感，文案、品牌与教育岗适用。",
+  "tags": [
+    "暖色",
+    "文案",
+    "品牌",
+    "教育"
+  ],
+  "author": "简历市场",
+  "accent": "#b07d4e",
+  "cls": "rm-t-warm-sand",
+  "templateId": "mkt-warm-sand",
+  "css": "\n.rm-t-warm-sand{padding:0 0 50px;color:#40372c;background:#fcf8f1;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;}\n.rm-t-warm-sand .rm-head{padding:52px 58px 26px;background:linear-gradient(180deg,#faf2e4 0%,#fdfaf4 100%);border-bottom:1px solid #e6d7c1;}\n.rm-t-warm-sand .rm-name{font-family:Georgia,\"Songti SC\",\"STSong\",\"Noto Serif SC\",serif;font-size:40px;font-weight:600;letter-spacing:.06em;line-height:1.16;color:#4a3a28;}\n.rm-t-warm-sand .rm-role{margin:10px 0 0;font-size:12.5px;letter-spacing:.16em;color:#9c7b52;}\n.rm-t-warm-sand .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 24px;margin-top:20px;}\n.rm-t-warm-sand .rm-k{font-size:9.5px;letter-spacing:.14em;color:#b39a7c;}\n.rm-t-warm-sand .rm-v{font-size:11.5px;color:#53452f;}\n.rm-t-warm-sand .rm-body{padding:0 58px;}\n.rm-t-warm-sand .rm-sec{margin-top:24px;}\n.rm-t-warm-sand .rm-sec-h{display:flex;align-items:center;gap:12px;margin:0 0 11px;padding-bottom:7px;}\n.rm-t-warm-sand .rm-sec-t{flex:0 0 auto;font-family:Georgia,\"Songti SC\",\"STSong\",\"Noto Serif SC\",serif;font-size:14.5px;letter-spacing:.16em;color:#8a5f34;}\n.rm-t-warm-sand .rm-sec-h::after{content:\"\";flex:1 1 auto;height:1px;background:linear-gradient(90deg,#e6d7c1,#f4ebdd);}\n.rm-t-warm-sand .rm-item{margin-bottom:13px;}\n.rm-t-warm-sand .rm-item-t{font-size:13.5px;font-weight:600;color:#4a3a28;}\n.rm-t-warm-sand .rm-item-role{font-size:12px;color:#8a7454;}\n.rm-t-warm-sand .rm-date{font-size:10.5px;font-style:italic;letter-spacing:.02em;color:#a08a6c;}\n.rm-t-warm-sand .rm-item-sub{font-size:11.5px;color:#8a7454;}\n.rm-t-warm-sand .rm-edu-courses{font-size:11px;color:#8a7454;}\n.rm-t-warm-sand .rm-bullets{padding-left:15px;}\n.rm-t-warm-sand .rm-bullets li{margin:3px 0;}\n.rm-t-warm-sand .rm-bullets li::marker{color:#c9a97c;}\n.rm-t-warm-sand .rm-summary{font-size:12.5px;line-height:1.78;color:#4b4030;}\n.rm-t-warm-sand .rm-tag{background:#f5ebda;border:1px solid #e8d7bd;border-radius:4px;color:#7a5a34;font-size:11px;}\n.rm-t-warm-sand .rm-skill-row{grid-template-columns:94px minmax(0,1fr);gap:10px;margin-bottom:7px;}\n.rm-t-warm-sand .rm-skill-k{font-size:11.5px;font-weight:600;color:#8a5f34;}\n.rm-t-warm-sand .rm-award-row{margin-bottom:6px;padding-bottom:5px;border-bottom:1px dashed #eadcc6;}\n.rm-t-warm-sand .rm-award-row:last-child{border-bottom:none;}\n.rm-t-warm-sand .rm-award-t{font-size:12.5px;color:#4a3a28;}\n.rm-t-warm-sand .rm-award-desc{font-size:11px;color:#8a7454;}\n.rm-t-warm-sand .rm-sec-campus .rm-item{margin-bottom:9px;}\n.rm-t-warm-sand .rm-sec-hobbies .rm-tags{gap:7px;}\n",
+  "createdAt": "2026-11-01T12:00:00.000Z",
+  "sample": {
+    "basics": {
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover",
+      "name": "顾言",
+      "role": "品牌文案 / 内容策划",
+      "phone": "138 0013 8000",
+      "email": "gu.yan@example.com",
+      "city": "广州",
+      "wechat": "guyan-copy",
+      "github": "github.com/guyan-copy",
+      "website": "guyan.ink"
+    },
+    "summary": "7 年品牌文案与内容策划经验，写过长文、脚本和品牌手册。相信好文案来自对用户和产品的双重理解，而不只是修辞。",
+    "experience": [
+      {
+        "company": "拾贝品牌咨询",
+        "role": "资深文案策划",
+        "period": "2021.05 — 至今",
+        "location": "广州",
+        "bullets": [
+          "服务 8 个消费与教育品牌，主导品牌故事与话语体系搭建。",
+          "一条品牌片文案带来 **320 万** 播放，官网咨询量提升 42%。"
+        ]
+      },
+      {
+        "company": "字里行间文化",
+        "role": "文案编辑",
+        "period": "2018.07 — 2021.04",
+        "location": "广州",
+        "bullets": [
+          "负责公众号内容，年均产出 120 篇，最高单篇阅读 26 万。",
+          "独立完成 3 本品牌手册的撰写与校对。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "「慢一点」品牌手册",
+        "role": "主笔",
+        "period": "2023.04 — 2023.09",
+        "bullets": [
+          "梳理品牌语气、命名规则与禁用词，形成 42 页可执行手册。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "暨南大学",
+        "degree": "硕士",
+        "major": "中国现当代文学",
+        "period": "2015.09 — 2018.06",
+        "gpa": "3.9 / 4.0",
+        "courses": "文学批评、叙事学、传播学"
+      }
+    ],
+    "campus": [
+      {
+        "name": "校报记者团",
+        "role": "副主编",
+        "period": "2016.09 — 2018.05",
+        "bullets": [
+          "策划「校园手艺人」系列报道，累计采访 34 位匠人。"
+        ]
+      }
+    ],
+    "hobbies": "读诗、篆刻、徒步",
+    "skills": [
+      {
+        "group": "内容",
+        "items": "品牌故事、长文写作、视频脚本、品牌手册、采访采写"
+      },
+      {
+        "group": "工具",
+        "items": "Notion、飞书、InDesign、Premiere、基础摄影"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳品牌案例 铜奖",
+        "date": "2023.11",
+        "desc": "慢一点品牌手册"
+      }
+    ]
+  }
+}

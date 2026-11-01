@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-resume-market",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "type": "module",
   "description": "免费简历模板市场：7 套内置模板、8 个字段分栏的个人信息编辑、A4 实时预览、HTML/Word/PDF 导出，可把简历发布到市场分享给其他用户。",
   "license": "MIT",

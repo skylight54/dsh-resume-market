@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "id": "rm-navy-classic",
+  "name": "商务藏蓝",
+  "en": "Navy Classic",
+  "tagline": "藏蓝窄页眉配细下划线标题，克制稳当，像一份正经的尽调报告；投行、咨询与金融岗首选。",
+  "tags": [
+    "金融",
+    "投行",
+    "咨询"
+  ],
+  "author": "大肥鱼",
+  "accent": "#1b3557",
+  "cls": "rm-t-navy-classic",
+  "templateId": "mkt-navy-classic",
+  "css": "\n.rm-t-navy-classic{padding:0 0 46px;background:#ffffff;color:#233043;font-size:13px;line-height:1.64;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",\"Noto Sans SC\",sans-serif;}\n.rm-t-navy-classic .rm-head{margin:0;padding:34px 46px 26px;background:linear-gradient(135deg,#1b3557 0%,#152846 58%,#1f3f68 100%);border-bottom:2px solid #b79355;color:#f2f6fb;}\n.rm-t-navy-classic .rm-name{margin:0;font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",serif;font-size:31px;line-height:1.2;font-weight:600;letter-spacing:.12em;color:#ffffff;}\n.rm-t-navy-classic .rm-role{margin:8px 0 0;font-size:12px;letter-spacing:.2em;color:#b9cbe4;}\n.rm-t-navy-classic .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 30px;margin:19px 0 0;max-width:566px;}\n.rm-t-navy-classic .rm-c{align-items:baseline;gap:8px;}\n.rm-t-navy-classic .rm-k{font-size:9.5px;letter-spacing:.16em;color:#93aacd;}\n.rm-t-navy-classic .rm-v{font-size:12px;color:#e8eef7;}\n.rm-t-navy-classic .rm-photo{width:92px;height:92px;background:#dfe7f2;border:2px solid rgba(255,255,255,.32);}\n.rm-t-navy-classic .rm-body{padding:0 46px;}\n.rm-t-navy-classic .rm-sec{margin-top:23px;}\n.rm-t-navy-classic .rm-sec-h{display:flex;align-items:center;gap:9px;margin:0 0 10px;padding-bottom:5px;border-bottom:1px solid #ccd7e6;}\n.rm-t-navy-classic .rm-sec-h::before{content:\"\";flex:0 0 auto;width:14px;height:2px;background:#1b3557;}\n.rm-t-navy-classic .rm-sec-t{font-size:12.5px;font-weight:700;letter-spacing:.2em;color:#1b3557;}\n.rm-t-navy-classic .rm-summary{font-size:12.8px;line-height:1.74;color:#3c4a5c;}\n.rm-t-navy-classic .rm-item{margin:0 0 11px;}\n.rm-t-navy-classic .rm-item-t{font-weight:650;color:#16273f;}\n.rm-t-navy-classic .rm-item-role{margin-left:7px;font-size:12.2px;color:#5b6b80;}\n.rm-t-navy-classic .rm-date{font-size:11px;color:#7285a0;font-variant-numeric:tabular-nums;}\n.rm-t-navy-classic .rm-item-sub{margin-top:2px;font-size:11.5px;color:#6d7d92;}\n.rm-t-navy-classic .rm-bullets{margin:5px 0 0;padding-left:15px;}\n.rm-t-navy-classic .rm-bullets li{margin:3px 0;color:#39465a;}\n.rm-t-navy-classic .rm-bullets li::marker{color:#1b3557;}\n.rm-t-navy-classic .rm-sec-campus .rm-item-t{color:#1b3557;}\n.rm-t-navy-classic .rm-sec-hobbies .rm-tags{gap:6px;}\n.rm-t-navy-classic .rm-sec-hobbies .rm-tag{background:#ffffff;}\n.rm-t-navy-classic .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#6d7d92;}\n.rm-t-navy-classic .rm-edu-courses .rm-k{margin-right:7px;color:#8a9bb4;}\n.rm-t-navy-classic .rm-skill-row{grid-template-columns:100px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-navy-classic .rm-skill-k{font-size:12px;font-weight:600;color:#1b3557;}\n.rm-t-navy-classic .rm-tags{gap:5px;}\n.rm-t-navy-classic .rm-tag{padding:1px 9px;border:1px solid #d3dde9;border-radius:2px;background:#f5f8fc;color:#2b4a72;font-size:11px;line-height:1.7;}\n.rm-t-navy-classic .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-navy-classic .rm-award-t{font-weight:600;color:#16273f;}\n.rm-t-navy-classic .rm-award-desc{font-size:11.5px;color:#6d7d92;}\n.rm-t-navy-classic strong{color:#0f2038;}\n",
+  "sample": {
+    "basics": {
+      "name": "陈致远",
+      "role": "投资经理 · 6 年一级市场与并购经验",
+      "phone": "138 0013 8000",
+      "email": "zhiyuan.chen@example.com",
+      "city": "北京",
+      "wechat": "chenzhiyuan-vc",
+      "github": "",
+      "website": "",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover"
+    },
+    "summary": "专注消费与先进制造赛道，主导及参与 9 笔交易，累计金额超过 12 亿元。习惯用行业底稿和财务模型把判断讲清楚，而不是靠故事。",
+    "experience": [
+      {
+        "company": "衡远资本",
+        "role": "投资经理",
+        "period": "2021.03 — 至今",
+        "location": "北京",
+        "bullets": [
+          "主导 4 笔成长期投资，其中 2 家已进入下一轮，账面回报 **2.3 倍**。",
+          "搭建消费赛道底稿模板，把项目初筛周期从 3 周压缩到 8 天。"
+        ]
+      },
+      {
+        "company": "中衡证券",
+        "role": "投行部分析师",
+        "period": "2018.08 — 2021.02",
+        "location": "上海",
+        "bullets": [
+          "参与 5 单 IPO 与再融资项目，负责财务核查与招股书数据章节。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "新式茶饮连锁 · B 轮融资",
+        "role": "项目负责人",
+        "period": "2023.06 — 2024.01",
+        "bullets": [
+          "牵头财务与门店模型尽调，项目最终完成 3.2 亿元融资。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "上海财经大学",
+        "degree": "硕士",
+        "major": "金融学",
+        "period": "2016.09 — 2018.06",
+        "gpa": "3.9 / 4.0",
+        "courses": "公司金融、投资学、财务报表分析"
+      }
+    ],
+    "campus": [
+      {
+        "name": "金融学院研究生会",
+        "role": "学术部部长",
+        "period": "2017.03 — 2018.05",
+        "bullets": [
+          "组织 8 场行业研究分享会，累计参与 600 余人次。"
+        ]
+      }
+    ],
+    "hobbies": "马拉松、围棋、古典乐、旅行",
+    "skills": [
+      {
+        "group": "专业能力",
+        "items": "财务建模、尽调、估值、行业研究"
+      },
+      {
+        "group": "工具",
+        "items": "Excel、PowerPoint、Wind、Capital IQ"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度最佳项目奖",
+        "date": "2023.12",
+        "desc": "衡远资本"
+      },
+      {
+        "title": "CFA 二级通过",
+        "date": "2020.08",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-11-01T12:00:00.000Z"
+}

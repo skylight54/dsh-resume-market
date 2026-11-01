@@ -400,6 +400,53 @@ ok('英文简历使用英文标签', () => {
   assert.ok(!xml.includes('个人简介'), 'en 不应出现中文标签');
 });
 
+ok('校园经历 / 兴趣爱好 渲染', () => {
+  const data = coursesData();
+  data.campus = [
+    {
+      name: '某某大学学生会',
+      role: '外联部部长',
+      period: '2016.09 – 2017.06',
+      bullets: ['组织迎新晚会，协调 12 个社团'],
+    },
+    {
+      name: '全国大学生创业大赛',
+      role: '队长',
+      period: '2017.03 – 2017.05',
+      bullets: ['带队完成商业计划书，获华东赛区二等奖'],
+    },
+  ];
+  data.hobbies = '篮球、摄影、旅行';
+  const { xml } = docOf(resumeOf(data), TEMPLATES[0]);
+  assert.ok(xml.includes('校园经历'), '缺少校园经历标题');
+  assert.ok(xml.includes('某某大学学生会') && xml.includes('外联部部长'), '缺少校园经历内容');
+  assert.ok(xml.includes('组织迎新晚会，协调 12 个社团'), '缺少校园要点');
+  assert.ok(xml.includes('w:left="284"') && xml.includes('w:hanging="142"'), '校园要点应有悬挂缩进');
+  assert.ok(xml.includes('兴趣爱好'), '缺少兴趣爱好标题');
+  for (const tag of ['篮球', '摄影', '旅行']) assert.ok(xml.includes(tag), '缺少兴趣标签 ' + tag);
+  assert.ok(xml.includes('> 篮球 <'), '兴趣标签应各自独立成 run');
+  assert.ok(xml.includes('<w:shd w:val="clear" w:color="auto" w:fill="'), '兴趣标签应有底纹');
+  // 顺序：教育背景 → 校园经历 → 专业技能 → 荣誉奖项 → 兴趣爱好（与 doc.js SECTION_ORDER 一致）
+  const pos = ['教育背景', '校园经历', '专业技能', '荣誉奖项', '兴趣爱好'].map((t) => xml.indexOf(t));
+  assert.ok(pos.every((v) => v >= 0), '新模块位置缺失');
+  assert.deepEqual(pos, pos.slice().sort((a, b) => a - b), '新模块顺序不对');
+  // 空数据的时候不渲染这两个模块
+  const plain = docOf(resumeOf(coursesData()), TEMPLATES[0]).xml;
+  assert.ok(!plain.includes('校园经历') && !plain.includes('兴趣爱好'), '空模块不应出现标题');
+  xmlBalanced(xml, 'campus document.xml');
+  textNodesOk(xml, 'campus');
+});
+
+ok('英文简历的校园 / 兴趣标签', () => {
+  const data = coursesData();
+  data.campus = [{ name: 'Student Union', role: 'Head of Outreach', period: '2016 – 2017', bullets: ['Ran orientation'] }];
+  data.hobbies = 'Basketball, Photography';
+  const { xml } = docOf(resumeOf(data, { lang: 'en' }), TEMPLATES[0]);
+  for (const label of ['CAMPUS', 'INTERESTS', 'Student Union', 'Basketball', 'Photography']) {
+    assert.ok(xml.includes(label), 'en 缺少 ' + label);
+  }
+});
+
 ok('resume.sections 顺序驱动文档顺序', () => {
   const { xml } = docOf(
     resumeOf(coursesData(), { sections: ['education', 'experience', 'projects', 'summary'] }),

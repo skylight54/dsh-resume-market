@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "id": "rm-fresh-mint",
+  "name": "清爽薄荷",
+  "en": "Fresh Mint",
+  "tagline": "低饱和青绿配圆角卡片，轻快不幼稚，设计和新媒体岗位好搭。",
+  "tags": [
+    "清爽",
+    "设计",
+    "新媒体",
+    "卡片"
+  ],
+  "author": "简历市场",
+  "accent": "#63b4a6",
+  "cls": "rm-t-fresh-mint",
+  "templateId": "mkt-fresh-mint",
+  "css": "\n.rm-t-fresh-mint{padding:0 0 46px;color:#274842;background:#fbfefd;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;}\n.rm-t-fresh-mint .rm-head{margin:34px 42px 0;padding:26px 28px 24px;background:linear-gradient(135deg,#e9f8f4 0%,#f6fdfb 70%,#ffffff 100%);border:1px solid #dff0eb;border-radius:18px;}\n.rm-t-fresh-mint .rm-name{font-size:34px;font-weight:700;letter-spacing:.04em;line-height:1.2;color:#1f5f55;}\n.rm-t-fresh-mint .rm-role{display:inline-block;margin-top:10px;padding:3px 12px;border-radius:999px;background:#d8f1e9;color:#2f7d6f;font-size:12px;letter-spacing:.02em;}\n.rm-t-fresh-mint .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;margin-top:18px;}\n.rm-t-fresh-mint .rm-k{padding:1px 8px;border-radius:999px;background:#eefaf6;color:#5c8f85;font-size:9.5px;}\n.rm-t-fresh-mint .rm-v{font-size:11.5px;color:#35564f;}\n.rm-t-fresh-mint .rm-body{padding:0 42px;}\n.rm-t-fresh-mint .rm-sec{margin-top:14px;padding:15px 20px 16px;background:#ffffff;border:1px solid #e4f2ee;border-radius:14px;box-shadow:0 2px 10px rgba(95,160,148,.06);}\n.rm-t-fresh-mint .rm-sec-h{margin:0 0 10px;padding-bottom:8px;border-bottom:1px dashed #dcefe9;gap:0;}\n.rm-t-fresh-mint .rm-sec-t{font-size:12.5px;font-weight:700;letter-spacing:.1em;color:#1f5f55;}\n.rm-t-fresh-mint .rm-sec-t::before{content:\"\";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:3px;background:#63b4a6;vertical-align:0;}\n.rm-t-fresh-mint .rm-item{margin-bottom:11px;}\n.rm-t-fresh-mint .rm-item-t{font-size:13.5px;font-weight:600;color:#1f5f55;}\n.rm-t-fresh-mint .rm-item-role{font-size:12px;color:#5b817a;}\n.rm-t-fresh-mint .rm-date{padding:0 7px;border-radius:6px;background:#f0faf7;color:#5c8f85;font-size:10.5px;}\n.rm-t-fresh-mint .rm-item-sub{font-size:11.5px;color:#648a83;}\n.rm-t-fresh-mint .rm-edu-courses{font-size:11px;color:#648a83;}\n.rm-t-fresh-mint .rm-bullets{padding-left:14px;}\n.rm-t-fresh-mint .rm-bullets li{margin:2px 0;}\n.rm-t-fresh-mint .rm-bullets li::marker{color:#9ed4c8;}\n.rm-t-fresh-mint .rm-summary{font-size:12.5px;line-height:1.75;color:#35564f;}\n.rm-t-fresh-mint .rm-tags{gap:6px;flex-wrap:wrap;}\n.rm-t-fresh-mint .rm-tag{padding:1px 10px;border-radius:999px;background:#eefaf6;border:1px solid #cfece4;color:#2f7d6f;font-size:11px;}\n.rm-t-fresh-mint .rm-skill-row{grid-template-columns:96px minmax(0,1fr);gap:10px;margin-bottom:8px;}\n.rm-t-fresh-mint .rm-skill-k{font-size:11.5px;font-weight:600;color:#2f7d6f;}\n.rm-t-fresh-mint .rm-award-row{margin-bottom:6px;}\n.rm-t-fresh-mint .rm-award-t{font-size:12.5px;color:#1f5f55;}\n.rm-t-fresh-mint .rm-award-desc{font-size:11px;color:#648a83;}\n.rm-t-fresh-mint .rm-sec-campus{padding-bottom:14px;}\n.rm-t-fresh-mint .rm-sec-hobbies{padding-bottom:14px;}\n",
+  "createdAt": "2026-11-01T12:00:00.000Z",
+  "sample": {
+    "basics": {
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover",
+      "name": "林小满",
+      "role": "视觉设计师 · 品牌与新媒体",
+      "phone": "138 0013 8000",
+      "email": "lin.xiaoman@example.com",
+      "city": "成都",
+      "wechat": "xiaoman-design",
+      "github": "github.com/xiaoman-design",
+      "website": "xiaoman.design"
+    },
+    "summary": "5 年品牌视觉与新媒体设计经验，擅长把品牌调性翻译成可复用的视觉系统。做过完整 VI、活动主视觉和信息流内容，能自己写文案、也能剪片子。",
+    "experience": [
+      {
+        "company": "青柚文化",
+        "role": "视觉设计负责人",
+        "period": "2022.03 — 至今",
+        "location": "成都",
+        "bullets": [
+          "主导品牌升级，统一 30+ 物料规范，物料复用率提升 **55%**。",
+          "建立设计组件库，活动主视觉产出周期从 5 天缩短到 2 天。"
+        ]
+      },
+      {
+        "company": "云朵工作室",
+        "role": "平面设计师",
+        "period": "2019.09 — 2022.02",
+        "location": "成都",
+        "bullets": [
+          "服务 20+ 消费品牌，完成 60 余套 KV 与包装设计。",
+          "小红书账号从 0 做到 5.8 万粉，单篇最高互动 1.9 万。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "「春分」品牌视觉系统",
+        "role": "主设计师",
+        "period": "2023.03 — 2023.07",
+        "bullets": [
+          "从字体、色彩到版式建立完整规范，落地 12 个触点场景。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "四川美术学院",
+        "degree": "本科",
+        "major": "视觉传达设计",
+        "period": "2015.09 — 2019.06",
+        "gpa": "3.8 / 4.0",
+        "courses": "字体设计、品牌形象、信息设计"
+      }
+    ],
+    "campus": [
+      {
+        "name": "校园文创市集",
+        "role": "视觉统筹",
+        "period": "2017.04 — 2017.11",
+        "bullets": [
+          "统筹 30 个摊位视觉与导视系统，活动两天到场 1.2 万人次。"
+        ]
+      }
+    ],
+    "hobbies": "胶片摄影、手作、城市漫步",
+    "skills": [
+      {
+        "group": "设计",
+        "items": "品牌 VI、海报主视觉、包装、信息可视化、动效设计"
+      },
+      {
+        "group": "工具",
+        "items": "Figma、Illustrator、Photoshop、After Effects、剪映"
+      }
+    ],
+    "awards": [
+      {
+        "title": "站酷推荐设计师",
+        "date": "2023.08",
+        "desc": ""
+      }
+    ]
+  }
+}

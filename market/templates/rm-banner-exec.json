@@ -26,7 +26,8 @@
       "website": "zhixia.design",
       "photo": "",
       "photoSide": "right",
-      "photoShape": "circle"
+      "photoShape": "circle",
+      "photoFit": "cover"
     },
     "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
     "experience": [
@@ -73,6 +74,8 @@
         "courses": ""
       }
     ],
+    "campus": [],
+    "hobbies": "",
     "skills": [
       {
         "group": "产品能力",

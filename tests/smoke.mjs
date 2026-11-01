@@ -374,6 +374,31 @@ assert.equal(res.json.error.code, 'export/bad-format');
 res = await call('POST', '/export/reveal', { path: 'C:/Windows/System32/drivers/etc/hosts' });
 assert.equal(res.status, 403, '越权路径必须被拒绝');
 
+// 5d-2) 新增模块：校园经历 / 兴趣爱好 能存、能导出
+res = await call('POST', '/resume', {
+  resume: {
+    id: resumeId,
+    sections: ['summary', 'campus', 'hobbies', 'skills'],
+    data: {
+      ...DEMO_RESUME_DATA,
+      basics: { ...DEMO_RESUME_DATA.basics, photo: '' },
+      campus: [{ name: '清华大学', role: '学生会干事', period: '2019 - 2023', bullets: ['组织校园招聘会'] }],
+      hobbies: '篮球、摄影',
+    },
+  },
+});
+assert.equal(res.status, 200, res.body);
+assert.deepEqual(res.json.value.resume.sections, ['summary', 'campus', 'hobbies', 'skills'], '校园/兴趣模块顺序应保存');
+assert.equal(res.json.value.resume.data.campus[0].name, '清华大学');
+assert.equal(res.json.value.resume.data.hobbies, '篮球、摄影');
+res = await call('GET', '/export?id=' + encodeURIComponent(resumeId));
+assert.equal(res.status, 200, res.body);
+assert.match(res.body, /rm-sec-campus/, '导出 HTML 应渲染校园经历模块');
+assert.match(res.body, /rm-sec-hobbies/, '导出 HTML 应渲染兴趣爱好模块');
+assert.match(res.body, /校园经历/, '导出 HTML 应包含校园经历标题');
+assert.match(res.body, /兴趣爱好/, '导出 HTML 应包含兴趣爱好标题');
+assert.match(res.body, /篮球/, '兴趣爱好应渲染成标签');
+
 // 5e) 编辑留历史版本；删除进回收站，可恢复
 res = await call('GET', '/resume/revisions?id=' + encodeURIComponent(resumeId));
 assert.equal(res.status, 200, res.body);

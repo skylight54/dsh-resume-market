@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "id": "rm-minimal-mono",
+  "name": "极简黑白",
+  "en": "Minimal Mono",
+  "tagline": "纯黑白细线排版，姓名大号左对齐，适合技术、研发与咨询岗。",
+  "tags": [
+    "极简",
+    "技术",
+    "研发",
+    "黑白"
+  ],
+  "author": "简历市场",
+  "accent": "#111111",
+  "cls": "rm-t-minimal-mono",
+  "templateId": "mkt-minimal-mono",
+  "css": "\n.rm-t-minimal-mono{padding:0 0 50px;color:#1b1b1b;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",\"Helvetica Neue\",Arial,sans-serif;}\n.rm-t-minimal-mono .rm-head{padding:58px 62px 20px;border-bottom:2px solid #111111;}\n.rm-t-minimal-mono .rm-name{font-size:42px;font-weight:700;line-height:1.05;letter-spacing:-.01em;color:#000000;}\n.rm-t-minimal-mono .rm-role{margin:12px 0 0;font-size:12px;letter-spacing:.26em;color:#555555;}\n.rm-t-minimal-mono .rm-contact{display:flex;flex-wrap:wrap;gap:6px 22px;margin:22px 0 0;grid-template-columns:none;}\n.rm-t-minimal-mono .rm-c{display:inline-flex;align-items:baseline;gap:6px;}\n.rm-t-minimal-mono .rm-k{font-size:9.5px;letter-spacing:.18em;color:#999999;}\n.rm-t-minimal-mono .rm-v{font-size:12px;color:#222222;}\n.rm-t-minimal-mono .rm-body{padding:0 62px;}\n.rm-t-minimal-mono .rm-sec{margin-top:26px;}\n.rm-t-minimal-mono .rm-sec-h{margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #111111;gap:0;}\n.rm-t-minimal-mono .rm-sec-t{font-size:10.5px;font-weight:600;letter-spacing:.32em;color:#111111;}\n.rm-t-minimal-mono .rm-item{margin-bottom:15px;}\n.rm-t-minimal-mono .rm-item-t{font-size:14px;font-weight:600;letter-spacing:.01em;color:#0a0a0a;}\n.rm-t-minimal-mono .rm-item-role{font-size:12px;color:#666666;}\n.rm-t-minimal-mono .rm-date{font-size:10.5px;letter-spacing:.08em;color:#888888;}\n.rm-t-minimal-mono .rm-item-sub{font-size:11.5px;color:#777777;}\n.rm-t-minimal-mono .rm-edu-courses{font-size:11px;color:#777777;}\n.rm-t-minimal-mono .rm-edu-courses .rm-k{font-size:9.5px;letter-spacing:.12em;color:#999999;}\n.rm-t-minimal-mono .rm-bullets{padding-left:15px;}\n.rm-t-minimal-mono .rm-bullets li{margin:3px 0;}\n.rm-t-minimal-mono .rm-bullets li::marker{color:#bbbbbb;}\n.rm-t-minimal-mono .rm-summary{font-size:12.5px;line-height:1.7;color:#333333;}\n.rm-t-minimal-mono .rm-tags{gap:6px;}\n.rm-t-minimal-mono .rm-tag{background:transparent;border:1px solid #d8d8d8;border-radius:2px;color:#444444;font-size:11px;padding:1px 8px;}\n.rm-t-minimal-mono .rm-skill-row{grid-template-columns:92px minmax(0,1fr);gap:10px;margin-bottom:7px;}\n.rm-t-minimal-mono .rm-skill-k{font-size:10px;font-weight:600;letter-spacing:.16em;color:#999999;}\n.rm-t-minimal-mono .rm-award-row{margin-bottom:6px;}\n.rm-t-minimal-mono .rm-award-t{font-size:12.5px;color:#111111;}\n.rm-t-minimal-mono .rm-award-desc{font-size:11.5px;color:#777777;}\n.rm-t-minimal-mono .rm-sec-campus .rm-item{margin-bottom:9px;}\n.rm-t-minimal-mono .rm-sec-hobbies .rm-tags{padding-left:0;}\n",
+  "createdAt": "2026-11-01T12:00:00.000Z",
+  "sample": {
+    "basics": {
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover",
+      "name": "陈墨",
+      "role": "技术负责人 / 高级后端工程师",
+      "phone": "138 0013 8000",
+      "email": "chen.mo@example.com",
+      "city": "北京",
+      "wechat": "chenmo-dev",
+      "github": "github.com/chenmo",
+      "website": "chenmo.dev"
+    },
+    "summary": "9 年后端与基础架构经验，长期负责高并发交易系统与研发效能建设。习惯用数据说话，也愿意把复杂问题讲给非技术同学听。",
+    "experience": [
+      {
+        "company": "知序科技",
+        "role": "技术负责人",
+        "period": "2021.04 — 至今",
+        "location": "北京",
+        "bullets": [
+          "带 12 人团队重构订单链路，峰值 QPS 从 3.2 万提升到 **9.6 万**，P99 延迟下降 46%。",
+          "推动服务网格与灰度发布落地，线上故障平均恢复时间从 38 分钟降到 9 分钟。"
+        ]
+      },
+      {
+        "company": "南屿网络",
+        "role": "后端工程师",
+        "period": "2017.07 — 2021.03",
+        "location": "北京",
+        "bullets": [
+          "负责支付清结算服务，支撑日均 180 万笔交易，全年资损事故 0 起。",
+          "自研对账任务调度框架，把日终对账耗时从 3 小时压缩到 25 分钟。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "统一配置中心",
+        "role": "发起人 / 主要开发",
+        "period": "2022.03 — 2022.10",
+        "bullets": [
+          "把散落在 7 个仓库的配置收敛到一处，发布误操作下降 **70%**。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "北京邮电大学",
+        "degree": "硕士",
+        "major": "计算机技术",
+        "period": "2014.09 — 2017.06",
+        "gpa": "3.7 / 4.0",
+        "courses": "分布式系统、数据库原理、算法设计"
+      }
+    ],
+    "campus": [
+      {
+        "name": "开源社区「东八区后端」",
+        "role": "核心维护者",
+        "period": "2019.03 — 至今",
+        "bullets": [
+          "组织 14 场线上分享，维护 2 个 Node 生态工具，累计 Star 3.4k。"
+        ]
+      }
+    ],
+    "hobbies": "长跑、摄影、开源维护",
+    "skills": [
+      {
+        "group": "技术栈",
+        "items": "Java、Go、MySQL、Redis、Kafka、Kubernetes"
+      },
+      {
+        "group": "方法",
+        "items": "架构评审、容量规划、故障复盘、团队梯队建设"
+      }
+    ],
+    "awards": [
+      {
+        "title": "公司年度技术突破奖",
+        "date": "2023.12",
+        "desc": "订单链路重构"
+      }
+    ]
+  }
+}

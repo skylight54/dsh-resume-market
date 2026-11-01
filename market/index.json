@@ -29,7 +29,8 @@
           "website": "muyun.academia.example",
           "photo": "",
           "photoSide": "right",
-          "photoShape": "circle"
+          "photoShape": "circle",
+          "photoFit": "cover"
         },
         "summary": "社会学博士，研究城市更新与社区治理。博士期间主持 1 项省级课题，发表 CSSCI 论文 3 篇，其中 1 篇被《人大复印资料》全文转载。",
         "experience": [
@@ -65,6 +66,8 @@
             "courses": ""
           }
         ],
+        "campus": [],
+        "hobbies": "",
         "skills": [
           {
             "group": "研究方法",
@@ -119,7 +122,8 @@
           "website": "",
           "photo": "",
           "photoSide": "right",
-          "photoShape": "circle"
+          "photoShape": "circle",
+          "photoFit": "cover"
         },
         "summary": "3 年投行经验，参与 6 单 IPO 与 2 单并购项目，累计交易规模约 48 亿元。熟悉消费行业财务模型与尽调流程。",
         "experience": [
@@ -155,6 +159,8 @@
             "courses": ""
           }
         ],
+        "campus": [],
+        "hobbies": "",
         "skills": [
           {
             "group": "专业能力",
@@ -209,7 +215,8 @@
           "website": "zhixia.design",
           "photo": "",
           "photoSide": "right",
-          "photoShape": "circle"
+          "photoShape": "circle",
+          "photoFit": "cover"
         },
         "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
         "experience": [
@@ -256,6 +263,8 @@
             "courses": ""
           }
         ],
+        "campus": [],
+        "hobbies": "",
         "skills": [
           {
             "group": "产品能力",
@@ -310,7 +319,8 @@
           "website": "zhixia.design",
           "photo": "",
           "photoSide": "right",
-          "photoShape": "circle"
+          "photoShape": "circle",
+          "photoFit": "cover"
         },
         "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
         "experience": [
@@ -357,6 +367,8 @@
             "courses": ""
           }
         ],
+        "campus": [],
+        "hobbies": "",
         "skills": [
           {
             "group": "产品能力",
@@ -411,7 +423,8 @@
           "website": "zhixia.design",
           "photo": "",
           "photoSide": "right",
-          "photoShape": "circle"
+          "photoShape": "circle",
+          "photoFit": "cover"
         },
         "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
         "experience": [
@@ -458,6 +471,8 @@
             "courses": ""
           }
         ],
+        "campus": [],
+        "hobbies": "",
         "skills": [
           {
             "group": "产品能力",
@@ -512,7 +527,8 @@
           "website": "zhixia.design",
           "photo": "",
           "photoSide": "right",
-          "photoShape": "circle"
+          "photoShape": "circle",
+          "photoFit": "cover"
         },
         "summary": "8 年 B 端产品经验，主导 3 个从 0 到 1 的 SaaS 产品，其中 2 个年营收过千万。擅长把模糊的业务诉求拆成可落地的方案，推动设计、研发、运营跨团队协作。",
         "experience": [
@@ -559,6 +575,8 @@
             "courses": ""
           }
         ],
+        "campus": [],
+        "hobbies": "",
         "skills": [
           {
             "group": "产品能力",
@@ -585,6 +603,875 @@
       "file": "templates/rm-banner-exec.json",
       "installs": 0,
       "updatedAt": "2026-10-31T12:00:00.000Z"
+    },
+    {
+      "id": "rm-fresh-mint",
+      "name": "清爽薄荷",
+      "en": "Fresh Mint",
+      "tagline": "低饱和青绿配圆角卡片，轻快不幼稚，设计和新媒体岗位好搭。",
+      "tags": [
+        "清爽",
+        "设计",
+        "新媒体",
+        "卡片"
+      ],
+      "author": "简历市场",
+      "accent": "#63b4a6",
+      "cls": "rm-t-fresh-mint",
+      "templateId": "mkt-fresh-mint",
+      "css": "\n.rm-t-fresh-mint{padding:0 0 46px;color:#274842;background:#fbfefd;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;}\n.rm-t-fresh-mint .rm-head{margin:34px 42px 0;padding:26px 28px 24px;background:linear-gradient(135deg,#e9f8f4 0%,#f6fdfb 70%,#ffffff 100%);border:1px solid #dff0eb;border-radius:18px;}\n.rm-t-fresh-mint .rm-name{font-size:34px;font-weight:700;letter-spacing:.04em;line-height:1.2;color:#1f5f55;}\n.rm-t-fresh-mint .rm-role{display:inline-block;margin-top:10px;padding:3px 12px;border-radius:999px;background:#d8f1e9;color:#2f7d6f;font-size:12px;letter-spacing:.02em;}\n.rm-t-fresh-mint .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;margin-top:18px;}\n.rm-t-fresh-mint .rm-k{padding:1px 8px;border-radius:999px;background:#eefaf6;color:#5c8f85;font-size:9.5px;}\n.rm-t-fresh-mint .rm-v{font-size:11.5px;color:#35564f;}\n.rm-t-fresh-mint .rm-body{padding:0 42px;}\n.rm-t-fresh-mint .rm-sec{margin-top:14px;padding:15px 20px 16px;background:#ffffff;border:1px solid #e4f2ee;border-radius:14px;box-shadow:0 2px 10px rgba(95,160,148,.06);}\n.rm-t-fresh-mint .rm-sec-h{margin:0 0 10px;padding-bottom:8px;border-bottom:1px dashed #dcefe9;gap:0;}\n.rm-t-fresh-mint .rm-sec-t{font-size:12.5px;font-weight:700;letter-spacing:.1em;color:#1f5f55;}\n.rm-t-fresh-mint .rm-sec-t::before{content:\"\";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:3px;background:#63b4a6;vertical-align:0;}\n.rm-t-fresh-mint .rm-item{margin-bottom:11px;}\n.rm-t-fresh-mint .rm-item-t{font-size:13.5px;font-weight:600;color:#1f5f55;}\n.rm-t-fresh-mint .rm-item-role{font-size:12px;color:#5b817a;}\n.rm-t-fresh-mint .rm-date{padding:0 7px;border-radius:6px;background:#f0faf7;color:#5c8f85;font-size:10.5px;}\n.rm-t-fresh-mint .rm-item-sub{font-size:11.5px;color:#648a83;}\n.rm-t-fresh-mint .rm-edu-courses{font-size:11px;color:#648a83;}\n.rm-t-fresh-mint .rm-bullets{padding-left:14px;}\n.rm-t-fresh-mint .rm-bullets li{margin:2px 0;}\n.rm-t-fresh-mint .rm-bullets li::marker{color:#9ed4c8;}\n.rm-t-fresh-mint .rm-summary{font-size:12.5px;line-height:1.75;color:#35564f;}\n.rm-t-fresh-mint .rm-tags{gap:6px;flex-wrap:wrap;}\n.rm-t-fresh-mint .rm-tag{padding:1px 10px;border-radius:999px;background:#eefaf6;border:1px solid #cfece4;color:#2f7d6f;font-size:11px;}\n.rm-t-fresh-mint .rm-skill-row{grid-template-columns:96px minmax(0,1fr);gap:10px;margin-bottom:8px;}\n.rm-t-fresh-mint .rm-skill-k{font-size:11.5px;font-weight:600;color:#2f7d6f;}\n.rm-t-fresh-mint .rm-award-row{margin-bottom:6px;}\n.rm-t-fresh-mint .rm-award-t{font-size:12.5px;color:#1f5f55;}\n.rm-t-fresh-mint .rm-award-desc{font-size:11px;color:#648a83;}\n.rm-t-fresh-mint .rm-sec-campus{padding-bottom:14px;}\n.rm-t-fresh-mint .rm-sec-hobbies{padding-bottom:14px;}\n",
+      "sample": {
+        "basics": {
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover",
+          "name": "林小满",
+          "role": "视觉设计师 · 品牌与新媒体",
+          "phone": "138 0013 8000",
+          "email": "lin.xiaoman@example.com",
+          "city": "成都",
+          "wechat": "xiaoman-design",
+          "github": "github.com/xiaoman-design",
+          "website": "xiaoman.design"
+        },
+        "summary": "5 年品牌视觉与新媒体设计经验，擅长把品牌调性翻译成可复用的视觉系统。做过完整 VI、活动主视觉和信息流内容，能自己写文案、也能剪片子。",
+        "experience": [
+          {
+            "company": "青柚文化",
+            "role": "视觉设计负责人",
+            "period": "2022.03 — 至今",
+            "location": "成都",
+            "bullets": [
+              "主导品牌升级，统一 30+ 物料规范，物料复用率提升 **55%**。",
+              "建立设计组件库，活动主视觉产出周期从 5 天缩短到 2 天。"
+            ]
+          },
+          {
+            "company": "云朵工作室",
+            "role": "平面设计师",
+            "period": "2019.09 — 2022.02",
+            "location": "成都",
+            "bullets": [
+              "服务 20+ 消费品牌，完成 60 余套 KV 与包装设计。",
+              "小红书账号从 0 做到 5.8 万粉，单篇最高互动 1.9 万。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "「春分」品牌视觉系统",
+            "role": "主设计师",
+            "period": "2023.03 — 2023.07",
+            "bullets": [
+              "从字体、色彩到版式建立完整规范，落地 12 个触点场景。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "四川美术学院",
+            "degree": "本科",
+            "major": "视觉传达设计",
+            "period": "2015.09 — 2019.06",
+            "gpa": "3.8 / 4.0",
+            "courses": "字体设计、品牌形象、信息设计"
+          }
+        ],
+        "campus": [
+          {
+            "name": "校园文创市集",
+            "role": "视觉统筹",
+            "period": "2017.04 — 2017.11",
+            "bullets": [
+              "统筹 30 个摊位视觉与导视系统，活动两天到场 1.2 万人次。"
+            ]
+          }
+        ],
+        "hobbies": "胶片摄影、手作、城市漫步",
+        "skills": [
+          {
+            "group": "设计",
+            "items": "品牌 VI、海报主视觉、包装、信息可视化、动效设计"
+          },
+          {
+            "group": "工具",
+            "items": "Figma、Illustrator、Photoshop、After Effects、剪映"
+          }
+        ],
+        "awards": [
+          {
+            "title": "站酷推荐设计师",
+            "date": "2023.08",
+            "desc": ""
+          }
+        ]
+      },
+      "file": "templates/rm-fresh-mint.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-minimal-mono",
+      "name": "极简黑白",
+      "en": "Minimal Mono",
+      "tagline": "纯黑白细线排版，姓名大号左对齐，适合技术、研发与咨询岗。",
+      "tags": [
+        "极简",
+        "技术",
+        "研发",
+        "黑白"
+      ],
+      "author": "简历市场",
+      "accent": "#111111",
+      "cls": "rm-t-minimal-mono",
+      "templateId": "mkt-minimal-mono",
+      "css": "\n.rm-t-minimal-mono{padding:0 0 50px;color:#1b1b1b;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",\"Helvetica Neue\",Arial,sans-serif;}\n.rm-t-minimal-mono .rm-head{padding:58px 62px 20px;border-bottom:2px solid #111111;}\n.rm-t-minimal-mono .rm-name{font-size:42px;font-weight:700;line-height:1.05;letter-spacing:-.01em;color:#000000;}\n.rm-t-minimal-mono .rm-role{margin:12px 0 0;font-size:12px;letter-spacing:.26em;color:#555555;}\n.rm-t-minimal-mono .rm-contact{display:flex;flex-wrap:wrap;gap:6px 22px;margin:22px 0 0;grid-template-columns:none;}\n.rm-t-minimal-mono .rm-c{display:inline-flex;align-items:baseline;gap:6px;}\n.rm-t-minimal-mono .rm-k{font-size:9.5px;letter-spacing:.18em;color:#999999;}\n.rm-t-minimal-mono .rm-v{font-size:12px;color:#222222;}\n.rm-t-minimal-mono .rm-body{padding:0 62px;}\n.rm-t-minimal-mono .rm-sec{margin-top:26px;}\n.rm-t-minimal-mono .rm-sec-h{margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid #111111;gap:0;}\n.rm-t-minimal-mono .rm-sec-t{font-size:10.5px;font-weight:600;letter-spacing:.32em;color:#111111;}\n.rm-t-minimal-mono .rm-item{margin-bottom:15px;}\n.rm-t-minimal-mono .rm-item-t{font-size:14px;font-weight:600;letter-spacing:.01em;color:#0a0a0a;}\n.rm-t-minimal-mono .rm-item-role{font-size:12px;color:#666666;}\n.rm-t-minimal-mono .rm-date{font-size:10.5px;letter-spacing:.08em;color:#888888;}\n.rm-t-minimal-mono .rm-item-sub{font-size:11.5px;color:#777777;}\n.rm-t-minimal-mono .rm-edu-courses{font-size:11px;color:#777777;}\n.rm-t-minimal-mono .rm-edu-courses .rm-k{font-size:9.5px;letter-spacing:.12em;color:#999999;}\n.rm-t-minimal-mono .rm-bullets{padding-left:15px;}\n.rm-t-minimal-mono .rm-bullets li{margin:3px 0;}\n.rm-t-minimal-mono .rm-bullets li::marker{color:#bbbbbb;}\n.rm-t-minimal-mono .rm-summary{font-size:12.5px;line-height:1.7;color:#333333;}\n.rm-t-minimal-mono .rm-tags{gap:6px;}\n.rm-t-minimal-mono .rm-tag{background:transparent;border:1px solid #d8d8d8;border-radius:2px;color:#444444;font-size:11px;padding:1px 8px;}\n.rm-t-minimal-mono .rm-skill-row{grid-template-columns:92px minmax(0,1fr);gap:10px;margin-bottom:7px;}\n.rm-t-minimal-mono .rm-skill-k{font-size:10px;font-weight:600;letter-spacing:.16em;color:#999999;}\n.rm-t-minimal-mono .rm-award-row{margin-bottom:6px;}\n.rm-t-minimal-mono .rm-award-t{font-size:12.5px;color:#111111;}\n.rm-t-minimal-mono .rm-award-desc{font-size:11.5px;color:#777777;}\n.rm-t-minimal-mono .rm-sec-campus .rm-item{margin-bottom:9px;}\n.rm-t-minimal-mono .rm-sec-hobbies .rm-tags{padding-left:0;}\n",
+      "sample": {
+        "basics": {
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover",
+          "name": "陈墨",
+          "role": "技术负责人 / 高级后端工程师",
+          "phone": "138 0013 8000",
+          "email": "chen.mo@example.com",
+          "city": "北京",
+          "wechat": "chenmo-dev",
+          "github": "github.com/chenmo",
+          "website": "chenmo.dev"
+        },
+        "summary": "9 年后端与基础架构经验，长期负责高并发交易系统与研发效能建设。习惯用数据说话，也愿意把复杂问题讲给非技术同学听。",
+        "experience": [
+          {
+            "company": "知序科技",
+            "role": "技术负责人",
+            "period": "2021.04 — 至今",
+            "location": "北京",
+            "bullets": [
+              "带 12 人团队重构订单链路，峰值 QPS 从 3.2 万提升到 **9.6 万**，P99 延迟下降 46%。",
+              "推动服务网格与灰度发布落地，线上故障平均恢复时间从 38 分钟降到 9 分钟。"
+            ]
+          },
+          {
+            "company": "南屿网络",
+            "role": "后端工程师",
+            "period": "2017.07 — 2021.03",
+            "location": "北京",
+            "bullets": [
+              "负责支付清结算服务，支撑日均 180 万笔交易，全年资损事故 0 起。",
+              "自研对账任务调度框架，把日终对账耗时从 3 小时压缩到 25 分钟。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "统一配置中心",
+            "role": "发起人 / 主要开发",
+            "period": "2022.03 — 2022.10",
+            "bullets": [
+              "把散落在 7 个仓库的配置收敛到一处，发布误操作下降 **70%**。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "北京邮电大学",
+            "degree": "硕士",
+            "major": "计算机技术",
+            "period": "2014.09 — 2017.06",
+            "gpa": "3.7 / 4.0",
+            "courses": "分布式系统、数据库原理、算法设计"
+          }
+        ],
+        "campus": [
+          {
+            "name": "开源社区「东八区后端」",
+            "role": "核心维护者",
+            "period": "2019.03 — 至今",
+            "bullets": [
+              "组织 14 场线上分享，维护 2 个 Node 生态工具，累计 Star 3.4k。"
+            ]
+          }
+        ],
+        "hobbies": "长跑、摄影、开源维护",
+        "skills": [
+          {
+            "group": "技术栈",
+            "items": "Java、Go、MySQL、Redis、Kafka、Kubernetes"
+          },
+          {
+            "group": "方法",
+            "items": "架构评审、容量规划、故障复盘、团队梯队建设"
+          }
+        ],
+        "awards": [
+          {
+            "title": "公司年度技术突破奖",
+            "date": "2023.12",
+            "desc": "订单链路重构"
+          }
+        ]
+      },
+      "file": "templates/rm-minimal-mono.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-navy-classic",
+      "name": "商务藏蓝",
+      "en": "Navy Classic",
+      "tagline": "藏蓝窄页眉配细下划线标题，克制稳当，像一份正经的尽调报告；投行、咨询与金融岗首选。",
+      "tags": [
+        "金融",
+        "投行",
+        "咨询"
+      ],
+      "author": "大肥鱼",
+      "accent": "#1b3557",
+      "cls": "rm-t-navy-classic",
+      "templateId": "mkt-navy-classic",
+      "css": "\n.rm-t-navy-classic{padding:0 0 46px;background:#ffffff;color:#233043;font-size:13px;line-height:1.64;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",\"Noto Sans SC\",sans-serif;}\n.rm-t-navy-classic .rm-head{margin:0;padding:34px 46px 26px;background:linear-gradient(135deg,#1b3557 0%,#152846 58%,#1f3f68 100%);border-bottom:2px solid #b79355;color:#f2f6fb;}\n.rm-t-navy-classic .rm-name{margin:0;font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",serif;font-size:31px;line-height:1.2;font-weight:600;letter-spacing:.12em;color:#ffffff;}\n.rm-t-navy-classic .rm-role{margin:8px 0 0;font-size:12px;letter-spacing:.2em;color:#b9cbe4;}\n.rm-t-navy-classic .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 30px;margin:19px 0 0;max-width:566px;}\n.rm-t-navy-classic .rm-c{align-items:baseline;gap:8px;}\n.rm-t-navy-classic .rm-k{font-size:9.5px;letter-spacing:.16em;color:#93aacd;}\n.rm-t-navy-classic .rm-v{font-size:12px;color:#e8eef7;}\n.rm-t-navy-classic .rm-photo{width:92px;height:92px;background:#dfe7f2;border:2px solid rgba(255,255,255,.32);}\n.rm-t-navy-classic .rm-body{padding:0 46px;}\n.rm-t-navy-classic .rm-sec{margin-top:23px;}\n.rm-t-navy-classic .rm-sec-h{display:flex;align-items:center;gap:9px;margin:0 0 10px;padding-bottom:5px;border-bottom:1px solid #ccd7e6;}\n.rm-t-navy-classic .rm-sec-h::before{content:\"\";flex:0 0 auto;width:14px;height:2px;background:#1b3557;}\n.rm-t-navy-classic .rm-sec-t{font-size:12.5px;font-weight:700;letter-spacing:.2em;color:#1b3557;}\n.rm-t-navy-classic .rm-summary{font-size:12.8px;line-height:1.74;color:#3c4a5c;}\n.rm-t-navy-classic .rm-item{margin:0 0 11px;}\n.rm-t-navy-classic .rm-item-t{font-weight:650;color:#16273f;}\n.rm-t-navy-classic .rm-item-role{margin-left:7px;font-size:12.2px;color:#5b6b80;}\n.rm-t-navy-classic .rm-date{font-size:11px;color:#7285a0;font-variant-numeric:tabular-nums;}\n.rm-t-navy-classic .rm-item-sub{margin-top:2px;font-size:11.5px;color:#6d7d92;}\n.rm-t-navy-classic .rm-bullets{margin:5px 0 0;padding-left:15px;}\n.rm-t-navy-classic .rm-bullets li{margin:3px 0;color:#39465a;}\n.rm-t-navy-classic .rm-bullets li::marker{color:#1b3557;}\n.rm-t-navy-classic .rm-sec-campus .rm-item-t{color:#1b3557;}\n.rm-t-navy-classic .rm-sec-hobbies .rm-tags{gap:6px;}\n.rm-t-navy-classic .rm-sec-hobbies .rm-tag{background:#ffffff;}\n.rm-t-navy-classic .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#6d7d92;}\n.rm-t-navy-classic .rm-edu-courses .rm-k{margin-right:7px;color:#8a9bb4;}\n.rm-t-navy-classic .rm-skill-row{grid-template-columns:100px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-navy-classic .rm-skill-k{font-size:12px;font-weight:600;color:#1b3557;}\n.rm-t-navy-classic .rm-tags{gap:5px;}\n.rm-t-navy-classic .rm-tag{padding:1px 9px;border:1px solid #d3dde9;border-radius:2px;background:#f5f8fc;color:#2b4a72;font-size:11px;line-height:1.7;}\n.rm-t-navy-classic .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-navy-classic .rm-award-t{font-weight:600;color:#16273f;}\n.rm-t-navy-classic .rm-award-desc{font-size:11.5px;color:#6d7d92;}\n.rm-t-navy-classic strong{color:#0f2038;}\n",
+      "sample": {
+        "basics": {
+          "name": "陈致远",
+          "role": "投资经理 · 6 年一级市场与并购经验",
+          "phone": "138 0013 8000",
+          "email": "zhiyuan.chen@example.com",
+          "city": "北京",
+          "wechat": "chenzhiyuan-vc",
+          "github": "",
+          "website": "",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover"
+        },
+        "summary": "专注消费与先进制造赛道，主导及参与 9 笔交易，累计金额超过 12 亿元。习惯用行业底稿和财务模型把判断讲清楚，而不是靠故事。",
+        "experience": [
+          {
+            "company": "衡远资本",
+            "role": "投资经理",
+            "period": "2021.03 — 至今",
+            "location": "北京",
+            "bullets": [
+              "主导 4 笔成长期投资，其中 2 家已进入下一轮，账面回报 **2.3 倍**。",
+              "搭建消费赛道底稿模板，把项目初筛周期从 3 周压缩到 8 天。"
+            ]
+          },
+          {
+            "company": "中衡证券",
+            "role": "投行部分析师",
+            "period": "2018.08 — 2021.02",
+            "location": "上海",
+            "bullets": [
+              "参与 5 单 IPO 与再融资项目，负责财务核查与招股书数据章节。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "新式茶饮连锁 · B 轮融资",
+            "role": "项目负责人",
+            "period": "2023.06 — 2024.01",
+            "bullets": [
+              "牵头财务与门店模型尽调，项目最终完成 3.2 亿元融资。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "上海财经大学",
+            "degree": "硕士",
+            "major": "金融学",
+            "period": "2016.09 — 2018.06",
+            "gpa": "3.9 / 4.0",
+            "courses": "公司金融、投资学、财务报表分析"
+          }
+        ],
+        "campus": [
+          {
+            "name": "金融学院研究生会",
+            "role": "学术部部长",
+            "period": "2017.03 — 2018.05",
+            "bullets": [
+              "组织 8 场行业研究分享会，累计参与 600 余人次。"
+            ]
+          }
+        ],
+        "hobbies": "马拉松、围棋、古典乐、旅行",
+        "skills": [
+          {
+            "group": "专业能力",
+            "items": "财务建模、尽调、估值、行业研究"
+          },
+          {
+            "group": "工具",
+            "items": "Excel、PowerPoint、Wind、Capital IQ"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳项目奖",
+            "date": "2023.12",
+            "desc": "衡远资本"
+          },
+          {
+            "title": "CFA 二级通过",
+            "date": "2020.08",
+            "desc": ""
+          }
+        ]
+      },
+      "file": "templates/rm-navy-classic.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-serif-editorial",
+      "name": "衬线杂志",
+      "en": "Serif Editorial",
+      "tagline": "大号衬线姓名加双细线标题，首字下沉的简介像杂志开篇，学术、出版与文化内容岗的气质。",
+      "tags": [
+        "学术",
+        "出版",
+        "内容"
+      ],
+      "author": "大肥鱼",
+      "accent": "#8a6a4f",
+      "cls": "rm-t-serif-editorial",
+      "templateId": "mkt-serif-editorial",
+      "css": "\n.rm-t-serif-editorial{padding:58px 64px 52px;background:#fffdf9;color:#3c352d;font-size:13.2px;line-height:1.72;font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",\"SimSun\",serif;}\n.rm-t-serif-editorial .rm-head{margin:0;padding:0 0 22px;background:transparent;border-bottom:3px double #d9cfc0;}\n.rm-t-serif-editorial .rm-name{margin:0;font-size:43px;line-height:1.16;font-weight:600;letter-spacing:.08em;color:#2f2a24;}\n.rm-t-serif-editorial .rm-role{margin:10px 0 0;font-size:11.5px;letter-spacing:.32em;color:#8a6a4f;}\n.rm-t-serif-editorial .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 34px;margin:18px 0 0;max-width:566px;}\n.rm-t-serif-editorial .rm-k{font-size:9px;letter-spacing:.24em;color:#a3947f;text-transform:uppercase;}\n.rm-t-serif-editorial .rm-v{font-size:12px;color:#4a4238;}\n.rm-t-serif-editorial .rm-photo{width:104px;height:104px;background:#f7f2ea;border:1px solid #d9cfc0;}\n.rm-t-serif-editorial .rm-sec{margin-top:26px;}\n.rm-t-serif-editorial .rm-sec-h{margin:0 0 13px;padding:6px 0 5px;border-top:1px solid #dcd3c4;border-bottom:1px solid #dcd3c4;}\n.rm-t-serif-editorial .rm-sec-t{font-size:12px;font-weight:600;letter-spacing:.3em;color:#5b4a38;}\n.rm-t-serif-editorial .rm-summary{margin:0;font-size:13.4px;line-height:1.8;color:#3c352d;}\n.rm-t-serif-editorial .rm-summary::first-letter{float:left;margin:7px 10px 0 0;font-size:44px;line-height:.84;font-weight:600;color:#8a6a4f;}\n.rm-t-serif-editorial .rm-item{margin:0 0 12px;}\n.rm-t-serif-editorial .rm-item-t{font-weight:600;letter-spacing:.02em;color:#2f2a24;}\n.rm-t-serif-editorial .rm-item-role{margin-left:7px;font-size:12px;font-style:italic;color:#7a6a58;}\n.rm-t-serif-editorial .rm-date{font-size:11px;color:#8d7f6c;font-variant-numeric:tabular-nums;}\n.rm-t-serif-editorial .rm-item-sub{margin-top:2px;font-size:11.5px;font-style:italic;color:#7a6a58;}\n.rm-t-serif-editorial .rm-bullets{margin:5px 0 0;padding-left:16px;}\n.rm-t-serif-editorial .rm-bullets li{margin:3px 0;color:#3c352d;}\n.rm-t-serif-editorial .rm-bullets li::marker{color:#c0a888;}\n.rm-t-serif-editorial .rm-body{padding:0;}\n.rm-t-serif-editorial .rm-sec-campus .rm-item-role{font-style:italic;}\n.rm-t-serif-editorial .rm-sec-hobbies .rm-tags{gap:8px;}\n.rm-t-serif-editorial .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#7a6a58;}\n.rm-t-serif-editorial .rm-edu-courses .rm-k{margin-right:7px;color:#a3947f;}\n.rm-t-serif-editorial .rm-skill-row{grid-template-columns:100px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-serif-editorial .rm-skill-k{font-size:12px;font-style:italic;color:#8a6a4f;}\n.rm-t-serif-editorial .rm-tags{gap:3px 14px;}\n.rm-t-serif-editorial .rm-tag{padding:0 0 1px;border:0;border-bottom:1px solid #cfc2ae;border-radius:0;background:transparent;color:#4a4238;font-size:11.5px;line-height:1.7;}\n.rm-t-serif-editorial .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-serif-editorial .rm-award-t{font-weight:600;color:#2f2a24;}\n.rm-t-serif-editorial .rm-award-desc{font-size:11.5px;font-style:italic;color:#7a6a58;}\n.rm-t-serif-editorial strong{color:#2f2a24;font-weight:650;}\n",
+      "sample": {
+        "basics": {
+          "name": "苏未晞",
+          "role": "出版编辑 · 内容策划",
+          "phone": "138 0013 8000",
+          "email": "weixi.su@example.com",
+          "city": "南京",
+          "wechat": "suweixi-edit",
+          "github": "",
+          "website": "",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover"
+        },
+        "summary": "在图书出版与新书营销之间来回打磨，做过 40 余本图书的编辑与策划，也替品牌写过能读下去的长文案。相信好内容值得被认真排版。",
+        "experience": [
+          {
+            "company": "拾光文化",
+            "role": "资深编辑",
+            "period": "2020.05 — 至今",
+            "location": "南京",
+            "bullets": [
+              "独立策划 18 本非虚构图书，其中 3 本进入年度榜单，累计销量 21 万册。",
+              "牵头搭建作者资源库与选题评审流程，选题通过率提升 **40%**。"
+            ]
+          },
+          {
+            "company": "南窗出版社",
+            "role": "编辑",
+            "period": "2016.07 — 2020.04",
+            "location": "南京",
+            "bullets": [
+              "负责文学与社科书稿的编辑加工，年均出版 9 本，差错率低于万分之三。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "《城市边缘的散步者》",
+            "role": "责任编辑",
+            "period": "2022.03 — 2022.12",
+            "bullets": [
+              "从选题到成书全程跟进，首印 8000 册三个月售罄并加印。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "南京大学",
+            "degree": "硕士",
+            "major": "中国现当代文学",
+            "period": "2013.09 — 2016.06",
+            "gpa": "3.8 / 4.0",
+            "courses": "现代文学研究、出版实务、文本细读"
+          }
+        ],
+        "campus": [
+          {
+            "name": "《南大青年》编辑部",
+            "role": "副主编",
+            "period": "2014.09 — 2015.12",
+            "bullets": [
+              "主持改版并推出人物专栏，单期最高转载量突破 5 万。"
+            ]
+          }
+        ],
+        "hobbies": "旧书、散步、木刻版画、手冲咖啡",
+        "skills": [
+          {
+            "group": "编辑出版",
+            "items": "选题策划、文稿编辑、版权沟通"
+          },
+          {
+            "group": "内容写作",
+            "items": "长篇报道、品牌文案、社交媒体"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度好书 · 文学类",
+            "date": "2023.04",
+            "desc": "城市边缘的散步者"
+          },
+          {
+            "title": "省级编辑奖二等奖",
+            "date": "2021.09",
+            "desc": ""
+          }
+        ]
+      },
+      "file": "templates/rm-serif-editorial.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-sidebar-ink",
+      "name": "墨色侧栏",
+      "en": "Sidebar Ink",
+      "tagline": "墨绿侧栏铺底，姓名与联系方式沉在一侧，正文干净收拢；设计、内容与品牌岗很适合。",
+      "tags": [
+        "设计",
+        "品牌",
+        "创意"
+      ],
+      "author": "大肥鱼",
+      "accent": "#173b33",
+      "cls": "rm-t-sidebar-ink",
+      "templateId": "mkt-sidebar-ink",
+      "css": "\n.rm-t-sidebar-ink{display:grid;grid-template-columns:250px minmax(0,1fr);align-items:stretch;min-height:1123px;padding:0;background:linear-gradient(90deg,#101d1a 0 250px,#ffffff 250px 100%);color:#2b3a36;font-size:13px;line-height:1.66;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",\"Noto Sans SC\",sans-serif;}\n.rm-t-sidebar-ink .rm-head{grid-column:1;grid-row:1;display:block;margin:0;padding:46px 26px 40px;background:transparent;border:0;color:#edf4f1;}\n.rm-t-sidebar-ink .rm-head.rm-has-photo{display:block;grid-template-columns:none;gap:0;}\n.rm-t-sidebar-ink .rm-head-main{min-width:0;}\n.rm-t-sidebar-ink .rm-photo{width:110px;height:110px;margin:0 0 20px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.26);}\n.rm-t-sidebar-ink .rm-photo.rm-photo-contain-box{background:rgba(255,255,255,.10);}\n.rm-t-sidebar-ink .rm-name{margin:0;font-size:29px;line-height:1.22;font-weight:600;letter-spacing:.06em;color:#f6faf8;}\n.rm-t-sidebar-ink .rm-name::after{content:\"\";display:block;width:36px;height:3px;margin:14px 0 0;background:#c2a06a;}\n.rm-t-sidebar-ink .rm-role{margin:11px 0 0;font-size:11px;line-height:1.62;letter-spacing:.14em;color:#a9c8bd;}\n.rm-t-sidebar-ink .rm-contact{grid-template-columns:minmax(0,1fr);gap:11px;margin:26px 0 0;}\n.rm-t-sidebar-ink .rm-head.rm-has-photo .rm-contact{grid-template-columns:minmax(0,1fr);width:auto;margin-top:26px;}\n.rm-t-sidebar-ink .rm-c{flex-direction:column;align-items:flex-start;gap:1px;min-width:0;}\n.rm-t-sidebar-ink .rm-k{font-size:9px;letter-spacing:.22em;color:#7f9d92;text-transform:uppercase;}\n.rm-t-sidebar-ink .rm-v{font-size:11.5px;line-height:1.5;color:#e4efeb;overflow-wrap:anywhere;}\n.rm-t-sidebar-ink .rm-body{grid-column:2;grid-row:1;padding:42px 42px 46px;}\n.rm-t-sidebar-ink .rm-body > .rm-sec{margin-top:24px;}\n.rm-t-sidebar-ink .rm-body > .rm-sec:first-child{margin-top:0;}\n.rm-t-sidebar-ink .rm-sec-h{display:flex;align-items:center;gap:10px;margin:0 0 11px;}\n.rm-t-sidebar-ink .rm-sec-t{font-size:13.5px;font-weight:700;letter-spacing:.14em;color:#16302b;}\n.rm-t-sidebar-ink .rm-sec-t::before{content:\"\";display:inline-block;width:5px;height:5px;margin-right:9px;vertical-align:2px;background:#c2a06a;}\n.rm-t-sidebar-ink .rm-sec-h::after{content:\"\";flex:1;height:1px;background:linear-gradient(90deg,rgba(194,160,106,.55),rgba(194,160,106,0));}\n.rm-t-sidebar-ink .rm-sec-hobbies .rm-tags{gap:6px;}\n.rm-t-sidebar-ink .rm-sec-campus .rm-item-t{color:#16302b;}\n.rm-t-sidebar-ink .rm-summary{margin:0;font-size:12.6px;line-height:1.76;color:#48564f;}\n.rm-t-sidebar-ink .rm-item{margin:0 0 12px;}\n.rm-t-sidebar-ink .rm-item-t{font-weight:650;color:#16302b;}\n.rm-t-sidebar-ink .rm-item-role{margin-left:8px;font-size:12.2px;color:#6d7c76;}\n.rm-t-sidebar-ink .rm-date{font-size:11px;color:#8d9a95;font-variant-numeric:tabular-nums;}\n.rm-t-sidebar-ink .rm-item-sub{margin-top:2px;font-size:11.5px;color:#78867f;}\n.rm-t-sidebar-ink .rm-bullets{margin:5px 0 0;padding-left:15px;}\n.rm-t-sidebar-ink .rm-bullets li{margin:3px 0;color:#3f4d47;}\n.rm-t-sidebar-ink .rm-bullets li::marker{color:#c2a06a;}\n.rm-t-sidebar-ink .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#6d7c76;}\n.rm-t-sidebar-ink .rm-edu-courses .rm-k{margin-right:7px;color:#93a49d;}\n.rm-t-sidebar-ink .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-sidebar-ink .rm-award-t{font-weight:600;color:#16302b;}\n.rm-t-sidebar-ink .rm-award-desc{font-size:11.5px;color:#6d7c76;}\n.rm-t-sidebar-ink .rm-skill-row{grid-template-columns:118px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-sidebar-ink .rm-skill-k{font-size:12px;font-weight:600;letter-spacing:.02em;color:#16302b;}\n.rm-t-sidebar-ink .rm-tag{display:inline-block;padding:1px 9px;border:1px solid #16302b;border-radius:3px;background:#16302b;color:#eaf2ee;font-size:11px;line-height:1.7;}\n.rm-t-sidebar-ink .rm-tags{gap:5px;}\n.rm-t-sidebar-ink strong{color:#0f2620;}\n",
+      "sample": {
+        "basics": {
+          "name": "许清和",
+          "role": "品牌设计师 · 6 年视觉与空间经验",
+          "phone": "138 0013 8000",
+          "email": "qinghe.xu@example.com",
+          "city": "上海",
+          "wechat": "qinghe-design",
+          "github": "github.com/qinghe-xu",
+          "website": "qinghe.studio",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover"
+        },
+        "summary": "从品牌识别到空间导视一路做下来，习惯把抽象的调性落到能触摸的材质与比例上。主导过 4 个完整品牌重塑项目，其中 2 个拿到设计奖项。",
+        "experience": [
+          {
+            "company": "未山设计工作室",
+            "role": "品牌设计师",
+            "period": "2021.04 — 至今",
+            "location": "上海",
+            "bullets": [
+              "独立负责 3 个品牌的视觉系统，从字标、版式到包装落地，平均交付周期 6 周。",
+              "搭建工作室的版式与配色规范，返工率下降 **35%**。"
+            ]
+          },
+          {
+            "company": "间白品牌咨询",
+            "role": "视觉设计师",
+            "period": "2018.07 — 2021.03",
+            "location": "杭州",
+            "bullets": [
+              "参与 12 个消费品牌的识别升级，其中 2 个项目续签全案。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "听潮书店 · 品牌与导视",
+            "role": "视觉主创",
+            "period": "2023.05 — 2023.11",
+            "bullets": [
+              "把「潮汐」抽象成一套可重复的弧线网格，覆盖 6 家门店的导视与物料。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "中国美术学院",
+            "degree": "学士",
+            "major": "视觉传达设计",
+            "period": "2014.09 — 2018.06",
+            "gpa": "3.7 / 4.0",
+            "courses": "字体设计、版式设计、品牌策略"
+          }
+        ],
+        "campus": [
+          {
+            "name": "院学生会宣传部",
+            "role": "部长",
+            "period": "2016.09 — 2017.06",
+            "bullets": [
+              "统筹 12 场校园展览的视觉物料，累计输出 60 余张海报。"
+            ]
+          }
+        ],
+        "hobbies": "长跑、胶片摄影、咖啡烘焙、木作",
+        "skills": [
+          {
+            "group": "设计工具",
+            "items": "Figma、Illustrator、InDesign、Cinema 4D"
+          },
+          {
+            "group": "设计能力",
+            "items": "品牌识别、版式系统、导视设计、印刷落地"
+          }
+        ],
+        "awards": [
+          {
+            "title": "东京 TDC 年度提名",
+            "date": "2023.02",
+            "desc": "听潮书店品牌"
+          },
+          {
+            "title": "金点设计奖 · 视觉传达类",
+            "date": "2021.11",
+            "desc": ""
+          }
+        ]
+      },
+      "file": "templates/rm-sidebar-ink.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-tech-dark",
+      "name": "夜色科技",
+      "en": "Tech Dark",
+      "tagline": "深色页眉配青色高亮，技能标签带发光边；开发、测试与 AI 岗一眼看出技术味。",
+      "tags": [
+        "互联网",
+        "研发",
+        "AI"
+      ],
+      "author": "大肥鱼",
+      "accent": "#06b6d4",
+      "cls": "rm-t-tech-dark",
+      "templateId": "mkt-tech-dark",
+      "css": "\n.rm-t-tech-dark{padding:0 0 46px;background:#f7f9fc;color:#243141;font-size:13px;line-height:1.66;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei\",\"Noto Sans SC\",sans-serif;}\n.rm-t-tech-dark .rm-head{position:relative;margin:0;padding:36px 46px 30px;background:linear-gradient(135deg,#111827 0%,#0b1220 60%,#111d33 100%);color:#e8eef7;}\n.rm-t-tech-dark .rm-head::after{content:\"\";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#22d3ee 0%,#0ea5e9 46%,rgba(14,165,233,0) 100%);}\n.rm-t-tech-dark .rm-name{margin:0;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:.02em;color:#f8fafc;}\n.rm-t-tech-dark .rm-name::after{content:\"\";display:inline-block;width:7px;height:7px;margin-left:12px;vertical-align:7px;border-radius:50%;background:#22d3ee;box-shadow:0 0 10px rgba(34,211,238,.8);}\n.rm-t-tech-dark .rm-role{margin:8px 0 0;font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:11.5px;letter-spacing:.14em;color:#67e8f9;}\n.rm-t-tech-dark .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 30px;margin:18px 0 0;max-width:600px;}\n.rm-t-tech-dark .rm-k{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:9px;letter-spacing:.18em;color:#8ba0bd;text-transform:uppercase;}\n.rm-t-tech-dark .rm-v{font-size:12px;color:#dbe6f3;}\n.rm-t-tech-dark .rm-photo{width:90px;height:90px;background:#0f1a2a;border:1px solid #1f3348;}\n.rm-t-tech-dark .rm-body{padding:0 46px;}\n.rm-t-tech-dark .rm-sec{margin-top:24px;}\n.rm-t-tech-dark .rm-sec-h{display:flex;align-items:baseline;gap:8px;margin:0 0 11px;padding-bottom:5px;border-bottom:1px solid #dbe3ee;}\n.rm-t-tech-dark .rm-sec-t{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:12px;font-weight:700;letter-spacing:.12em;color:#0b1220;}\n.rm-t-tech-dark .rm-sec-t::before{content:\"//\";margin-right:7px;color:#0891b2;font-weight:700;letter-spacing:0;}\n.rm-t-tech-dark .rm-summary{color:#3b4a5e;font-size:12.8px;line-height:1.74;}\n.rm-t-tech-dark .rm-item{margin:0 0 11px;}\n.rm-t-tech-dark .rm-item-t{font-weight:650;color:#0b1220;}\n.rm-t-tech-dark .rm-item-role{margin-left:7px;font-size:12.2px;color:#5b6b80;}\n.rm-t-tech-dark .rm-date{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:10.5px;color:#5f7288;}\n.rm-t-tech-dark .rm-item-sub{margin-top:2px;font-size:11.5px;color:#63758c;}\n.rm-t-tech-dark .rm-bullets{margin:5px 0 0;padding-left:15px;}\n.rm-t-tech-dark .rm-bullets li{margin:3px 0;color:#31404f;}\n.rm-t-tech-dark .rm-bullets li::marker{color:#0e9db8;}\n.rm-t-tech-dark .rm-sec-campus .rm-item-t{color:#0b1220;}\n.rm-t-tech-dark .rm-sec-hobbies .rm-tags{gap:6px;}\n.rm-t-tech-dark .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#5b6b80;}\n.rm-t-tech-dark .rm-edu-courses .rm-k{margin-right:7px;color:#8ba0bd;}\n.rm-t-tech-dark .rm-skill-row{grid-template-columns:104px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-tech-dark .rm-skill-k{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:11.5px;font-weight:600;color:#0f172a;}\n.rm-t-tech-dark .rm-tags{gap:5px;}\n.rm-t-tech-dark .rm-tag{padding:1px 8px;border:1px solid #164e63;border-radius:3px;background:#0f172a;color:#a5f3fc;font-size:11px;line-height:1.7;box-shadow:0 0 10px rgba(34,211,238,.16);}\n.rm-t-tech-dark .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-tech-dark .rm-award-t{font-weight:600;color:#0b1220;}\n.rm-t-tech-dark .rm-award-desc{font-size:11.5px;color:#5b6b80;}\n.rm-t-tech-dark strong{color:#0b1220;}\n",
+      "sample": {
+        "basics": {
+          "name": "周景行",
+          "role": "前端工程师 · AI 应用开发",
+          "phone": "138 0013 8000",
+          "email": "jingxing.zhou@example.com",
+          "city": "深圳",
+          "wechat": "zhoujx-dev",
+          "github": "github.com/zhoujx",
+          "website": "",
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover"
+        },
+        "summary": "5 年前端经验，近两年专注把大模型能力接进真实产品：流式对话、工具调用、检索增强都做过完整落地。习惯先跑通最小闭环，再谈架构。",
+        "experience": [
+          {
+            "company": "浪潮智能",
+            "role": "前端工程师",
+            "period": "2022.09 — 至今",
+            "location": "深圳",
+            "bullets": [
+              "负责 AI 助手的前端链路，首屏可交互时间从 2.8s 降到 **1.1s**。",
+              "设计流式渲染与中断重试机制，长对话失败率下降 46%。"
+            ]
+          },
+          {
+            "company": "微核网络",
+            "role": "前端工程师",
+            "period": "2019.07 — 2022.08",
+            "location": "广州",
+            "bullets": [
+              "主导中台组件库建设，沉淀 38 个组件，被 6 条业务线复用。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "企业知识库问答",
+            "role": "前端负责人",
+            "period": "2024.02 — 2024.09",
+            "bullets": [
+              "完成检索结果流式渲染与引用溯源，周活用户 3 个月增长至 1.4 万。",
+              "把人工评测试验流程自动化，单个模型评测耗时从 3 天缩短到 4 小时。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "华南理工大学",
+            "degree": "学士",
+            "major": "软件工程",
+            "period": "2015.09 — 2019.06",
+            "gpa": "3.6 / 4.0",
+            "courses": "数据结构、计算机网络、人机交互"
+          }
+        ],
+        "campus": [
+          {
+            "name": "ACM 集训队",
+            "role": "队员",
+            "period": "2017.03 — 2018.12",
+            "bullets": [
+              "参加省级程序设计竞赛，获团队二等奖。"
+            ]
+          }
+        ],
+        "hobbies": "机械键盘、开源、登山、科幻小说",
+        "skills": [
+          {
+            "group": "前端",
+            "items": "TypeScript、React、Vite、Node.js"
+          },
+          {
+            "group": "AI 应用",
+            "items": "LLM 接入、RAG、流式渲染、评测"
+          }
+        ],
+        "awards": [
+          {
+            "title": "内部黑客松一等奖",
+            "date": "2024.06",
+            "desc": "RAG 知识库"
+          },
+          {
+            "title": "开源项目贡献者 Top 100",
+            "date": "2023.12",
+            "desc": ""
+          }
+        ]
+      },
+      "file": "templates/rm-tech-dark.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-timeline",
+      "name": "时间轴",
+      "en": "Timeline",
+      "tagline": "左侧时间列加竖线圆点，成长路径一眼看清，产品运营岗首选。",
+      "tags": [
+        "时间轴",
+        "产品",
+        "运营",
+        "成长"
+      ],
+      "author": "简历市场",
+      "accent": "#2563eb",
+      "cls": "rm-t-timeline",
+      "templateId": "mkt-timeline",
+      "css": "\n.rm-t-timeline{padding:0 0 48px;color:#25303f;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;}\n.rm-t-timeline .rm-head{padding:0 56px 24px;background:#f8fafc;border-bottom:1px solid #e2e8f0;}\n.rm-t-timeline .rm-head::before{content:\"\";display:block;height:5px;margin:0 -56px 30px;background:linear-gradient(90deg,#2563eb 0%,#7db0f7 60%,#dbeafe 100%);}\n.rm-t-timeline .rm-name{font-size:36px;font-weight:700;letter-spacing:.02em;line-height:1.15;color:#0f172a;}\n.rm-t-timeline .rm-role{margin:8px 0 0;font-size:12.5px;letter-spacing:.18em;color:#2563eb;}\n.rm-t-timeline .rm-contact{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;margin-top:18px;}\n.rm-t-timeline .rm-k{display:inline-block;padding:1px 7px;border-radius:4px;background:#e8f0fe;color:#3b63a8;font-size:9.5px;letter-spacing:.04em;}\n.rm-t-timeline .rm-v{font-size:11.5px;color:#334155;}\n.rm-t-timeline .rm-body{padding:0 56px;}\n.rm-t-timeline .rm-sec{margin-top:24px;}\n.rm-t-timeline .rm-sec-h{margin:0 0 12px;padding-bottom:6px;border-bottom:1px dashed #c7d7ee;gap:0;}\n.rm-t-timeline .rm-sec-t{font-size:12px;font-weight:700;letter-spacing:.22em;color:#1d4ed8;}\n.rm-t-timeline .rm-items{position:relative;}\n.rm-t-timeline .rm-items::before{content:\"\";position:absolute;left:110px;top:12px;bottom:8px;width:1px;background:#d7e2f3;}\n.rm-t-timeline .rm-item{position:relative;padding-left:128px;margin-bottom:16px;}\n.rm-t-timeline .rm-item::before{content:\"\";position:absolute;left:104px;top:6px;width:8px;height:8px;border-radius:50%;background:#ffffff;border:2px solid #2563eb;box-shadow:0 0 0 3px #e8f0fe;z-index:1;}\n.rm-t-timeline .rm-item::after{display:none;}\n.rm-t-timeline .rm-item:last-child::after{display:none;}\n.rm-t-timeline .rm-row{display:block;}\n.rm-t-timeline .rm-date{position:absolute;left:0;top:2px;width:86px;text-align:right;font-size:10.5px;letter-spacing:.02em;color:#64748b;line-height:1.5;}\n.rm-t-timeline .rm-item-main{display:block;}\n.rm-t-timeline .rm-item-t{display:block;font-size:14px;font-weight:600;color:#0f172a;}\n.rm-t-timeline .rm-item-role{display:inline-block;margin-top:3px;font-size:11.5px;color:#5b6b82;}\n.rm-t-timeline .rm-item-sub{font-size:11.5px;color:#64748b;}\n.rm-t-timeline .rm-edu-courses{font-size:11px;line-height:1.5;color:#64748b;}\n.rm-t-timeline .rm-bullets{margin-top:5px;padding-left:14px;}\n.rm-t-timeline .rm-bullets li{margin:2px 0;font-size:12.5px;color:#3c4a5e;}\n.rm-t-timeline .rm-bullets li::marker{color:#94b3e6;}\n.rm-t-timeline .rm-summary{font-size:13px;line-height:1.75;color:#3c4a5e;}\n.rm-t-timeline .rm-tag{border:1px solid #d3e0f5;background:#f1f6fe;color:#2a4d86;border-radius:4px;font-size:11px;}\n.rm-t-timeline .rm-skill-row{grid-template-columns:88px minmax(0,1fr);gap:10px;margin-bottom:7px;}\n.rm-t-timeline .rm-skill-k{font-size:11px;font-weight:600;letter-spacing:.06em;color:#1d4ed8;}\n.rm-t-timeline .rm-award-row{margin-bottom:6px;}\n.rm-t-timeline .rm-award-t{font-size:12.5px;color:#0f172a;}\n.rm-t-timeline .rm-award-desc{font-size:11px;color:#64748b;}\n.rm-t-timeline .rm-sec-campus .rm-item{padding-left:128px;}\n.rm-t-timeline .rm-sec-hobbies .rm-tags{padding-left:0;}\n",
+      "sample": {
+        "basics": {
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover",
+          "name": "苏禾",
+          "role": "用户增长运营 / 6 年 B 端与 C 端经验",
+          "phone": "138 0013 8000",
+          "email": "su.he@example.com",
+          "city": "杭州",
+          "wechat": "suhe-growth",
+          "github": "github.com/suhe-growth",
+          "website": "suhe.notion.site"
+        },
+        "summary": "6 年增长运营经验，擅长用实验和数据拆解增长问题。做过冷启动、留存提升与私域体系，既写得了方案也能上手跑数据。",
+        "experience": [
+          {
+            "company": "橙屿科技",
+            "role": "用户增长负责人",
+            "period": "2022.05 — 至今",
+            "location": "杭州",
+            "bullets": [
+              "搭建 A/B 实验流程，季度新增注册提升 **64%**，次周留存提升 11 个百分点。",
+              "设计老带新激励体系，裂变贡献占新增的 38%，获客成本下降 27%。"
+            ]
+          },
+          {
+            "company": "拾光互动",
+            "role": "运营经理",
+            "period": "2019.08 — 2022.04",
+            "location": "杭州",
+            "bullets": [
+              "从 0 搭建内容社区，6 个月做到日活 4.2 万，UGC 占比 61%。",
+              "策划 3 场行业直播，单场带来 2600 条有效线索。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "增长实验平台",
+            "role": "业务负责人",
+            "period": "2023.02 — 2023.09",
+            "bullets": [
+              "把实验配置从排期 2 周缩短到 1 天，季度实验量从 6 个提升到 24 个。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "浙江工业大学",
+            "degree": "本科",
+            "major": "市场营销",
+            "period": "2014.09 — 2018.06",
+            "gpa": "3.6 / 4.0",
+            "courses": "消费者行为、数据分析、品牌管理"
+          }
+        ],
+        "campus": [
+          {
+            "name": "校学生会新媒体中心",
+            "role": "内容负责人",
+            "period": "2015.09 — 2017.06",
+            "bullets": [
+              "把公众号从 3000 做到 2.6 万关注，单篇最高阅读 4.8 万。"
+            ]
+          }
+        ],
+        "hobbies": "城市骑行、播客、咖啡探店",
+        "skills": [
+          {
+            "group": "增长",
+            "items": "A/B 实验、漏斗分析、留存体系、私域运营、活动策划"
+          },
+          {
+            "group": "工具",
+            "items": "SQL、神策、Tableau、Figma、飞书多维表"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度增长之星",
+            "date": "2023.12",
+            "desc": "橙屿科技"
+          }
+        ]
+      },
+      "file": "templates/rm-timeline.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "rm-warm-sand",
+      "name": "暖沙",
+      "en": "Warm Sand",
+      "tagline": "米白底配棕金与衬线标题，温和有质感，文案、品牌与教育岗适用。",
+      "tags": [
+        "暖色",
+        "文案",
+        "品牌",
+        "教育"
+      ],
+      "author": "简历市场",
+      "accent": "#b07d4e",
+      "cls": "rm-t-warm-sand",
+      "templateId": "mkt-warm-sand",
+      "css": "\n.rm-t-warm-sand{padding:0 0 50px;color:#40372c;background:#fcf8f1;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",sans-serif;}\n.rm-t-warm-sand .rm-head{padding:52px 58px 26px;background:linear-gradient(180deg,#faf2e4 0%,#fdfaf4 100%);border-bottom:1px solid #e6d7c1;}\n.rm-t-warm-sand .rm-name{font-family:Georgia,\"Songti SC\",\"STSong\",\"Noto Serif SC\",serif;font-size:40px;font-weight:600;letter-spacing:.06em;line-height:1.16;color:#4a3a28;}\n.rm-t-warm-sand .rm-role{margin:10px 0 0;font-size:12.5px;letter-spacing:.16em;color:#9c7b52;}\n.rm-t-warm-sand .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 24px;margin-top:20px;}\n.rm-t-warm-sand .rm-k{font-size:9.5px;letter-spacing:.14em;color:#b39a7c;}\n.rm-t-warm-sand .rm-v{font-size:11.5px;color:#53452f;}\n.rm-t-warm-sand .rm-body{padding:0 58px;}\n.rm-t-warm-sand .rm-sec{margin-top:24px;}\n.rm-t-warm-sand .rm-sec-h{display:flex;align-items:center;gap:12px;margin:0 0 11px;padding-bottom:7px;}\n.rm-t-warm-sand .rm-sec-t{flex:0 0 auto;font-family:Georgia,\"Songti SC\",\"STSong\",\"Noto Serif SC\",serif;font-size:14.5px;letter-spacing:.16em;color:#8a5f34;}\n.rm-t-warm-sand .rm-sec-h::after{content:\"\";flex:1 1 auto;height:1px;background:linear-gradient(90deg,#e6d7c1,#f4ebdd);}\n.rm-t-warm-sand .rm-item{margin-bottom:13px;}\n.rm-t-warm-sand .rm-item-t{font-size:13.5px;font-weight:600;color:#4a3a28;}\n.rm-t-warm-sand .rm-item-role{font-size:12px;color:#8a7454;}\n.rm-t-warm-sand .rm-date{font-size:10.5px;font-style:italic;letter-spacing:.02em;color:#a08a6c;}\n.rm-t-warm-sand .rm-item-sub{font-size:11.5px;color:#8a7454;}\n.rm-t-warm-sand .rm-edu-courses{font-size:11px;color:#8a7454;}\n.rm-t-warm-sand .rm-bullets{padding-left:15px;}\n.rm-t-warm-sand .rm-bullets li{margin:3px 0;}\n.rm-t-warm-sand .rm-bullets li::marker{color:#c9a97c;}\n.rm-t-warm-sand .rm-summary{font-size:12.5px;line-height:1.78;color:#4b4030;}\n.rm-t-warm-sand .rm-tag{background:#f5ebda;border:1px solid #e8d7bd;border-radius:4px;color:#7a5a34;font-size:11px;}\n.rm-t-warm-sand .rm-skill-row{grid-template-columns:94px minmax(0,1fr);gap:10px;margin-bottom:7px;}\n.rm-t-warm-sand .rm-skill-k{font-size:11.5px;font-weight:600;color:#8a5f34;}\n.rm-t-warm-sand .rm-award-row{margin-bottom:6px;padding-bottom:5px;border-bottom:1px dashed #eadcc6;}\n.rm-t-warm-sand .rm-award-row:last-child{border-bottom:none;}\n.rm-t-warm-sand .rm-award-t{font-size:12.5px;color:#4a3a28;}\n.rm-t-warm-sand .rm-award-desc{font-size:11px;color:#8a7454;}\n.rm-t-warm-sand .rm-sec-campus .rm-item{margin-bottom:9px;}\n.rm-t-warm-sand .rm-sec-hobbies .rm-tags{gap:7px;}\n",
+      "sample": {
+        "basics": {
+          "photo": "",
+          "photoSide": "right",
+          "photoShape": "circle",
+          "photoFit": "cover",
+          "name": "顾言",
+          "role": "品牌文案 / 内容策划",
+          "phone": "138 0013 8000",
+          "email": "gu.yan@example.com",
+          "city": "广州",
+          "wechat": "guyan-copy",
+          "github": "github.com/guyan-copy",
+          "website": "guyan.ink"
+        },
+        "summary": "7 年品牌文案与内容策划经验，写过长文、脚本和品牌手册。相信好文案来自对用户和产品的双重理解，而不只是修辞。",
+        "experience": [
+          {
+            "company": "拾贝品牌咨询",
+            "role": "资深文案策划",
+            "period": "2021.05 — 至今",
+            "location": "广州",
+            "bullets": [
+              "服务 8 个消费与教育品牌，主导品牌故事与话语体系搭建。",
+              "一条品牌片文案带来 **320 万** 播放，官网咨询量提升 42%。"
+            ]
+          },
+          {
+            "company": "字里行间文化",
+            "role": "文案编辑",
+            "period": "2018.07 — 2021.04",
+            "location": "广州",
+            "bullets": [
+              "负责公众号内容，年均产出 120 篇，最高单篇阅读 26 万。",
+              "独立完成 3 本品牌手册的撰写与校对。"
+            ]
+          }
+        ],
+        "projects": [
+          {
+            "name": "「慢一点」品牌手册",
+            "role": "主笔",
+            "period": "2023.04 — 2023.09",
+            "bullets": [
+              "梳理品牌语气、命名规则与禁用词，形成 42 页可执行手册。"
+            ]
+          }
+        ],
+        "education": [
+          {
+            "school": "暨南大学",
+            "degree": "硕士",
+            "major": "中国现当代文学",
+            "period": "2015.09 — 2018.06",
+            "gpa": "3.9 / 4.0",
+            "courses": "文学批评、叙事学、传播学"
+          }
+        ],
+        "campus": [
+          {
+            "name": "校报记者团",
+            "role": "副主编",
+            "period": "2016.09 — 2018.05",
+            "bullets": [
+              "策划「校园手艺人」系列报道，累计采访 34 位匠人。"
+            ]
+          }
+        ],
+        "hobbies": "读诗、篆刻、徒步",
+        "skills": [
+          {
+            "group": "内容",
+            "items": "品牌故事、长文写作、视频脚本、品牌手册、采访采写"
+          },
+          {
+            "group": "工具",
+            "items": "Notion、飞书、InDesign、Premiere、基础摄影"
+          }
+        ],
+        "awards": [
+          {
+            "title": "年度最佳品牌案例 铜奖",
+            "date": "2023.11",
+            "desc": "慢一点品牌手册"
+          }
+        ]
+      },
+      "file": "templates/rm-warm-sand.json",
+      "installs": 0,
+      "updatedAt": "2026-11-01T12:00:00.000Z"
     }
   ]
 }

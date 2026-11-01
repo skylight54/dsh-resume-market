@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "id": "rm-serif-editorial",
+  "name": "衬线杂志",
+  "en": "Serif Editorial",
+  "tagline": "大号衬线姓名加双细线标题，首字下沉的简介像杂志开篇，学术、出版与文化内容岗的气质。",
+  "tags": [
+    "学术",
+    "出版",
+    "内容"
+  ],
+  "author": "大肥鱼",
+  "accent": "#8a6a4f",
+  "cls": "rm-t-serif-editorial",
+  "templateId": "mkt-serif-editorial",
+  "css": "\n.rm-t-serif-editorial{padding:58px 64px 52px;background:#fffdf9;color:#3c352d;font-size:13.2px;line-height:1.72;font-family:Georgia,\"Songti SC\",\"Noto Serif SC\",\"SimSun\",serif;}\n.rm-t-serif-editorial .rm-head{margin:0;padding:0 0 22px;background:transparent;border-bottom:3px double #d9cfc0;}\n.rm-t-serif-editorial .rm-name{margin:0;font-size:43px;line-height:1.16;font-weight:600;letter-spacing:.08em;color:#2f2a24;}\n.rm-t-serif-editorial .rm-role{margin:10px 0 0;font-size:11.5px;letter-spacing:.32em;color:#8a6a4f;}\n.rm-t-serif-editorial .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 34px;margin:18px 0 0;max-width:566px;}\n.rm-t-serif-editorial .rm-k{font-size:9px;letter-spacing:.24em;color:#a3947f;text-transform:uppercase;}\n.rm-t-serif-editorial .rm-v{font-size:12px;color:#4a4238;}\n.rm-t-serif-editorial .rm-photo{width:104px;height:104px;background:#f7f2ea;border:1px solid #d9cfc0;}\n.rm-t-serif-editorial .rm-sec{margin-top:26px;}\n.rm-t-serif-editorial .rm-sec-h{margin:0 0 13px;padding:6px 0 5px;border-top:1px solid #dcd3c4;border-bottom:1px solid #dcd3c4;}\n.rm-t-serif-editorial .rm-sec-t{font-size:12px;font-weight:600;letter-spacing:.3em;color:#5b4a38;}\n.rm-t-serif-editorial .rm-summary{margin:0;font-size:13.4px;line-height:1.8;color:#3c352d;}\n.rm-t-serif-editorial .rm-summary::first-letter{float:left;margin:7px 10px 0 0;font-size:44px;line-height:.84;font-weight:600;color:#8a6a4f;}\n.rm-t-serif-editorial .rm-item{margin:0 0 12px;}\n.rm-t-serif-editorial .rm-item-t{font-weight:600;letter-spacing:.02em;color:#2f2a24;}\n.rm-t-serif-editorial .rm-item-role{margin-left:7px;font-size:12px;font-style:italic;color:#7a6a58;}\n.rm-t-serif-editorial .rm-date{font-size:11px;color:#8d7f6c;font-variant-numeric:tabular-nums;}\n.rm-t-serif-editorial .rm-item-sub{margin-top:2px;font-size:11.5px;font-style:italic;color:#7a6a58;}\n.rm-t-serif-editorial .rm-bullets{margin:5px 0 0;padding-left:16px;}\n.rm-t-serif-editorial .rm-bullets li{margin:3px 0;color:#3c352d;}\n.rm-t-serif-editorial .rm-bullets li::marker{color:#c0a888;}\n.rm-t-serif-editorial .rm-body{padding:0;}\n.rm-t-serif-editorial .rm-sec-campus .rm-item-role{font-style:italic;}\n.rm-t-serif-editorial .rm-sec-hobbies .rm-tags{gap:8px;}\n.rm-t-serif-editorial .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#7a6a58;}\n.rm-t-serif-editorial .rm-edu-courses .rm-k{margin-right:7px;color:#a3947f;}\n.rm-t-serif-editorial .rm-skill-row{grid-template-columns:100px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-serif-editorial .rm-skill-k{font-size:12px;font-style:italic;color:#8a6a4f;}\n.rm-t-serif-editorial .rm-tags{gap:3px 14px;}\n.rm-t-serif-editorial .rm-tag{padding:0 0 1px;border:0;border-bottom:1px solid #cfc2ae;border-radius:0;background:transparent;color:#4a4238;font-size:11.5px;line-height:1.7;}\n.rm-t-serif-editorial .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-serif-editorial .rm-award-t{font-weight:600;color:#2f2a24;}\n.rm-t-serif-editorial .rm-award-desc{font-size:11.5px;font-style:italic;color:#7a6a58;}\n.rm-t-serif-editorial strong{color:#2f2a24;font-weight:650;}\n",
+  "sample": {
+    "basics": {
+      "name": "苏未晞",
+      "role": "出版编辑 · 内容策划",
+      "phone": "138 0013 8000",
+      "email": "weixi.su@example.com",
+      "city": "南京",
+      "wechat": "suweixi-edit",
+      "github": "",
+      "website": "",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover"
+    },
+    "summary": "在图书出版与新书营销之间来回打磨，做过 40 余本图书的编辑与策划，也替品牌写过能读下去的长文案。相信好内容值得被认真排版。",
+    "experience": [
+      {
+        "company": "拾光文化",
+        "role": "资深编辑",
+        "period": "2020.05 — 至今",
+        "location": "南京",
+        "bullets": [
+          "独立策划 18 本非虚构图书，其中 3 本进入年度榜单，累计销量 21 万册。",
+          "牵头搭建作者资源库与选题评审流程，选题通过率提升 **40%**。"
+        ]
+      },
+      {
+        "company": "南窗出版社",
+        "role": "编辑",
+        "period": "2016.07 — 2020.04",
+        "location": "南京",
+        "bullets": [
+          "负责文学与社科书稿的编辑加工，年均出版 9 本，差错率低于万分之三。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "《城市边缘的散步者》",
+        "role": "责任编辑",
+        "period": "2022.03 — 2022.12",
+        "bullets": [
+          "从选题到成书全程跟进，首印 8000 册三个月售罄并加印。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "南京大学",
+        "degree": "硕士",
+        "major": "中国现当代文学",
+        "period": "2013.09 — 2016.06",
+        "gpa": "3.8 / 4.0",
+        "courses": "现代文学研究、出版实务、文本细读"
+      }
+    ],
+    "campus": [
+      {
+        "name": "《南大青年》编辑部",
+        "role": "副主编",
+        "period": "2014.09 — 2015.12",
+        "bullets": [
+          "主持改版并推出人物专栏，单期最高转载量突破 5 万。"
+        ]
+      }
+    ],
+    "hobbies": "旧书、散步、木刻版画、手冲咖啡",
+    "skills": [
+      {
+        "group": "编辑出版",
+        "items": "选题策划、文稿编辑、版权沟通"
+      },
+      {
+        "group": "内容写作",
+        "items": "长篇报道、品牌文案、社交媒体"
+      }
+    ],
+    "awards": [
+      {
+        "title": "年度好书 · 文学类",
+        "date": "2023.04",
+        "desc": "城市边缘的散步者"
+      },
+      {
+        "title": "省级编辑奖二等奖",
+        "date": "2021.09",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-11-01T12:00:00.000Z"
+}

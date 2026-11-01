@@ -26,7 +26,8 @@
       "website": "",
       "photo": "",
       "photoSide": "right",
-      "photoShape": "circle"
+      "photoShape": "circle",
+      "photoFit": "cover"
     },
     "summary": "3 年投行经验，参与 6 单 IPO 与 2 单并购项目，累计交易规模约 48 亿元。熟悉消费行业财务模型与尽调流程。",
     "experience": [
@@ -62,6 +63,8 @@
         "courses": ""
       }
     ],
+    "campus": [],
+    "hobbies": "",
     "skills": [
       {
         "group": "专业能力",

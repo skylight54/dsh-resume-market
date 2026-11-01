@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "id": "rm-sidebar-ink",
+  "name": "墨色侧栏",
+  "en": "Sidebar Ink",
+  "tagline": "墨绿侧栏铺底，姓名与联系方式沉在一侧，正文干净收拢；设计、内容与品牌岗很适合。",
+  "tags": [
+    "设计",
+    "品牌",
+    "创意"
+  ],
+  "author": "大肥鱼",
+  "accent": "#173b33",
+  "cls": "rm-t-sidebar-ink",
+  "templateId": "mkt-sidebar-ink",
+  "css": "\n.rm-t-sidebar-ink{display:grid;grid-template-columns:250px minmax(0,1fr);align-items:stretch;min-height:1123px;padding:0;background:linear-gradient(90deg,#101d1a 0 250px,#ffffff 250px 100%);color:#2b3a36;font-size:13px;line-height:1.66;font-family:-apple-system,BlinkMacSystemFont,\"PingFang SC\",\"Microsoft YaHei\",\"Noto Sans SC\",sans-serif;}\n.rm-t-sidebar-ink .rm-head{grid-column:1;grid-row:1;display:block;margin:0;padding:46px 26px 40px;background:transparent;border:0;color:#edf4f1;}\n.rm-t-sidebar-ink .rm-head.rm-has-photo{display:block;grid-template-columns:none;gap:0;}\n.rm-t-sidebar-ink .rm-head-main{min-width:0;}\n.rm-t-sidebar-ink .rm-photo{width:110px;height:110px;margin:0 0 20px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.26);}\n.rm-t-sidebar-ink .rm-photo.rm-photo-contain-box{background:rgba(255,255,255,.10);}\n.rm-t-sidebar-ink .rm-name{margin:0;font-size:29px;line-height:1.22;font-weight:600;letter-spacing:.06em;color:#f6faf8;}\n.rm-t-sidebar-ink .rm-name::after{content:\"\";display:block;width:36px;height:3px;margin:14px 0 0;background:#c2a06a;}\n.rm-t-sidebar-ink .rm-role{margin:11px 0 0;font-size:11px;line-height:1.62;letter-spacing:.14em;color:#a9c8bd;}\n.rm-t-sidebar-ink .rm-contact{grid-template-columns:minmax(0,1fr);gap:11px;margin:26px 0 0;}\n.rm-t-sidebar-ink .rm-head.rm-has-photo .rm-contact{grid-template-columns:minmax(0,1fr);width:auto;margin-top:26px;}\n.rm-t-sidebar-ink .rm-c{flex-direction:column;align-items:flex-start;gap:1px;min-width:0;}\n.rm-t-sidebar-ink .rm-k{font-size:9px;letter-spacing:.22em;color:#7f9d92;text-transform:uppercase;}\n.rm-t-sidebar-ink .rm-v{font-size:11.5px;line-height:1.5;color:#e4efeb;overflow-wrap:anywhere;}\n.rm-t-sidebar-ink .rm-body{grid-column:2;grid-row:1;padding:42px 42px 46px;}\n.rm-t-sidebar-ink .rm-body > .rm-sec{margin-top:24px;}\n.rm-t-sidebar-ink .rm-body > .rm-sec:first-child{margin-top:0;}\n.rm-t-sidebar-ink .rm-sec-h{display:flex;align-items:center;gap:10px;margin:0 0 11px;}\n.rm-t-sidebar-ink .rm-sec-t{font-size:13.5px;font-weight:700;letter-spacing:.14em;color:#16302b;}\n.rm-t-sidebar-ink .rm-sec-t::before{content:\"\";display:inline-block;width:5px;height:5px;margin-right:9px;vertical-align:2px;background:#c2a06a;}\n.rm-t-sidebar-ink .rm-sec-h::after{content:\"\";flex:1;height:1px;background:linear-gradient(90deg,rgba(194,160,106,.55),rgba(194,160,106,0));}\n.rm-t-sidebar-ink .rm-sec-hobbies .rm-tags{gap:6px;}\n.rm-t-sidebar-ink .rm-sec-campus .rm-item-t{color:#16302b;}\n.rm-t-sidebar-ink .rm-summary{margin:0;font-size:12.6px;line-height:1.76;color:#48564f;}\n.rm-t-sidebar-ink .rm-item{margin:0 0 12px;}\n.rm-t-sidebar-ink .rm-item-t{font-weight:650;color:#16302b;}\n.rm-t-sidebar-ink .rm-item-role{margin-left:8px;font-size:12.2px;color:#6d7c76;}\n.rm-t-sidebar-ink .rm-date{font-size:11px;color:#8d9a95;font-variant-numeric:tabular-nums;}\n.rm-t-sidebar-ink .rm-item-sub{margin-top:2px;font-size:11.5px;color:#78867f;}\n.rm-t-sidebar-ink .rm-bullets{margin:5px 0 0;padding-left:15px;}\n.rm-t-sidebar-ink .rm-bullets li{margin:3px 0;color:#3f4d47;}\n.rm-t-sidebar-ink .rm-bullets li::marker{color:#c2a06a;}\n.rm-t-sidebar-ink .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#6d7c76;}\n.rm-t-sidebar-ink .rm-edu-courses .rm-k{margin-right:7px;color:#93a49d;}\n.rm-t-sidebar-ink .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-sidebar-ink .rm-award-t{font-weight:600;color:#16302b;}\n.rm-t-sidebar-ink .rm-award-desc{font-size:11.5px;color:#6d7c76;}\n.rm-t-sidebar-ink .rm-skill-row{grid-template-columns:118px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-sidebar-ink .rm-skill-k{font-size:12px;font-weight:600;letter-spacing:.02em;color:#16302b;}\n.rm-t-sidebar-ink .rm-tag{display:inline-block;padding:1px 9px;border:1px solid #16302b;border-radius:3px;background:#16302b;color:#eaf2ee;font-size:11px;line-height:1.7;}\n.rm-t-sidebar-ink .rm-tags{gap:5px;}\n.rm-t-sidebar-ink strong{color:#0f2620;}\n",
+  "sample": {
+    "basics": {
+      "name": "许清和",
+      "role": "品牌设计师 · 6 年视觉与空间经验",
+      "phone": "138 0013 8000",
+      "email": "qinghe.xu@example.com",
+      "city": "上海",
+      "wechat": "qinghe-design",
+      "github": "github.com/qinghe-xu",
+      "website": "qinghe.studio",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover"
+    },
+    "summary": "从品牌识别到空间导视一路做下来，习惯把抽象的调性落到能触摸的材质与比例上。主导过 4 个完整品牌重塑项目，其中 2 个拿到设计奖项。",
+    "experience": [
+      {
+        "company": "未山设计工作室",
+        "role": "品牌设计师",
+        "period": "2021.04 — 至今",
+        "location": "上海",
+        "bullets": [
+          "独立负责 3 个品牌的视觉系统，从字标、版式到包装落地，平均交付周期 6 周。",
+          "搭建工作室的版式与配色规范，返工率下降 **35%**。"
+        ]
+      },
+      {
+        "company": "间白品牌咨询",
+        "role": "视觉设计师",
+        "period": "2018.07 — 2021.03",
+        "location": "杭州",
+        "bullets": [
+          "参与 12 个消费品牌的识别升级，其中 2 个项目续签全案。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "听潮书店 · 品牌与导视",
+        "role": "视觉主创",
+        "period": "2023.05 — 2023.11",
+        "bullets": [
+          "把「潮汐」抽象成一套可重复的弧线网格，覆盖 6 家门店的导视与物料。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "中国美术学院",
+        "degree": "学士",
+        "major": "视觉传达设计",
+        "period": "2014.09 — 2018.06",
+        "gpa": "3.7 / 4.0",
+        "courses": "字体设计、版式设计、品牌策略"
+      }
+    ],
+    "campus": [
+      {
+        "name": "院学生会宣传部",
+        "role": "部长",
+        "period": "2016.09 — 2017.06",
+        "bullets": [
+          "统筹 12 场校园展览的视觉物料，累计输出 60 余张海报。"
+        ]
+      }
+    ],
+    "hobbies": "长跑、胶片摄影、咖啡烘焙、木作",
+    "skills": [
+      {
+        "group": "设计工具",
+        "items": "Figma、Illustrator、InDesign、Cinema 4D"
+      },
+      {
+        "group": "设计能力",
+        "items": "品牌识别、版式系统、导视设计、印刷落地"
+      }
+    ],
+    "awards": [
+      {
+        "title": "东京 TDC 年度提名",
+        "date": "2023.02",
+        "desc": "听潮书店品牌"
+      },
+      {
+        "title": "金点设计奖 · 视觉传达类",
+        "date": "2021.11",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-11-01T12:00:00.000Z"
+}

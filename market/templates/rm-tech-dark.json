@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "id": "rm-tech-dark",
+  "name": "夜色科技",
+  "en": "Tech Dark",
+  "tagline": "深色页眉配青色高亮，技能标签带发光边；开发、测试与 AI 岗一眼看出技术味。",
+  "tags": [
+    "互联网",
+    "研发",
+    "AI"
+  ],
+  "author": "大肥鱼",
+  "accent": "#06b6d4",
+  "cls": "rm-t-tech-dark",
+  "templateId": "mkt-tech-dark",
+  "css": "\n.rm-t-tech-dark{padding:0 0 46px;background:#f7f9fc;color:#243141;font-size:13px;line-height:1.66;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",\"PingFang SC\",\"Microsoft YaHei\",\"Noto Sans SC\",sans-serif;}\n.rm-t-tech-dark .rm-head{position:relative;margin:0;padding:36px 46px 30px;background:linear-gradient(135deg,#111827 0%,#0b1220 60%,#111d33 100%);color:#e8eef7;}\n.rm-t-tech-dark .rm-head::after{content:\"\";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#22d3ee 0%,#0ea5e9 46%,rgba(14,165,233,0) 100%);}\n.rm-t-tech-dark .rm-name{margin:0;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:.02em;color:#f8fafc;}\n.rm-t-tech-dark .rm-name::after{content:\"\";display:inline-block;width:7px;height:7px;margin-left:12px;vertical-align:7px;border-radius:50%;background:#22d3ee;box-shadow:0 0 10px rgba(34,211,238,.8);}\n.rm-t-tech-dark .rm-role{margin:8px 0 0;font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:11.5px;letter-spacing:.14em;color:#67e8f9;}\n.rm-t-tech-dark .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 30px;margin:18px 0 0;max-width:600px;}\n.rm-t-tech-dark .rm-k{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:9px;letter-spacing:.18em;color:#8ba0bd;text-transform:uppercase;}\n.rm-t-tech-dark .rm-v{font-size:12px;color:#dbe6f3;}\n.rm-t-tech-dark .rm-photo{width:90px;height:90px;background:#0f1a2a;border:1px solid #1f3348;}\n.rm-t-tech-dark .rm-body{padding:0 46px;}\n.rm-t-tech-dark .rm-sec{margin-top:24px;}\n.rm-t-tech-dark .rm-sec-h{display:flex;align-items:baseline;gap:8px;margin:0 0 11px;padding-bottom:5px;border-bottom:1px solid #dbe3ee;}\n.rm-t-tech-dark .rm-sec-t{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:12px;font-weight:700;letter-spacing:.12em;color:#0b1220;}\n.rm-t-tech-dark .rm-sec-t::before{content:\"//\";margin-right:7px;color:#0891b2;font-weight:700;letter-spacing:0;}\n.rm-t-tech-dark .rm-summary{color:#3b4a5e;font-size:12.8px;line-height:1.74;}\n.rm-t-tech-dark .rm-item{margin:0 0 11px;}\n.rm-t-tech-dark .rm-item-t{font-weight:650;color:#0b1220;}\n.rm-t-tech-dark .rm-item-role{margin-left:7px;font-size:12.2px;color:#5b6b80;}\n.rm-t-tech-dark .rm-date{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:10.5px;color:#5f7288;}\n.rm-t-tech-dark .rm-item-sub{margin-top:2px;font-size:11.5px;color:#63758c;}\n.rm-t-tech-dark .rm-bullets{margin:5px 0 0;padding-left:15px;}\n.rm-t-tech-dark .rm-bullets li{margin:3px 0;color:#31404f;}\n.rm-t-tech-dark .rm-bullets li::marker{color:#0e9db8;}\n.rm-t-tech-dark .rm-sec-campus .rm-item-t{color:#0b1220;}\n.rm-t-tech-dark .rm-sec-hobbies .rm-tags{gap:6px;}\n.rm-t-tech-dark .rm-edu-courses{margin-top:3px;font-size:11.5px;color:#5b6b80;}\n.rm-t-tech-dark .rm-edu-courses .rm-k{margin-right:7px;color:#8ba0bd;}\n.rm-t-tech-dark .rm-skill-row{grid-template-columns:104px minmax(0,1fr);gap:10px;margin:0 0 7px;}\n.rm-t-tech-dark .rm-skill-k{font-family:ui-monospace,\"SFMono-Regular\",Consolas,\"Courier New\",monospace;font-size:11.5px;font-weight:600;color:#0f172a;}\n.rm-t-tech-dark .rm-tags{gap:5px;}\n.rm-t-tech-dark .rm-tag{padding:1px 8px;border:1px solid #164e63;border-radius:3px;background:#0f172a;color:#a5f3fc;font-size:11px;line-height:1.7;box-shadow:0 0 10px rgba(34,211,238,.16);}\n.rm-t-tech-dark .rm-award-row{margin:0 0 7px;align-items:baseline;}\n.rm-t-tech-dark .rm-award-t{font-weight:600;color:#0b1220;}\n.rm-t-tech-dark .rm-award-desc{font-size:11.5px;color:#5b6b80;}\n.rm-t-tech-dark strong{color:#0b1220;}\n",
+  "sample": {
+    "basics": {
+      "name": "周景行",
+      "role": "前端工程师 · AI 应用开发",
+      "phone": "138 0013 8000",
+      "email": "jingxing.zhou@example.com",
+      "city": "深圳",
+      "wechat": "zhoujx-dev",
+      "github": "github.com/zhoujx",
+      "website": "",
+      "photo": "",
+      "photoSide": "right",
+      "photoShape": "circle",
+      "photoFit": "cover"
+    },
+    "summary": "5 年前端经验，近两年专注把大模型能力接进真实产品：流式对话、工具调用、检索增强都做过完整落地。习惯先跑通最小闭环，再谈架构。",
+    "experience": [
+      {
+        "company": "浪潮智能",
+        "role": "前端工程师",
+        "period": "2022.09 — 至今",
+        "location": "深圳",
+        "bullets": [
+          "负责 AI 助手的前端链路，首屏可交互时间从 2.8s 降到 **1.1s**。",
+          "设计流式渲染与中断重试机制，长对话失败率下降 46%。"
+        ]
+      },
+      {
+        "company": "微核网络",
+        "role": "前端工程师",
+        "period": "2019.07 — 2022.08",
+        "location": "广州",
+        "bullets": [
+          "主导中台组件库建设，沉淀 38 个组件，被 6 条业务线复用。"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "企业知识库问答",
+        "role": "前端负责人",
+        "period": "2024.02 — 2024.09",
+        "bullets": [
+          "完成检索结果流式渲染与引用溯源，周活用户 3 个月增长至 1.4 万。",
+          "把人工评测试验流程自动化，单个模型评测耗时从 3 天缩短到 4 小时。"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "school": "华南理工大学",
+        "degree": "学士",
+        "major": "软件工程",
+        "period": "2015.09 — 2019.06",
+        "gpa": "3.6 / 4.0",
+        "courses": "数据结构、计算机网络、人机交互"
+      }
+    ],
+    "campus": [
+      {
+        "name": "ACM 集训队",
+        "role": "队员",
+        "period": "2017.03 — 2018.12",
+        "bullets": [
+          "参加省级程序设计竞赛，获团队二等奖。"
+        ]
+      }
+    ],
+    "hobbies": "机械键盘、开源、登山、科幻小说",
+    "skills": [
+      {
+        "group": "前端",
+        "items": "TypeScript、React、Vite、Node.js"
+      },
+      {
+        "group": "AI 应用",
+        "items": "LLM 接入、RAG、流式渲染、评测"
+      }
+    ],
+    "awards": [
+      {
+        "title": "内部黑客松一等奖",
+        "date": "2024.06",
+        "desc": "RAG 知识库"
+      },
+      {
+        "title": "开源项目贡献者 Top 100",
+        "date": "2023.12",
+        "desc": ""
+      }
+    ]
+  },
+  "createdAt": "2026-11-01T12:00:00.000Z"
+}

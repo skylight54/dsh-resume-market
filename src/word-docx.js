@@ -44,7 +44,7 @@ const FONT_SANS = 'Microsoft YaHei';
 const FONT_SERIF = 'Georgia';
 const FONT_SERIF_EA = 'SimSun';
 
-const SECTION_ORDER = ['summary', 'experience', 'projects', 'education', 'skills', 'awards'];
+const SECTION_ORDER = ['summary', 'experience', 'projects', 'education', 'campus', 'skills', 'awards', 'hobbies'];
 const CONTACT_FIELDS = ['phone', 'email', 'city', 'wechat', 'github', 'website'];
 
 /** 中英文标签（与 doc.js 的 LABELS 保持一致；doc.js 未导出 labelsOf，这里保留一份）。 */
@@ -54,8 +54,10 @@ const LABELS = {
     experience: '工作经历',
     projects: '项目经历',
     education: '教育背景',
+    campus: '校园经历',
     skills: '专业技能',
     awards: '荣誉奖项',
+    hobbies: '兴趣爱好',
     phone: '电话',
     email: '邮箱',
     city: '城市',
@@ -70,8 +72,10 @@ const LABELS = {
     experience: 'EXPERIENCE',
     projects: 'PROJECTS',
     education: 'EDUCATION',
+    campus: 'CAMPUS',
     skills: 'SKILLS',
     awards: 'AWARDS',
+    hobbies: 'INTERESTS',
     phone: 'Phone',
     email: 'Email',
     city: 'Location',
@@ -207,6 +211,7 @@ function run(text, opts) {
   if (o.spacingPx) rPr.push('<w:spacing w:val="' + Math.round(o.spacingPx * 15) + '"/>');
   if (o.size) rPr.push('<w:sz w:val="' + sz(o.size) + '"/><w:szCs w:val="' + sz(o.size) + '"/>');
   if (o.underline) rPr.push('<w:u w:val="single"/>');
+  if (o.shd) rPr.push('<w:shd w:val="clear" w:color="auto" w:fill="' + val(o.shd) + '"/>');
   const rPrXml = '<w:rPr>' + rPr.join('') + '</w:rPr>';
   return String(text == null ? '' : text)
     .split('\n')
@@ -952,6 +957,26 @@ function projectBlocks(data, L, st, width) {
   return out;
 }
 
+/** 校园经历：与项目经历同构（组织/职务 + 时间 + 要点）。 */
+function campusBlocks(data, L, st, width) {
+  const list = data.campus || [];
+  if (!list.length) return [];
+  const fonts = bodyFonts(st);
+  const out = [];
+  list.forEach((it, i) => {
+    if (i) out.push(gapPara(7));
+    const left = [
+      it.name
+        ? run(it.name, { size: st.bodySize, bold: true, color: st.bodyColor, font: fonts.font, eaFont: fonts.eaFont })
+        : '',
+      it.role ? run('　' + it.role, { size: 12, color: '#5a616c', font: fonts.font, eaFont: fonts.eaFont }) : '',
+    ].join('');
+    out.push(entryPara(left, it.period, width, st));
+    for (const bullet of it.bullets || []) out.push(bulletPara(bullet, st));
+  });
+  return out;
+}
+
 function educationBlocks(data, L, st, width) {
   const list = data.education || [];
   if (!list.length) return [];
@@ -1036,13 +1061,42 @@ function awardsBlocks(data, L, st, width) {
   return out;
 }
 
+/** 兴趣爱好：一行标签，用顿号/逗号分隔；Word 里用浅色底纹的 run 模拟标签。 */
+function hobbiesBlocks(data, L, st, width) {
+  const tags = String(data.hobbies || '')
+    .split(/[、,，/|]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!tags.length) return [];
+  const fonts = bodyFonts(st);
+  const fill = mix(st.accent, '#ffffff', 0.86);
+  const ink = mix(st.accent, st.bodyColor || '#1d2129', 0.58);
+  const parts = [];
+  tags.forEach((tag, i) => {
+    if (i) parts.push(run('  ', { size: 11, font: fonts.font, eaFont: fonts.eaFont }));
+    parts.push(
+      run(' ' + tag + ' ', {
+        size: 11.5,
+        color: ink,
+        shd: fill,
+        spacingPx: 0.3,
+        font: fonts.font,
+        eaFont: fonts.eaFont,
+      })
+    );
+  });
+  return [para(parts.join(''), { beforePt: 1.5, afterPt: 1.5 })];
+}
+
 function contentBlocks(id, data, L, st, width) {
   if (id === 'summary') return summaryBlocks(data, L, st);
   if (id === 'experience') return experienceBlocks(data, L, st, width);
   if (id === 'projects') return projectBlocks(data, L, st, width);
   if (id === 'education') return educationBlocks(data, L, st, width);
+  if (id === 'campus') return campusBlocks(data, L, st, width);
   if (id === 'skills') return skillsBlocks(data, L, st, width);
   if (id === 'awards') return awardsBlocks(data, L, st, width);
+  if (id === 'hobbies') return hobbiesBlocks(data, L, st, width);
   return [];
 }
 

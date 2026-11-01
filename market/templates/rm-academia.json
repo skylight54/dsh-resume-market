@@ -26,7 +26,8 @@
       "website": "muyun.academia.example",
       "photo": "",
       "photoSide": "right",
-      "photoShape": "circle"
+      "photoShape": "circle",
+      "photoFit": "cover"
     },
     "summary": "社会学博士，研究城市更新与社区治理。博士期间主持 1 项省级课题，发表 CSSCI 论文 3 篇，其中 1 篇被《人大复印资料》全文转载。",
     "experience": [
@@ -62,6 +63,8 @@
         "courses": ""
       }
     ],
+    "campus": [],
+    "hobbies": "",
     "skills": [
       {
         "group": "研究方法",

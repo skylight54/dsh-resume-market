@@ -369,6 +369,50 @@ function EducationCard(props) {
   });
 }
 
+function CampusCard(props) {
+  return card({
+    title: '校园经历',
+    hint: '可选 · 社团 / 学生组织 / 竞赛，最多 6 条',
+    children: h(ListEditor, {
+      items: props.items,
+      onChange: props.onChange,
+      addLabel: '添加一条校园经历',
+      makeItem: function () {
+        return { name: '', role: '', period: '', bullets: [] };
+      },
+      render: function (item, update) {
+        return h(
+          'div',
+          { className: 'rm-col' },
+          h(
+            Fields2,
+            null,
+            h(Field, { label: '学校 / 组织', value: item.name, placeholder: '某某大学学生会', onChange: function (v) { update({ name: v }); } }),
+            h(Field, { label: '角色 / 职务', value: item.role, placeholder: '外联部部长', onChange: function (v) { update({ role: v }); } }),
+            h(Field, { label: '时间', value: item.period, placeholder: '2016.09 – 2017.06', wide: true, onChange: function (v) { update({ period: v }); } })
+          ),
+          h(BulletsArea, { bullets: item.bullets, label: '校园要点（每行一条）', onChange: function (v) { update({ bullets: v }); } })
+        );
+      },
+    }),
+  });
+}
+
+function HobbiesCard(props) {
+  return card({
+    title: '兴趣爱好',
+    hint: '可选 · 一行，用顿号或逗号分隔',
+    children: h(Area, {
+      label: '兴趣标签',
+      rows: 2,
+      value: props.value,
+      placeholder: '用顿号或逗号分隔，如：篮球、摄影、旅行',
+      onChange: props.onChange,
+    }),
+  });
+}
+
+
 function SkillsCard(props) {
   return card({
     title: '专业技能',
@@ -420,7 +464,7 @@ function AwardsCard(props) {
   });
 }
 
-var RM_SECTION_LABELS_UI = { summary: '个人简介', experience: '工作经历', projects: '项目经历', education: '教育背景', skills: '专业技能', awards: '荣誉奖项' };
+var RM_SECTION_LABELS_UI = { summary: '个人简介', experience: '工作经历', projects: '项目经历', education: '教育背景', campus: '校园经历', skills: '专业技能', awards: '荣誉奖项', hobbies: '兴趣爱好' };
 
 /**
  * 模块顺序与显示：
@@ -601,7 +645,9 @@ function EditorForm(props) {
     h(ExperienceCard, { items: data.experience, onChange: patch('experience') }),
     h(ProjectsCard, { items: data.projects, onChange: patch('projects') }),
     h(EducationCard, { items: data.education, onChange: patch('education') }),
+    h(CampusCard, { items: data.campus, onChange: patch('campus') }),
     h(SkillsCard, { items: data.skills, onChange: patch('skills') }),
-    h(AwardsCard, { items: data.awards, onChange: patch('awards') })
+    h(AwardsCard, { items: data.awards, onChange: patch('awards') }),
+    h(HobbiesCard, { value: data.hobbies, onChange: patch('hobbies') })
   );
 }

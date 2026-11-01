@@ -87,6 +87,10 @@ var RM_STYLE_NUM_RANGES = {
   padY: [20, 120],
   sectionGap: [8, 48],
   contactCols: [1, 4],
+  // 版式细项里的数值（和后端 sanitizeStyle 的夹取范围保持一致）。
+  photoSize: [56, 160],
+  itemGap: [0, 40],
+  titleGap: [0, 40],
 };
 
 var RM_HEADING_STYLES = [
@@ -118,6 +122,54 @@ var RM_CONTENT_STYLES = [
   ['card', '卡片'],
 ];
 
+/** 模块标题下的分隔线样式（默认 line = 沿用各标题样式自带的线）。 */
+var RM_SECTION_DIVIDERS = [
+  ['line', '细线'],
+  ['dashed', '虚线'],
+  ['double', '双线'],
+  ['accent', '强调色'],
+  ['none', '无'],
+];
+
+/** 要点列表的符号。 */
+var RM_BULLET_STYLES = [
+  ['dot', '圆点'],
+  ['dash', '短横线'],
+  ['square', '方块'],
+  ['ring', '空心圆'],
+];
+
+/** 姓名对齐。 */
+var RM_NAME_ALIGNS = [
+  ['left', '左对齐'],
+  ['center', '居中'],
+];
+
+/** 联系方式的排布。 */
+var RM_CONTACT_STYLES = [
+  ['grid', '网格'],
+  ['inline', '单行'],
+  ['pills', '胶囊'],
+];
+
+/** 技能 / 兴趣标签的样式。 */
+var RM_TAG_STYLES = [
+  ['pill', '胶囊'],
+  ['plain', '纯文字'],
+  ['underline', '下划线'],
+];
+
+/** 照片位置与形状（left/right 管位置，circle 管圆形，none 隐藏）。 */
+var RM_PHOTO_FRAMES = [
+  ['left', '靠左'],
+  ['right', '靠右'],
+  ['circle', '圆形'],
+  ['none', '不显示'],
+];
+
+/** 照片边长的参照值：等于它时沿用模板原有尺寸，不动 CSS。 */
+var RM_PHOTO_SIZE_BASE = 96;
+
 /** 左侧栏布局时，哪些模块搬到左栏（顺序即左栏里的上下顺序）。 */
 var RM_SIDEBAR_SECTIONS = [
   ['summary', '自我评价'],
@@ -138,6 +190,26 @@ function rmStylePickEnum(value, options, fallback) {
     if (options[i][0] === value) return value;
   }
   return fallback;
+}
+
+/** 版式细项的枚举字段 → 白名单（clone / merge 共用一张表）。 */
+var RM_STYLE_ENUM_FIELDS = [
+  ['sectionDivider', RM_SECTION_DIVIDERS],
+  ['bulletStyle', RM_BULLET_STYLES],
+  ['nameAlign', RM_NAME_ALIGNS],
+  ['contactStyle', RM_CONTACT_STYLES],
+  ['tagStyle', RM_TAG_STYLES],
+  ['photoFrame', RM_PHOTO_FRAMES],
+];
+
+/** 把 source 上的版式细项枚举收敛进 out（非法值保留 out 原值）。 */
+function rmPickStyleEnums(out, source) {
+  if (!source || typeof source !== 'object') return out;
+  for (var i = 0; i < RM_STYLE_ENUM_FIELDS.length; i++) {
+    var key = RM_STYLE_ENUM_FIELDS[i][0];
+    out[key] = rmStylePickEnum(source[key], RM_STYLE_ENUM_FIELDS[i][1], out[key]);
+  }
+  return out;
 }
 
 /** 侧栏模块收敛：只留白名单 id，按白名单顺序去重；不是数组时返回 null（表示沿用原值）。 */
@@ -206,6 +278,16 @@ function rmStyleDefaults() {
     contentStyle: 'plain',
     // 左侧栏布局时左栏承载的模块（默认把技能特长放左栏，和常见「深色侧栏」简历一致）。
     sidebarSections: ['skills'],
+    // 版式细项：默认值都等于「沿用模板原有样式」，只有改动后才额外生成规则。
+    sectionDivider: 'line',
+    bulletStyle: 'dot',
+    nameAlign: 'left',
+    contactStyle: 'grid',
+    tagStyle: 'pill',
+    photoFrame: 'right',
+    photoSize: 96,
+    itemGap: 0,
+    titleGap: 0,
   };
 }
 
@@ -215,11 +297,15 @@ var RM_STYLE_PRESETS = {
     colors: { accent: '#1f2328', nameColor: '#111827', headingColor: '#111827', bodyColor: '#333941', background: '#ffffff', bandColor: '#f3f4f6', gold: '#b8912c' },
     nameSize: 34, headingSize: 12, bodySize: 13.5, lineHeight: 1.62, padX: 60, padY: 54, sectionGap: 18,
     headingStyle: 'rule', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
+    // 极简黑白：单行联系方式 + 纯文字标签 + 短横线要点，更像一份干净的 Word 简历。
+    bulletStyle: 'dash', contactStyle: 'inline', tagStyle: 'plain', nameAlign: 'left',
   },
   'quiet-luxury': {
     colors: { accent: '#5f7896', nameColor: '#1f2b3d', headingColor: '#3d4c61', bodyColor: '#2a3442', background: '#ffffff', bandColor: '#f1f4f8', gold: '#b8912c' },
     nameSize: 34, headingSize: 12, bodySize: 13.2, lineHeight: 1.68, padX: 62, padY: 56, sectionGap: 20,
     headingStyle: 'underline', fontFamily: 'serif', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
+    // 静奢：双线分隔 + 纯文字标签，克制的细线条。
+    sectionDivider: 'double', tagStyle: 'plain', bulletStyle: 'ring',
   },
   'fresh-creative': {
     colors: { accent: '#7ccab6', nameColor: '#135c4f', headingColor: '#175e52', bodyColor: '#22343a', background: '#ffffff', bandColor: '#e6f6f2', gold: '#c9a227' },
@@ -235,6 +321,8 @@ var RM_STYLE_PRESETS = {
     colors: { accent: '#2f6fde', nameColor: '#1f3352', headingColor: '#1f3352', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#eaf1fc', gold: '#c9a227' },
     nameSize: 32, headingSize: 12.5, bodySize: 13.5, lineHeight: 1.62, padX: 56, padY: 50, sectionGap: 18,
     headingStyle: 'rule', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
+    // 时间轴：方块要点 + 强调色分隔线，一眼能看出「条目感」。
+    bulletStyle: 'square', sectionDivider: 'accent',
   },
   'tech-grid': {
     colors: { accent: '#2c5f96', nameColor: '#10213a', headingColor: '#133a63', bodyColor: '#16202e', background: '#ffffff', bandColor: '#eef2f7', gold: '#c9a227' },
@@ -246,6 +334,8 @@ var RM_STYLE_PRESETS = {
     nameSize: 26, headingSize: 12.5, bodySize: 13, lineHeight: 1.6, padX: 40, padY: 34, sectionGap: 16,
     headingStyle: 'icon', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 1,
     layout: 'sidebar', headerStyle: 'plain', contentStyle: 'plain', sidebarSections: ['skills'],
+    // 侧栏模板：标题本来就没有下划线（leftbar），圆形头像更像常见深色侧栏简历。
+    sectionDivider: 'none', photoFrame: 'circle',
   },
   'pill-blue': {
     colors: { accent: '#2f6fde', nameColor: '#10213a', headingColor: '#1f3352', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#1f4b7a', gold: '#c9a227' },
@@ -394,6 +484,7 @@ function rmCloneStyle(base) {
   out.layout = rmStylePickEnum(base.layout, RM_LAYOUTS, out.layout);
   out.headerStyle = rmStylePickEnum(base.headerStyle, RM_HEADER_STYLES, out.headerStyle);
   out.contentStyle = rmStylePickEnum(base.contentStyle, RM_CONTENT_STYLES, out.contentStyle);
+  rmPickStyleEnums(out, base);
   var baseSections = rmNormalizeSidebarSections(base.sidebarSections);
   if (baseSections) out.sidebarSections = baseSections;
   if (typeof base.headerBand === 'boolean') out.headerBand = base.headerBand;
@@ -436,6 +527,7 @@ function rmStyleMerge(base, patch) {
   out.layout = rmStylePickEnum(patch.layout, RM_LAYOUTS, out.layout);
   out.headerStyle = rmStylePickEnum(patch.headerStyle, RM_HEADER_STYLES, out.headerStyle);
   out.contentStyle = rmStylePickEnum(patch.contentStyle, RM_CONTENT_STYLES, out.contentStyle);
+  rmPickStyleEnums(out, patch);
   var patchSections = rmNormalizeSidebarSections(patch.sidebarSections);
   if (patchSections) out.sidebarSections = patchSections;
   if (typeof patch.headerBand === 'boolean') out.headerBand = patch.headerBand;
@@ -712,6 +804,82 @@ function rmStyleToCss(style, cls) {
     rule(root + ' .rm-name::after', 'content:"";display:inline-block;width:2px;height:.9em;margin-left:22px;vertical-align:-2px;background:linear-gradient(180deg,' + c.gold + ',#e9d7a0);');
     rule(root + ' .rm-role', 'letter-spacing:.4em;text-transform:uppercase;color:' + c.headingColor + ';');
   }
+
+  /* ---- 版式细项：分隔线 / 要点符号 / 姓名对齐 / 联系方式 / 标签 / 照片 / 间距 ---- */
+  // 这些字段的默认值都等于「不改动」：只有用户真改过才生成规则，避免动到内置模板原有外观。
+  var dividerBody = '';
+  if (st.sectionDivider === 'dashed') dividerBody = 'border-bottom:1px dashed ' + rmRgba(c.accent, 0.48) + ';padding-bottom:4px;';
+  else if (st.sectionDivider === 'double') dividerBody = 'border-bottom:3px double ' + rmRgba(c.accent, 0.55) + ';padding-bottom:4px;';
+  else if (st.sectionDivider === 'accent') dividerBody = 'border-bottom:2px solid ' + c.accent + ';padding-bottom:5px;';
+  else if (st.sectionDivider === 'none') dividerBody = 'border-bottom:0;padding-bottom:2px;';
+  if (dividerBody) {
+    rule(root + ' .rm-sec-h', dividerBody);
+    // 左栏里的模块标题是深底白字，单独给一条（选择器更具体，能盖过上一条）。
+    if (st.layout === 'sidebar' && sideSections.length && railSel) {
+      var railDividerInk = rmLuminance(railBg) < 0.62 ? '#ffffff' : c.bodyColor;
+      rule(
+        railSel + ' .rm-sec-h',
+        st.sectionDivider === 'none'
+          ? 'border-bottom:0;padding-bottom:2px;'
+          : 'border-bottom:' + (st.sectionDivider === 'double' ? '3px double ' : st.sectionDivider === 'accent' ? '2px solid ' : '1px dashed ') + rmRgba(railDividerInk, 0.42) + ';padding-bottom:4px;'
+      );
+    }
+  }
+
+  if (st.bulletStyle === 'square') {
+    rule(root + ' .rm-bullets li', 'list-style-type:square;');
+  } else if (st.bulletStyle === 'ring') {
+    rule(root + ' .rm-bullets li', 'list-style-type:circle;');
+  } else if (st.bulletStyle === 'dash') {
+    // 短横线要点：::marker 只认很少的取值，这里自己画一个，兼容性最好。
+    rule(root + ' .rm-bullets li', 'list-style:none;position:relative;padding-left:14px;');
+    rule(root + ' .rm-bullets li::before', 'content:"–";position:absolute;left:0;top:0;color:' + c.accent + ';');
+  }
+
+  if (st.nameAlign === 'center') {
+    rule(root + ' .rm-id', 'text-align:center;');
+    rule(root + ' .rm-name', 'text-align:center;');
+  }
+
+  var contactSel = root + ' .rm-contact,' + root + ' .rm-head.rm-has-photo .rm-contact';
+  if (st.contactStyle === 'inline') {
+    // 一行排开、用 · 分隔：窄屏会自然换行，不会挤成一列。
+    rule(contactSel, 'display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 0;');
+    rule(root + ' .rm-contact .rm-c', 'display:inline-flex;align-items:baseline;gap:5px;margin:0 16px 0 0;');
+    rule(root + ' .rm-contact .rm-c + .rm-c::before', 'content:"·";margin-right:8px;color:' + rmRgba(c.accent, 0.5) + ';');
+  } else if (st.contactStyle === 'pills') {
+    rule(contactSel, 'display:flex;flex-wrap:wrap;align-items:center;gap:6px;');
+    rule(
+      root + ' .rm-contact .rm-c',
+      'display:inline-flex;align-items:baseline;gap:6px;padding:2px 10px;border-radius:999px;background:' + rmRgba(c.accent, 0.08) + ';border:1px solid ' + rmRgba(c.accent, 0.18) + ';'
+    );
+  }
+
+  if (st.tagStyle === 'plain') {
+    rule(root + ' .rm-tag', 'border:0;background:transparent;padding:0;border-radius:0;color:' + c.bodyColor + ';');
+  } else if (st.tagStyle === 'underline') {
+    rule(root + ' .rm-tag', 'border:0;background:transparent;padding:0 0 1px;border-radius:0;border-bottom:1px solid ' + rmRgba(c.accent, 0.5) + ';color:' + rmMixHex(c.accent, c.bodyColor, 0.3) + ';');
+  }
+
+  // 照片：.rm-head .rm-photo 的选择器要压过左侧栏那几条固定尺寸的规则。
+  var photoSel = root + ' .rm-head .rm-photo';
+  if (st.photoFrame === 'none') {
+    rule(photoSel, 'display:none;');
+    rule(root + ' .rm-head.rm-has-photo', 'grid-template-columns:minmax(0,1fr);');
+  } else if (st.photoFrame === 'circle') {
+    rule(photoSel, 'border-radius:50%;');
+  } else if (st.photoFrame === 'left') {
+    // 强制照片在左：靠 order 把照片排到第一格（grid 也认 order）。
+    rule(root + ' .rm-head.rm-has-photo', 'grid-template-columns:auto minmax(0,1fr);');
+    rule(photoSel, 'order:-1;grid-column:1;grid-row:1;');
+  }
+  if (st.photoSize !== RM_PHOTO_SIZE_BASE) rule(photoSel, 'width:' + st.photoSize + 'px;height:' + st.photoSize + 'px;');
+
+  if (st.itemGap > 0) {
+    rule(root + ' .rm-item', 'margin-bottom:0;');
+    rule(root + ' .rm-item + .rm-item', 'margin-top:' + st.itemGap + 'px;');
+  }
+  if (st.titleGap > 0) rule(root + ' .rm-sec-h', 'margin-bottom:' + st.titleGap + 'px;');
 
   return lines.join('\n');
 }
@@ -2039,6 +2207,49 @@ function TemplateEditor(props) {
                   ],
                   value: String(Math.round(style.contactCols)),
                   onPick: function (v) { patchStyle({ contactCols: Number(v) }); },
+                })
+              ),
+              h('span', { className: 'rm-field-k' }, '分隔线'),
+              h(rmChipRow, { options: RM_SECTION_DIVIDERS, value: style.sectionDivider, onPick: function (v) { patchStyle({ sectionDivider: v }); } }),
+              h('span', { className: 'rm-field-k' }, '要点符号'),
+              h(rmChipRow, { options: RM_BULLET_STYLES, value: style.bulletStyle, onPick: function (v) { patchStyle({ bulletStyle: v }); } }),
+              h('span', { className: 'rm-field-k' }, '标签样式'),
+              h(rmChipRow, { options: RM_TAG_STYLES, value: style.tagStyle, onPick: function (v) { patchStyle({ tagStyle: v }); } }),
+              h('span', { className: 'rm-field-k' }, '联系方式'),
+              h(rmChipRow, { options: RM_CONTACT_STYLES, value: style.contactStyle, onPick: function (v) { patchStyle({ contactStyle: v }); } }),
+              h('span', { className: 'rm-field-k' }, '姓名对齐'),
+              h(rmChipRow, { options: RM_NAME_ALIGNS, value: style.nameAlign, onPick: function (v) { patchStyle({ nameAlign: v }); } }),
+              h('span', { className: 'rm-field-k' }, '照片'),
+              h(rmChipRow, { options: RM_PHOTO_FRAMES, value: style.photoFrame, onPick: function (v) { patchStyle({ photoFrame: v }); } }),
+              h(
+                'div',
+                { className: 'rm-range-grid' },
+                h(rmRangeField, {
+                  label: '照片大小',
+                  value: style.photoSize,
+                  min: 56,
+                  max: 160,
+                  step: 4,
+                  display: style.photoSize + 'px',
+                  onChange: function (v) { patchStyle({ photoSize: v }); },
+                }),
+                h(rmRangeField, {
+                  label: '条目间距',
+                  value: style.itemGap,
+                  min: 0,
+                  max: 40,
+                  step: 2,
+                  display: style.itemGap ? style.itemGap + 'px' : '默认',
+                  onChange: function (v) { patchStyle({ itemGap: v }); },
+                }),
+                h(rmRangeField, {
+                  label: '标题间距',
+                  value: style.titleGap,
+                  min: 0,
+                  max: 40,
+                  step: 2,
+                  display: style.titleGap ? style.titleGap + 'px' : '默认',
+                  onChange: function (v) { patchStyle({ titleGap: v }); },
                 })
               )
             ),

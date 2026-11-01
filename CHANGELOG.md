@@ -3,6 +3,13 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.13.0 — 2026-11-01
+
+- 简历模块新增两节：**校园经历**（名称 / 角色 / 时间 / 要点，最多 6 条）和**兴趣爱好**（一句话，按顿号或逗号拆成标签云）。`SECTION_ORDER` 扩到 8 项，编辑器多两张卡片（可排序 / 可隐藏），预览、HTML、Word(.docx)、PDF 全部支持；`tests/smoke.mjs` 增加导出断言，`tests/docx.mjs` 增加中英双语两模块断言。
+- 模板编辑器的「元素格式」新增 9 个版式细项：模块分隔线（细线 / 虚线 / 双线 / 强调色 / 无）、要点符号（圆点 / 短线 / 方块 / 空心环）、姓名对齐（左 / 居中）、联系方式排布（两列 / 行内 / 胶囊）、标签样式（胶囊 / 纯文字 / 下划线）、照片位置（左 / 右 / 圆形 / 无）、照片大小（56–160px）、条目间距（0–40px）、标题间距（0–40px）。全部走 `sanitizeStyle` 白名单与默认值「不改动」，内置模板外观零变化；编辑器「版式」卡多了 6 行 chip 与 3 个滑杆。
+- 公共市场从 6 套扩到 **14 套**，新增 8 套流行风格：极简黑白（Minimal Mono）、时间轴（Timeline）、清爽薄荷（Fresh Mint）、暖沙（Warm Sand）、墨色侧栏（Sidebar Ink）、商务藏蓝（Navy Classic）、衬线杂志（Serif Editorial）、夜色科技（Tech Dark）。全部含 8 个模块的示例数据，走 `market/validate.mjs`（根选择器 / 无 @import / 无远程资源 / 示例电话邮箱合规）；侧栏与时间轴两套用真实无头浏览器截图逐张目检后调过间距与竖线连续性。
+- `market/build.mjs` 支持 `market/extra/*.json` 补充模板：外部只需按字段写 JSON 丢进 `market/extra/`，重新 `node market/build.mjs` 即进 index，不必手改 `index.json`。
+
 ## v0.12.1 — 2026-11-01
 
 - CI 首次跑起来就抓到问题：产物不可复现。`build/build.mjs` 之前把源码原样拼进 bundle，Windows 工作区是 CRLF、Linux CI 是 LF，本地构建 448890 字节、CI 441341 字节，导致「产物与提交一致」检查永远失败。现在构建统一按 LF 归一源码行尾，并加了 `.gitattributes`（`* text=auto eol=lf`），从任意平台重建都得到同一份产物。
