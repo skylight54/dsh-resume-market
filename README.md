@@ -39,9 +39,9 @@
   本仓库 `market/index.json`，不需要服务器和账号；安装时只拉那一套模板的 JSON，10 分钟内走本地缓存，
   GitHub 不可达时退回上次缓存。发布弹窗勾选「同时生成 GitHub 公共投稿」会生成规范 JSON + Issue /
   新建文件链接，提交 PR 合并进 `market/` 即对所有用户上架。
-- **兼容插件**：设置页「兼容插件」卡片列出与本插件互补的简历相关插件（如 `dsh-resume-skills`、
-  `dsh-resume-expert`），自动检测当前 profile 装没装，没装的一键「下载安装」（交给 DSH 插件管理器），
-  装完重启 DSH 或刷新页面生效。
+- **兼容插件**：设置页列出真实存在的简历相关插件（`dsh-resume-screening`、`@xrxs-ai/dsh-resume-migrator`、
+  `dsh-plugin-resume-warehouse`），自动检测装没装；没装的可以「去插件市场」跳转安装或「直接安装」，
+  装上后它们注册的工具会显示成能力标签，并能被本插件的 AI 对话调用（`chatTools` 开关）。
 - **AI 协作**：给「大肥鱼」提供 9 个工具，直接用结构化数据生成/修改/导出/发布简历，浏览与安装公共市场模板。
 
 > 文档：[安装说明](docs/INSTALL.md) · [发布步骤](docs/RELEASE.md) · [贡献指南](CONTRIBUTING.md) ·
@@ -65,22 +65,36 @@ dsh plugin add file:<本目录绝对路径>
 
 ## 兼容插件
 
-设置页（侧栏「简历市场」→「设置」）底部有一张「兼容插件」卡片，用来装与本插件互补的独立插件：
+设置页（侧栏「简历市场」→「设置」）底部有一张「兼容插件」卡片，用来接上与本插件互补的独立插件。
+这里的「兼容」不是只装个包，而是**把对方注册到 DSH 的工具接进本插件**：装上后，本插件的 AI 对话可以
+直接调用它们的能力（例如把一批旧简历批量入库、迁移、检索本地简历仓库）。
 
-- **清单**：内置一份静态目录（源码里的 `src/compat.js` → `COMPAT_CATALOG`），每条带分类、关键词和
-  一句话说明；还没发布的条目显示「即将上线」，只展示不提供安装按钮。
+- **真实清单**（`src/compat.js` → `COMPAT_CATALOG`）：
+
+  | 包名 | 用途 | 装好后接进来的能力 |
+  | --- | --- | --- |
+  | `dsh-resume-screening` | HR 视角的简历筛选 / 人才库：Word、PDF、Excel 批量入库，按技能和分类检索、去重 | 筛选、入库类工具 |
+  | `@xrxs-ai/dsh-resume-migrator` | 批量迁移：带队列的批量导入 + 分类导出 | 导入、迁移类工具 |
+  | `dsh-plugin-resume-warehouse` | 本地优先的简历仓库：数据不离开本机 | 仓库、检索类工具 |
+  | `dsh-resume` | 通用简历包（npm 名字已占用，尚未正式发布，条目只展示） | — |
+
+- **能力发现**：Host 读 `ctx.get('tools').schemas()` 拿到 DSH 里当前注册的全部工具，按目录条目的关键词
+  匹配出「这个插件提供了哪些工具」，在卡片上显示成 `工具：xxx` 标签。本插件自己的 `resume_*` 工具会被
+  排除，不算成兼容能力。插件是在 DSH 启动时加载的，所以**装完要重启 DSH** 才会出现能力标签。
+- **两种安装方式**：
+  - 「去插件市场」：切到 DSH 自带的插件市场面板（`layout.selectPanel('dsh-market')`），在市场里搜索安装；
+  - 「直接安装」：Host 执行 `dsh plugin --profile <profile> add <包名>`，命令输出回填到卡片上；已装过的会跳过。
+- **能力真正用起来**：设置页 AI 对话卡片里的「允许 AI 对话调用已安装插件的工具（实验）」（`chatTools`）。
+  打开后，对话的 system prompt 会带上可用工具清单；模型需要时会输出一个 ```tool 代码块，
+  Host 用 `tools.execute()` 执行一次（60 秒超时）并把结果回灌，再让模型给出最终回答。
+  默认关闭；模型点名清单外的工具会被忽略，不会越权执行。
 - **检测**：读 `~/.dsh/profiles/*/package.json`（`dependencies` 与 `dsh.profile.bundles`）以及
-  `node_modules/<包名>/package.json`，判断每个包装没装、装的什么版本；自动选中装了本插件的 profile，
-  也可以用环境变量 `DSH_PROFILE` 指定要检测的 profile。
-- **一键安装**：点「下载安装」后，Host 会执行 `dsh plugin --profile <profile> add <包名>`，交给 DSH 插件
-  管理器（profile 目录下的 pnpm）下载安装，命令输出会回填到卡片上；已经装过的会跳过。
-- **装完要重启**：DSH 在启动时加载插件，所以安装完成后需要**重启 DSH 或刷新 Web 页面**才会生效，
-  卡片上的按钮旁也会提示这一点。
-- **找不到 `dsh` 命令**：把环境变量 `DSH_CLI` 指向 `dsh` 可执行文件，或按卡片提示手动执行安装命令。
-- 接口（只本机同源可访问）：`GET /resume-market/api/compat/state`、
-  `POST /resume-market/api/compat/install`（body：`{"id": "resume-skills"}`）。
-- **想加条目**：改 `src/compat.js` 里的 `COMPAT_CATALOG` 即可；`dsh-resume-market` 自身的 `lib/` 不用重建
-  （这是 Host 侧文件，不进客户端 bundle）。
+  `node_modules/<包名>/package.json`，自动选中装了本插件的 profile，也可用 `DSH_PROFILE` 指定。
+- **找不到 `dsh` 命令**：把环境变量 `DSH_CLI` 指向可执行文件，或按卡片提示手动执行安装命令。
+- 接口（只本机同源可访问）：`GET /resume-market/api/compat/state`（含 `capabilities` / `hasTools`）、
+  `POST /resume-market/api/compat/install`（body：`{"id": "resume-screening"}`）。
+- **想加条目**：改 `COMPAT_CATALOG`（`id` / `name` / `installSpec` / `hints` 四项必填）；`hints` 用来匹配
+  工具名和描述，写宽一点更容易认出来。这是 Host 侧文件，不进客户端 bundle。
 
 ## 给 AI（大肥鱼）的工具
 

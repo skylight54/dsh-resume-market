@@ -146,6 +146,21 @@ function sendHtml(res, status, html, downloadName) {
   res.end(html);
 }
 
+/**
+ * 防御式取宿主已注册的工具 schema：tools 服务是 optional 的，
+ * 拿不到就返回空数组（兼容插件页退化为「只看安装状态」）。
+ */
+function pickToolSchemas(ctx) {
+  try {
+    const tools = ctx && typeof ctx.get === 'function' ? ctx.get('tools') : null;
+    if (!tools || typeof tools.schemas !== 'function') return [];
+    const list = tools.schemas();
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
 /** 构造路由处理器（纯函数，方便 tests/smoke.mjs 直接驱动）。 */
 export function createHandler({ ctx, store }) {
   const chatService = createChatService({ store, ctx, log: (message) => logWarn(ctx, message) });
@@ -281,7 +296,8 @@ export function createHandler({ ctx, store }) {
 
     // 兼容插件：设置页列出可兼容的简历相关插件；「下载安装」直接交给 DSH 插件管理器。
     if (suffix === '/compat/state' && method === 'GET') {
-      return { status: 200, body: ok(listStatus()) };
+      // 带上宿主已注册的工具清单，用来识别「已安装的兼容插件提供了哪些能力」。
+      return { status: 200, body: ok(listStatus({ tools: pickToolSchemas(ctx) })) };
     }
 
     if (suffix === '/compat/install' && method === 'POST') {

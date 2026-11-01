@@ -40,6 +40,8 @@ const SETTINGS_DEFAULTS = {
   chatApiKey: '',
   chatModel: 'deepseek-chat',
   chatBaseUrl: 'https://api.deepseek.com',
+  // 允许 AI 对话调用「已安装的兼容插件」注册的工具（实验开关，默认关）。
+  chatTools: false,
   // 公共市场：把一个 GitHub 仓库当作模板市场（市场内容是仓库里的 market/ 目录）。
   githubRepo: 'skylight54/dsh-resume-market',
   githubBranch: 'main',
@@ -156,6 +158,8 @@ function sanitizeSettings(input) {
   if (typeof input.chatBaseUrl === 'string' && /^https?:\/\//.test(input.chatBaseUrl.trim())) {
     out.chatBaseUrl = input.chatBaseUrl.trim().replace(/\/+$/, '').slice(0, 300);
   }
+  // 工具桥：只有显式 true 才开启，避免历史数据里出现怪值时误开。
+  out.chatTools = input.chatTools === true;
   // 公共市场仓库：owner/repo，避免把任意 URL 拼进 raw.githubusercontent.com。
   if (typeof input.githubRepo === 'string' && /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(input.githubRepo.trim())) {
     out.githubRepo = input.githubRepo.trim().slice(0, 120);

@@ -3,6 +3,14 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.8.0 — 2026-11-01
+
+- 修复「兼容插件下载装不上」：旧目录里的包名是编造的（`dsh-resume-skills` 等在 npm 上不存在，pnpm 直接 404）。换成真实存在的包：`dsh-resume-screening`（简历筛选 / 人才库）、`@xrxs-ai/dsh-resume-migrator`（批量迁移）、`dsh-plugin-resume-warehouse`（本地简历仓库），`dsh-resume` 因名字已占用且未发布标为「规划中」。
+- 兼容语义从「只检测 + 安装」升级为「能力真接入」：Host 读 `ctx.get('tools').schemas()`，按目录关键词认出发行插件注册了哪些工具，`/compat/state` 每条返回 `capabilities` / `hasTools` / `toolsHint`，设置页显示成 `工具：xxx` 标签（排除本插件自己的 `resume_*` 工具）。
+- AI 对话新增「工具桥」（`chatTools`，默认关）：打开后 system prompt 带上可用工具清单，模型输出 ```tool 代码块时由 Host 用 `tools.execute()` 执行一次（60 秒超时），把结果回灌再生成最终回答；返回 `toolUsed` / `toolPreview`，执行失败降级为 `bridgeError`，清单外工具拒绝执行。
+- 设置页兼容插件卡片新增「打开插件市场」（切到 DSH 自带市场面板 `dsh-market`），未安装条目提供「去插件市场」主按钮 + 「直接安装」次按钮；已安装显示版本与能力标签。
+- 测试补强：`tests/compat.mjs` 真实目录 + 能力匹配断言，`tests/chat.mjs` 新增 5 组工具桥用例，`tests/smoke.mjs` 覆盖 `/compat/state` 字段与 `chatTools` 设置往返；README「兼容插件」章节重写。
+
 ## v0.7.0 — 2026-11-01
 
 - 修复「模板库点不了模板」：内置模板改为返回 `builtin: true`（以前缺这个标记，卡片被当成自定义模板渲染、点击行为错乱）；模板列表与下拉改用复合 key，并在加载旧数据时自动给与内置模板同 id 的自定义条目改名（如 `-copy2`），避免 React key 冲突导致点击/选中错位。

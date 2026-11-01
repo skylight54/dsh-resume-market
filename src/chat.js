@@ -21,6 +21,14 @@ const HOST_TIMEOUT_MS = 120 * 1000;
 /** 两条路径共用同一组生成参数，保证「免 Key」和「填 Key」的回复风格一致。 */
 const TEMPERATURE = 0.4;
 const MAX_REPLY_TOKENS = 2400;
+/** 工具桥：一次对话最多展示给模型多少个兼容插件工具。 */
+const MAX_BRIDGE_TOOLS = 12;
+/** 工具桥：单次工具执行超时。 */
+const TOOL_TIMEOUT_MS = 60 * 1000;
+/** 工具执行结果回灌给模型时的最大字符数。 */
+const MAX_TOOL_RESULT_CHARS = 2000;
+
+import { COMPAT_CATALOG, capabilitiesOf } from './compat.js';
 
 /**
  * 简历顾问 system prompt。要求：
@@ -130,6 +138,115 @@ function serviceOf(ctx, name) {
 }
 
 /**
+ * 工具桥：找出「已安装的兼容插件」注册到宿主的工具。
+ *
+ * 本插件自己的工具不算（否则 AI 会自己调自己），只保留 compat 目录里 hints 命中的。
+ * 插件是在 DSH 启动时加载的，所以刚装完插件要重启 DSH 才会出现。
+ * @param {object} [ctx] Host 的 ctx
+ * @returns {Array<{name: string, description: string}>}
+ */
+export function discoverBridgeTools(ctx) {
+  const tools = serviceOf(ctx, 'tools');
+  if (!tools || typeof tools.schemas !== 'function') return [];
+  let schemas = [];
+  try {
+    schemas = tools.schemas();
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(schemas)) return [];
+  const seen = new Set();
+  const found = [];
+  for (const item of COMPAT_CATALOG) {
+    for (const capability of capabilitiesOf(item, schemas)) {
+      if (seen.has(capability.name)) continue;
+      seen.add(capability.name);
+      found.push(capability);
+      if (found.length >= MAX_BRIDGE_TOOLS) return found;
+    }
+  }
+  return found;
+}
+
+/** 把可用工具清单写进 system prompt，并约定 ```tool 调用格式。 */
+function buildToolsPrompt(tools) {
+  if (!Array.isArray(tools) || !tools.length) return '';
+  const lines = tools.map((tool) => '- ' + tool.name + (tool.description ? '：' + tool.description : ''));
+  return [
+    '',
+    '可用插件工具（可选，实验）：下列工具由用户已安装的兼容简历插件提供。',
+    '如果用户的要求正好能用其中一个工具完成，你可以调用一次（每次回复最多一次）：',
+    '在回复最后只输出一个 ```tool 代码块，内容是严格 JSON：{"name": "工具名", "arguments": { ... }}。',
+    '不要编造工具名，也不要自己编造工具结果；调用后你会收到执行结果，再据此给出最终回答。',
+    '工具清单：',
+  ]
+    .concat(lines)
+    .join('\n');
+}
+
+/** 从模型回复里解析 ```tool 调用（取最后一个代码块，解析失败当作没有调用）。 */
+export function parseToolCall(text) {
+  const source = String(text == null ? '' : text);
+  const blocks = [...source.matchAll(/```tool\s*\n?([\s\S]*?)```/g)];
+  if (!blocks.length) return null;
+  const raw = blocks[blocks.length - 1][1].trim();
+  if (!raw) return null;
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object') return null;
+  const name = typeof parsed.name === 'string' ? parsed.name.trim() : '';
+  if (!name) return null;
+  const args = parsed.arguments && typeof parsed.arguments === 'object' && !Array.isArray(parsed.arguments) ? parsed.arguments : {};
+  return { name, arguments: args };
+}
+
+/** 把 tools.execute 的返回收敛成一段可回灌给模型的文本。 */
+function summarizeToolResult(result) {
+  if (!result || typeof result !== 'object') return '(工具没有返回内容)';
+  const content = Array.isArray(result.content) ? result.content : [];
+  const texts = content
+    .map((block) => (block && typeof block === 'object' && typeof block.text === 'string' ? block.text : ''))
+    .filter(Boolean);
+  if (texts.length) return short(texts.join('\n'), MAX_TOOL_RESULT_CHARS);
+  if (result.isError) return '工具执行失败：' + short(JSON.stringify(result.error || result.value || ''), MAX_TOOL_RESULT_CHARS);
+  if (result.value !== undefined) {
+    try {
+      const text = typeof result.value === 'string' ? result.value : JSON.stringify(result.value);
+      return short(text, MAX_TOOL_RESULT_CHARS);
+    } catch {
+      return '(工具结果无法序列化)';
+    }
+  }
+  return '(工具执行完成，没有输出)';
+}
+
+/** 通过宿主 tools 服务执行一次兼容插件工具。 */
+async function executeBridgeTool(ctx, call) {
+  const tools = serviceOf(ctx, 'tools');
+  if (!tools || typeof tools.execute !== 'function') {
+    throw new Error('宿主没有可用的 tools.execute（当前 DSH 版本不支持）');
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TOOL_TIMEOUT_MS);
+  if (typeof timer.unref === 'function') timer.unref();
+  try {
+    const result = await tools.execute({
+      callId: 'rmchat-' + Date.now().toString(36),
+      name: call.name,
+      arguments: call.arguments,
+      signal: controller.signal,
+    });
+    return summarizeToolResult(result);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * 解析「免 Key」通道：宿主有 llm 服务 + 默认模型选择（provider/model）才算可用。
  * @param {object} [ctx] Host 的 ctx
  * @returns {{llm: object, provider: string, model: string, reasoningEffort?: string}|null}
@@ -218,7 +335,7 @@ export function createChatService({ store, log, ctx } = {}) {
    * 免 Key 通道：直接用宿主 llm 服务 + DSH 当前模型生成回复。
    * 模型报错/超时是 chat/upstream，便于面板提示用户重试或换回 Key 通道。
    */
-  async function chatViaHost(support, conversation, resume) {
+  async function chatViaHost(support, conversation, resume, extraPrompt) {
     const messages = hostMessages(conversation);
     if (!messages.length) {
       throw new ChatError('chat/bad-messages', '对话内容不能为空', 400);
@@ -227,7 +344,7 @@ export function createChatService({ store, log, ctx } = {}) {
       provider: support.provider,
       model: support.model,
       messages,
-      system: buildSystemPrompt(resume),
+      system: buildSystemPrompt(resume) + (extraPrompt ? '\n' + extraPrompt : ''),
       temperature: TEMPERATURE,
       maxTokens: MAX_REPLY_TOKENS,
     };
@@ -275,13 +392,8 @@ export function createChatService({ store, log, ctx } = {}) {
     return { reply: text, model: support.model, mode: 'host', usage, durationMs: Date.now() - startedAt };
   }
 
-  async function chat({ messages, resume } = {}) {
-    const settings = settingsOf(store);
+  async function generate({ settings, conversation, resume, extraPrompt }) {
     const apiKey = typeof settings.chatApiKey === 'string' ? settings.chatApiKey.trim() : '';
-    const conversation = normalizeMessages(messages);
-    if (!conversation.length) {
-      throw new ChatError('chat/bad-messages', '对话内容不能为空', 400);
-    }
     // 没填 Key 时优先走宿主 llm（用用户当前 DSH 模型，不额外配 Key）；
     // 宿主也没有可用模型时，才提示去设置页填 Key。
     if (!apiKey) {
@@ -293,7 +405,7 @@ export function createChatService({ store, log, ctx } = {}) {
           400,
         );
       }
-      return chatViaHost(support, conversation, resume);
+      return chatViaHost(support, conversation, resume, extraPrompt);
     }
     const baseUrl = normalizeBaseUrl(settings.chatBaseUrl);
     const model =
@@ -304,7 +416,7 @@ export function createChatService({ store, log, ctx } = {}) {
 
     const payload = {
       model,
-      messages: [{ role: 'system', content: buildSystemPrompt(resume) }].concat(conversation),
+      messages: [{ role: 'system', content: buildSystemPrompt(resume) + (extraPrompt ? '\n' + extraPrompt : '') }].concat(conversation),
       temperature: TEMPERATURE,
       max_tokens: MAX_REPLY_TOKENS,
     };
@@ -364,6 +476,57 @@ export function createChatService({ store, log, ctx } = {}) {
       usage: body && body.usage && typeof body.usage === 'object' ? body.usage : null,
       durationMs: Date.now() - startedAt,
     };
+  }
+
+  /**
+   * 一轮完整对话 = 生成回复（可能带「工具桥」：模型请求调用兼容插件的工具，宿主执行一次后回灌再生成）。
+   */
+  async function chat({ messages, resume } = {}) {
+    const settings = settingsOf(store);
+    const conversation = normalizeMessages(messages);
+    if (!conversation.length) {
+      throw new ChatError('chat/bad-messages', '对话内容不能为空', 400);
+    }
+    // 只有用户在设置里显式打开「允许 AI 对话调用插件工具」时才启用工具桥。
+    const bridgeTools = settings.chatTools === true ? discoverBridgeTools(ctx) : [];
+    const extraPrompt = buildToolsPrompt(bridgeTools);
+    const first = await generate({ settings, conversation, resume, extraPrompt });
+    if (!bridgeTools.length) return first;
+
+    const call = parseToolCall(first.reply);
+    if (!call) return first;
+    if (!bridgeTools.some((tool) => tool.name === call.name)) {
+      // 模型点名了清单外的工具：忽略这次调用，直接返回原回复，避免越权执行。
+      warn('chat: 模型请求了未授权的工具：' + call.name);
+      return first;
+    }
+
+    let toolResult;
+    try {
+      toolResult = await executeBridgeTool(ctx, call);
+    } catch (error) {
+      warn('chat: 工具桥执行失败：' + messageOf(error));
+      return Object.assign({}, first, {
+        bridgeError: '工具调用失败：' + short(messageOf(error), 160),
+      });
+    }
+
+    const followup = conversation.concat([
+      {
+        role: 'user',
+        content:
+          '（系统）工具 ' +
+          call.name +
+          ' 的执行结果如下：\n' +
+          toolResult +
+          '\n\n请基于这个结果直接回答用户，不要再输出 tool 代码块。',
+      },
+    ]);
+    const second = await generate({ settings, conversation: followup, resume, extraPrompt: '' });
+    return Object.assign({}, second, {
+      toolUsed: { name: call.name, arguments: call.arguments },
+      toolPreview: short(toolResult, 300),
+    });
   }
 
   return { chat };

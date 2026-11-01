@@ -513,8 +513,139 @@ async function routeTests() {
   assert.equal(res.json.value.model, 'deepseek-v4-flash');
 }
 
+/**
+ * 工具桥：chatTools=true 时，模型可以请求执行「兼容插件」注册的工具，
+ * Host 调 tools.execute 一次、把结果回灌、再让模型给出最终回答。
+ */
+function bridgeHost({ replies, schemas, execute }) {
+  let index = 0;
+  const seen = [];
+  const executed = [];
+  const llm = {
+    stream(options) {
+      seen.push(options);
+      const chunks = replies[Math.min(index, replies.length - 1)];
+      index += 1;
+      return (async function* () {
+        for (const chunk of chunks) yield chunk;
+      })();
+    },
+  };
+  const tools = {
+    schemas() {
+      return schemas;
+    },
+    async execute(input) {
+      executed.push(input);
+      return execute(input);
+    },
+  };
+  const ctx = {
+    get(name) {
+      if (name === 'tools') return tools;
+      if (name === 'llm') return llm;
+      if (name === 'agentDefaultModel') return { currentSelection: () => ({ provider: 'deepseek-official', model: 'deepseek-v4-flash' }) };
+      return undefined;
+    },
+  };
+  return { ctx, seen, executed };
+}
+
+const BRIDGE_SCHEMAS = [
+  { name: 'resume_market_list', description: '本插件自己的工具，不该暴露给 AI' },
+  { name: 'resume_screen_upload', description: '批量筛选简历：把候选人简历入库并按技能分类' },
+  { name: 'resume_warehouse_health', description: '本地简历仓库健康检查' },
+];
+
+function toolBlock(name, args) {
+  return '好的，我来调用工具。\n```tool\n' + JSON.stringify({ name, arguments: args }) + '\n```';
+}
+
+async function toolBridgeTests() {
+  // A) chatTools 关闭：即使模型输出 tool 块也不执行
+  const offHost = bridgeHost({
+    replies: [hostReply(toolBlock('resume_screen_upload', {})), hostReply('不该走到第二轮')],
+    schemas: BRIDGE_SCHEMAS,
+    execute: () => ({ isError: false, content: [{ type: 'text', text: '不该执行' }] }),
+  });
+  const off = await createChatService({ store: storeWith({}), ctx: offHost.ctx }).chat({
+    messages: [{ role: 'user', content: '帮我把简历入库' }],
+  });
+  assert.equal(offHost.executed.length, 0, 'chatTools=false 时不能执行任何工具');
+  assert.equal(offHost.seen.length, 1, '不执行工具就只调用一次模型');
+  assert.equal(off.toolUsed, undefined);
+  assert.ok(!offHost.seen[0].system.includes('可用插件工具'), '关闭时不注入工具清单');
+
+  // B) chatTools 打开：执行一次 → 结果回灌 → 第二次生成
+  const onHost = bridgeHost({
+    replies: [
+      hostReply(toolBlock('resume_screen_upload', { folder: 'C:/cv' })),
+      hostReply('已入库 3 份简历，你可以在「我的简历」里看到它们。'),
+    ],
+    schemas: BRIDGE_SCHEMAS,
+    execute: (input) => ({
+      isError: false,
+      content: [{ type: 'text', text: '已入库 3 份简历（文件夹 ' + input.arguments.folder + '）' }],
+    }),
+  });
+  const on = await createChatService({ store: storeWith({ chatTools: true }), ctx: onHost.ctx }).chat({
+    messages: [{ role: 'user', content: '把 C:/cv 里的简历入库' }],
+  });
+  assert.equal(onHost.executed.length, 1, '应该执行一次工具');
+  assert.equal(onHost.executed[0].name, 'resume_screen_upload');
+  assert.deepEqual(onHost.executed[0].arguments, { folder: 'C:/cv' });
+  assert.match(String(onHost.executed[0].callId), /^rmchat-/);
+  assert.ok(onHost.executed[0].signal, '执行时要带 AbortSignal 超时保护');
+  assert.equal(onHost.seen.length, 2, '执行工具后要再生成一次最终回答');
+  assert.ok(onHost.seen[0].system.includes('可用插件工具'), '打开时注入工具清单');
+  assert.ok(onHost.seen[0].system.includes('resume_screen_upload'));
+  assert.ok(!onHost.seen[0].system.includes('resume_market_list'), '本插件自己的工具不暴露');
+  assert.ok(JSON.stringify(onHost.seen[1].messages).includes('已入库 3 份简历'), '工具结果要回灌给模型');
+  assert.equal(on.reply.includes('已入库 3 份简历'), true);
+  assert.equal(on.toolUsed.name, 'resume_screen_upload');
+  assert.match(on.toolPreview, /已入库 3 份简历/);
+
+  // C) 模型点名清单外的工具：忽略，不执行
+  const ghostHost = bridgeHost({
+    replies: [hostReply(toolBlock('delete_everything', {})), hostReply('不该走到第二轮')],
+    schemas: BRIDGE_SCHEMAS,
+    execute: () => ({ isError: false, content: [] }),
+  });
+  const ghost = await createChatService({ store: storeWith({ chatTools: true }), ctx: ghostHost.ctx }).chat({
+    messages: [{ role: 'user', content: '删掉所有简历' }],
+  });
+  assert.equal(ghostHost.executed.length, 0, '清单外的工具不能执行');
+  assert.equal(ghostHost.seen.length, 1);
+  assert.equal(ghost.toolUsed, undefined);
+
+  // D) 工具执行抛错：降级返回原回复，并带可展示的 bridgeError
+  const brokenHost = bridgeHost({
+    replies: [hostReply(toolBlock('resume_screen_upload', {})), hostReply('不该走到第二轮')],
+    schemas: BRIDGE_SCHEMAS,
+    execute: () => {
+      throw new Error('磁盘满了');
+    },
+  });
+  const broken = await createChatService({ store: storeWith({ chatTools: true }), ctx: brokenHost.ctx }).chat({
+    messages: [{ role: 'user', content: '入库' }],
+  });
+  assert.equal(brokenHost.seen.length, 1, '工具失败就不再生成第二轮');
+  assert.equal(broken.toolUsed, undefined);
+  assert.match(broken.bridgeError, /工具调用失败/);
+  assert.match(broken.bridgeError, /磁盘满了/);
+
+  // E) 没有 tools 服务：chatTools 打开也不注入清单（优雅降级）
+  const plainHost = fakeHost({ chunks: hostReply('普通回复') });
+  const plain = await createChatService({ store: storeWith({ chatTools: true }), ctx: plainHost.ctx }).chat({
+    messages: [{ role: 'user', content: 'hi' }],
+  });
+  assert.equal(plain.reply, '普通回复');
+  assert.ok(!plainHost.seen[0].system.includes('可用插件工具'), '没有 tools 服务时不注入');
+}
+
 try {
   await serviceTests();
+  await toolBridgeTests();
   await routeTests();
   console.log('chat ok: 对话服务 + /chat 路由全部通过');
 } catch (error) {

@@ -18,7 +18,9 @@ import {
   COMPAT_CATALOG,
   CompatError,
   INSTALL_TIMEOUT_MS,
+  OWN_TOOL_NAMES,
   SELF_PACKAGE,
+  capabilitiesOf,
   detectProfiles,
   findActiveProfile,
   installCommand,
@@ -113,8 +115,8 @@ async function makeDshHome() {
 try {
   // ── 1. profile 检测 ──────────────────────────────────────────────────────
   const dshHome = await makeDshHome();
-  await makeProfile(dshHome, 'alpha', { name: 'alpha-profile', dependencies: { 'dsh-resume-skills': '^0.3.0' } }, {
-    'dsh-resume-skills': '0.3.1',
+  await makeProfile(dshHome, 'alpha', { name: 'alpha-profile', dependencies: { 'dsh-resume-screening': '^0.3.0' } }, {
+    'dsh-resume-screening': '0.3.1',
   });
   const betaDir = await makeProfile(
     dshHome,
@@ -124,7 +126,7 @@ try {
       dependencies: { [SELF_PACKAGE]: 'link:C:/work/resume-market' },
       dsh: { profile: { bundles: [SELF_PACKAGE] } },
     },
-    { 'dsh-resume-expert': '1.2.3' },
+    { '@xrxs-ai/dsh-resume-migrator': '1.2.3' },
   );
   // 坏 profile（没有 package.json）应被跳过
   await mkdir(join(dshHome, 'profiles', 'broken'), { recursive: true });
@@ -160,15 +162,15 @@ try {
   );
 
   // statusOf：依赖 + node_modules 版本
-  const skills = itemById('resume-skills');
-  const expert = itemById('resume-expert');
-  const cover = itemById('cover-letter');
+  const skills = itemById('resume-screening');
+  const expert = itemById('resume-migrator');
+  const cover = itemById('resume-core');
   const beta = profiles[1];
   const expertStatus = statusOf(beta, expert);
   assert.equal(expertStatus.installed, true, 'node_modules 里有包就算已安装');
   assert.equal(expertStatus.version, '1.2.3');
   assert.equal(expertStatus.source, 'node_modules');
-  assert.equal(statusOf(beta, skills).installed, false, 'beta 没装 resume-skills');
+  assert.equal(statusOf(beta, skills).installed, false, 'beta 没装 resume-screening');
   assert.equal(statusOf(null, cover).planned, true);
 
   // listStatus：当前 profile + 条目状态
@@ -178,11 +180,60 @@ try {
   assert.equal(snapshot.items.length, COMPAT_CATALOG.length);
   assert.deepEqual(
     snapshot.items.map((item) => item.id),
-    ['resume-skills', 'resume-expert', 'cover-letter'],
+    ['resume-screening', 'resume-migrator', 'resume-warehouse', 'resume-core'],
   );
-  assert.equal(snapshot.items.find((item) => item.id === 'resume-expert').installed, true);
-  assert.equal(snapshot.items.find((item) => item.id === 'cover-letter').planned, true);
+  assert.equal(snapshot.items.find((item) => item.id === 'resume-migrator').installed, true);
+  assert.equal(snapshot.items.find((item) => item.id === 'resume-core').planned, true);
   assert.deepEqual(snapshot.profiles.map((p) => p.name), ['alpha', 'beta']);
+  assert.equal(snapshot.toolsKnown, 0, '没传 tools 时 capabilities 为空、toolsKnown=0');
+
+  // ── 1b. 能力发现：从宿主工具清单里认出兼容插件提供的工具 ──────────────────
+  const hostTools = [
+    // 本插件自己的工具：必须被排除
+    { name: 'resume_save', description: '保存简历到本地' },
+    { name: 'resume_export', description: '导出简历为 HTML / Word / PDF' },
+    // 兼容插件注册的工具
+    { name: 'resume_screen_upload', description: '批量筛选简历：把候选人简历入库并按技能分类' },
+    { name: 'resume_import_batch', description: '批量导入 / 迁移旧简历，带迁移队列' },
+    { name: 'resume_warehouse_health', description: '本地简历仓库：读取本地服务健康状态' },
+    { name: 'unrelated_weather', description: '查天气，跟简历无关' },
+  ];
+  const screeningCaps = capabilitiesOf(itemById('resume-screening'), hostTools);
+  assert.deepEqual(
+    screeningCaps.map((cap) => cap.name),
+    ['resume_screen_upload'],
+    '应该只认出筛选插件自己的工具',
+  );
+  assert.deepEqual(
+    capabilitiesOf(itemById('resume-migrator'), hostTools).map((cap) => cap.name),
+    ['resume_import_batch'],
+  );
+  assert.deepEqual(
+    capabilitiesOf(itemById('resume-warehouse'), hostTools).map((cap) => cap.name),
+    ['resume_warehouse_health'],
+  );
+  assert.equal(
+    capabilitiesOf(itemById('resume-screening'), hostTools).some((cap) => OWN_TOOL_NAMES.includes(cap.name)),
+    false,
+    '本插件自己的工具不能被算成兼容能力',
+  );
+  assert.equal(capabilitiesOf(itemById('resume-screening'), []).length, 0);
+  assert.equal(capabilitiesOf(itemById('resume-screening'), null).length, 0);
+  assert.equal(capabilitiesOf(null, hostTools).length, 0);
+
+  const withTools = listStatus({ dshHome, env: {}, profiles, tools: hostTools });
+  assert.equal(withTools.toolsKnown, hostTools.length);
+  const migrator = withTools.items.find((item) => item.id === 'resume-migrator');
+  assert.equal(migrator.installed, true);
+  assert.equal(migrator.hasTools, true, '已安装且能对上工具时 hasTools=true');
+  assert.deepEqual(migrator.capabilities.map((cap) => cap.name), ['resume_import_batch']);
+  const notInstalled = withTools.items.find((item) => item.id === 'resume-screening');
+  assert.equal(notInstalled.installed, false);
+  assert.equal(notInstalled.hasTools, false, '没安装就不该显示能力');
+  assert.deepEqual(notInstalled.capabilities, []);
+  assert.match(notInstalled.toolsHint, /装完需要重启 DSH|^$/, '未安装时 toolsHint 为空');
+  const warehouse = withTools.items.find((item) => item.id === 'resume-warehouse');
+  assert.equal(warehouse.toolsHint.includes('重启 DSH'), false, '未安装条目不提示重启');
 
   // ── 2. CLI 定位 + 安装逻辑 ────────────────────────────────────────────────
   assert.deepEqual(
@@ -206,8 +257,8 @@ try {
 
   const cli = { command: 'dsh.cmd', from: 'path' };
   assert.deepEqual(
-    installCommand({ cli, profile: 'beta', installSpec: 'dsh-resume-skills' }),
-    { command: 'dsh.cmd', args: ['plugin', '--profile', 'beta', 'add', 'dsh-resume-skills'] },
+    installCommand({ cli, profile: 'beta', installSpec: 'dsh-resume-screening' }),
+    { command: 'dsh.cmd', args: ['plugin', '--profile', 'beta', 'add', 'dsh-resume-screening'] },
     '安装命令 = dsh plugin --profile <p> add <包名>',
   );
 
@@ -217,7 +268,7 @@ try {
     return { ok: true, code: 0, log: ['scope: all 3 workspace projects', 'Progress: resolved 1, reused 1, downloaded 0'] };
   };
   const installed = await installPlugin({
-    id: 'resume-skills',
+    id: 'resume-screening',
     dshHome,
     profiles,
     env: {},
@@ -226,19 +277,19 @@ try {
     timeoutMs: INSTALL_TIMEOUT_MS,
   });
   assert.equal(calls.length, 1);
-  assert.deepEqual(calls[0].args, ['plugin', '--profile', 'beta', 'add', 'dsh-resume-skills']);
+  assert.deepEqual(calls[0].args, ['plugin', '--profile', 'beta', 'add', 'dsh-resume-screening']);
   assert.equal(calls[0].command, 'dsh.cmd');
   assert.equal(calls[0].timeoutMs, INSTALL_TIMEOUT_MS);
   assert.equal(installed.ok, true);
   assert.equal(installed.code, 0);
   assert.equal(installed.profile, 'beta');
-  assert.equal(installed.id, 'resume-skills');
-  assert.equal(installed.name, 'dsh-resume-skills');
-  assert.match(installed.command, /^dsh\.cmd plugin --profile beta add dsh-resume-skills$/);
+  assert.equal(installed.id, 'resume-screening');
+  assert.equal(installed.name, 'dsh-resume-screening');
+  assert.match(installed.command, /^dsh\.cmd plugin --profile beta add dsh-resume-screening$/);
   assert.equal(installed.log.length, 2);
 
   const failed = await installPlugin({
-    id: 'resume-skills',
+    id: 'resume-screening',
     dshHome,
     profiles,
     env: {},
@@ -252,7 +303,7 @@ try {
   // 已装：跳过，不再执行命令
   const skippedCalls = [];
   const skipped = await installPlugin({
-    id: 'resume-expert',
+    id: 'resume-migrator',
     dshHome,
     profiles,
     env: {},
@@ -268,7 +319,7 @@ try {
 
   await expectCompatError(
     installPlugin({
-      id: 'resume-skills',
+      id: 'resume-screening',
       dshHome,
       profiles,
       env: {},
@@ -281,21 +332,21 @@ try {
   const enoent = new Error('spawn dsh.cmd ENOENT');
   enoent.code = 'ENOENT';
   await expectCompatError(
-    installPlugin({ id: 'resume-skills', dshHome, profiles, env: {}, cli, run: async () => { throw enoent; } }),
+    installPlugin({ id: 'resume-screening', dshHome, profiles, env: {}, cli, run: async () => { throw enoent; } }),
     'compat/no-cli',
     500,
   );
   await expectCompatError(
-    installPlugin({ id: 'resume-skills', dshHome, profiles, env: {}, cli, run: async () => { throw new Error('boom'); } }),
+    installPlugin({ id: 'resume-screening', dshHome, profiles, env: {}, cli, run: async () => { throw new Error('boom'); } }),
     'compat/install-failed',
     502,
   );
 
   await expectCompatError(installPlugin({ id: 'nope', dshHome, profiles, env: {} }), 'compat/unknown', 404);
-  await expectCompatError(installPlugin({ id: 'cover-letter', dshHome, profiles, env: {} }), 'compat/planned', 400);
+  await expectCompatError(installPlugin({ id: 'resume-core', dshHome, profiles, env: {} }), 'compat/planned', 400);
 
   const emptyHome = await makeDshHome();
-  await expectCompatError(installPlugin({ id: 'resume-skills', dshHome: emptyHome, env: {} }), 'compat/no-profile', 500);
+  await expectCompatError(installPlugin({ id: 'resume-screening', dshHome: emptyHome, env: {} }), 'compat/no-profile', 500);
 
   // ── 3. 路由：GET /compat/state、POST /compat/install ──────────────────────
   const handler = createHandler({ ctx: makeCtx(), store: makeStore() });
@@ -315,7 +366,7 @@ try {
     assert.equal(stateRes.body.value.profile, 'beta');
     assert.equal(stateRes.body.value.items.length, COMPAT_CATALOG.length);
     assert.equal(
-      stateRes.body.value.items.find((item) => item.id === 'resume-expert').installed,
+      stateRes.body.value.items.find((item) => item.id === 'resume-migrator').installed,
       true,
     );
 
@@ -324,7 +375,7 @@ try {
     assert.equal(unknown.body.ok, false);
     assert.equal(unknown.body.error.code, 'compat/unknown');
 
-    const planned = await call({ method: 'POST', url: PREFIX + '/compat/install', body: { id: 'cover-letter' } });
+    const planned = await call({ method: 'POST', url: PREFIX + '/compat/install', body: { id: 'resume-core' } });
     assert.equal(planned.status, 400, '未发布插件 → 400');
     assert.equal(planned.body.error.code, 'compat/planned');
 

@@ -32,34 +32,100 @@ export const SELF_PACKAGE = 'dsh-plugin-resume-market';
  */
 export const COMPAT_CATALOG = [
   {
-    id: 'resume-skills',
-    name: 'dsh-resume-skills',
-    kind: '技能扩展',
-    tags: ['岗位关键词', '技能分级', 'ATS'],
-    blurb: '简历内容与技能的检索增强：按目标岗位补关键词、把技能按熟练度分级，配合本插件写「工作经历」更省事。',
-    homepage: 'https://www.npmjs.com/package/dsh-resume-skills',
-    installSpec: 'dsh-resume-skills',
+    id: 'resume-screening',
+    name: 'dsh-resume-screening',
+    kind: '简历筛选 / 人才库',
+    tags: ['人才库', '批量导入', '技能分类'],
+    blurb:
+      'HR 视角的简历筛选插件：把 Word / PDF / Excel 简历批量收进一个可搜索的人才库，按技能和粗分类检索，自动去重。装上以后，本插件的 AI 对话可以直接调用它的筛选工具。',
+    homepage: 'https://www.npmjs.com/package/dsh-resume-screening',
+    installSpec: 'dsh-resume-screening',
+    // 用来在宿主已注册的工具里认出「这个插件提供了哪些能力」。
+    hints: ['screening', 'screen', '简历筛选', '人才库', 'candidate'],
   },
   {
-    id: 'resume-expert',
-    name: 'dsh-resume-expert',
-    kind: 'AI 顾问',
-    tags: ['HR 视角', '简历诊断', '改写建议'],
-    blurb: '资深 HR 视角的简历诊断与改写建议：逐条挑毛病，给出可以直接替换的表述。',
-    homepage: 'https://www.npmjs.com/package/dsh-resume-expert',
-    installSpec: 'dsh-resume-expert',
+    id: 'resume-migrator',
+    name: '@xrxs-ai/dsh-resume-migrator',
+    kind: '批量迁移',
+    tags: ['导入', '导出', '批量'],
+    blurb:
+      '批量迁移简历：带迁移队列的批量导入 + 分类导出，适合把旧简历一次性搬进本插件；它的导入能力同样会出现在 AI 对话的可用工具里。',
+    homepage: 'https://www.npmjs.com/package/@xrxs-ai/dsh-resume-migrator',
+    installSpec: '@xrxs-ai/dsh-resume-migrator',
+    hints: ['migrat', 'import', '迁移', '导入', 'batch'],
   },
   {
-    id: 'cover-letter',
-    name: 'dsh-cover-letter',
-    kind: '求职信',
-    tags: ['求职信', '邮件模板'],
-    blurb: '根据简历和目标岗位生成求职信 / 自荐邮件（规划中，发布后会出现在这里）。',
-    homepage: 'https://www.npmjs.com/search?q=dsh-cover-letter',
-    installSpec: 'dsh-cover-letter',
+    id: 'resume-warehouse',
+    name: 'dsh-plugin-resume-warehouse',
+    kind: '本地简历仓库',
+    tags: ['本地', '检索', '仓库'],
+    blurb:
+      '本地优先的简历仓库：一个工具负责启动/停止本地服务并读健康状态，数据全部留在本机。装好后，它的仓库工具会出现在本插件 AI 对话的可用能力里。',
+    homepage: 'https://www.npmjs.com/package/dsh-plugin-resume-warehouse',
+    installSpec: 'dsh-plugin-resume-warehouse',
+    hints: ['warehouse', '仓库', '本地', 'library'],
+  },
+  {
+    id: 'resume-core',
+    name: 'dsh-resume',
+    kind: '通用简历工具',
+    tags: ['名字已占用', '规划中'],
+    blurb: 'npm 上的通用简历包（名字已占用，尚未正式发布）。等它上线后会出现在这里。',
+    homepage: 'https://www.npmjs.com/package/dsh-resume',
+    installSpec: 'dsh-resume',
+    hints: ['resume', '简历'],
     planned: true,
   },
 ];
+
+/**
+ * 本插件自己的工具名。能力发现时要排除掉，否则「兼容插件」会把自己算进去。
+ * 新增 resume_* 工具时记得同步这里。
+ */
+export const OWN_TOOL_NAMES = [
+  'resume_market_list',
+  'resume_save',
+  'resume_export',
+  'resume_publish',
+  'resume_import_template',
+  'resume_list_templates',
+  'resume_market_public',
+  'resume_install_public',
+  'resume_publish_public',
+];
+
+/** 能力条目上限：设置页只显示前几条，避免清单过长。 */
+export const MAX_CAPABILITIES = 8;
+
+function shortText(value, max) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return text.length > max ? text.slice(0, max - 1) + '…' : text;
+}
+
+/**
+ * 从一个兼容条目的 hints 里，匹配宿主当前注册的工具有哪些是它提供的。
+ * @param {object} item COMPAT_CATALOG 条目
+ * @param {Array<{name?: string, description?: string}>} tools 宿主 tools.schemas() 的结果
+ * @returns {Array<{name: string, description: string}>}
+ */
+export function capabilitiesOf(item, tools) {
+  const hints = Array.isArray(item && item.hints) ? item.hints : [];
+  if (!hints.length || !Array.isArray(tools)) return [];
+  const found = [];
+  for (const tool of tools) {
+    if (!tool || typeof tool !== 'object') continue;
+    const name = typeof tool.name === 'string' ? tool.name : '';
+    if (!name || OWN_TOOL_NAMES.includes(name)) continue;
+    const description = typeof tool.description === 'string' ? tool.description : '';
+    const haystack = (name + ' ' + description).toLowerCase();
+    const matched = hints.some((hint) => haystack.includes(String(hint).toLowerCase()));
+    if (!matched) continue;
+    if (found.some((entry) => entry.name === name)) continue;
+    found.push({ name, description: shortText(description, 120) });
+    if (found.length >= MAX_CAPABILITIES) break;
+  }
+  return found;
+}
 
 /** 安装超时：pnpm 拉依赖可能很慢，给 5 分钟。 */
 export const INSTALL_TIMEOUT_MS = 5 * 60 * 1000;
@@ -227,7 +293,8 @@ export function defaultRunner({ command, args, timeoutMs }) {
 }
 
 /**
- * 兼容插件总览：当前 profile、DSH 目录、CLI、每个条目的安装状态。
+ * 兼容插件总览：当前 profile、DSH 目录、CLI、每个条目的安装状态，
+ * 以及（传入 tools 时）已装插件给宿主注册了哪些可调用工具。
  * 纯读操作，不会写任何文件。
  */
 export function listStatus(options = {}) {
@@ -235,12 +302,26 @@ export function listStatus(options = {}) {
   const profiles = Array.isArray(options.profiles) ? options.profiles : detectProfiles({ dshHome });
   const active = findActiveProfile({ profiles, env: options.env });
   const cli = resolveDshCli(options);
+  const tools = Array.isArray(options.tools) ? options.tools : [];
   return {
     dshHome,
     profile: active ? active.name : '',
     profiles: profiles.map((p) => ({ name: p.name, dependencies: Object.keys(p.dependencies).length })),
     cli,
-    items: COMPAT_CATALOG.map((item) => Object.assign({}, item, statusOf(active, item))),
+    toolsKnown: tools.length,
+    items: COMPAT_CATALOG.map((item) => {
+      const status = statusOf(active, item);
+      const capabilities = status.installed ? capabilitiesOf(item, tools) : [];
+      return Object.assign({}, item, status, {
+        capabilities,
+        hasTools: capabilities.length > 0,
+        toolsHint: status.installed
+          ? capabilities.length
+            ? ''
+            : '已安装，但还没发现它注册的工具（插件在 DSH 启动时加载，装完需要重启 DSH）'
+          : '',
+      });
+    }),
   };
 }
 

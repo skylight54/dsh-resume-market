@@ -191,6 +191,62 @@ globalThis.fetch = async (url, init = {}) => {
       newFileUrl: 'https://github.com/skylight54/dsh-resume-market/new/main/market/templates',
     });
   }
+  // Host 的兼容插件检测（含已安装插件通过 tools 服务发现的工具）
+  if (target.includes('/compat/state')) {
+    return json({
+      dshHome: 'C:/Users/test/.dsh',
+      profile: 'desktop',
+      profiles: [{ name: 'desktop', dependencies: 3 }],
+      cli: { command: 'dsh.cmd', from: 'path' },
+      items: [
+        {
+          id: 'resume-screening',
+          name: 'dsh-resume-screening',
+          kind: '筛选',
+          tags: ['批量筛选'],
+          blurb: '按关键词批量筛选简历。',
+          homepage: 'https://www.npmjs.com/package/dsh-resume-screening',
+          installSpec: 'dsh-resume-screening',
+          installed: true,
+          version: '0.2.0',
+          source: 'dependency',
+          planned: false,
+          capabilities: [{ name: 'resume_screen', description: '筛选简历' }],
+          hasTools: true,
+        },
+        {
+          id: 'resume-migrator',
+          name: '@xrxs-ai/dsh-resume-migrator',
+          kind: '迁移',
+          tags: ['导入'],
+          blurb: '把旧格式简历迁进来。',
+          homepage: 'https://www.npmjs.com/package/@xrxs-ai/dsh-resume-migrator',
+          installSpec: '@xrxs-ai/dsh-resume-migrator',
+          installed: false,
+          version: '',
+          source: '',
+          planned: false,
+          capabilities: [],
+          hasTools: false,
+        },
+        {
+          id: 'cover-letter',
+          name: 'dsh-cover-letter',
+          kind: '求职信',
+          tags: ['求职信'],
+          blurb: '生成配套求职信。',
+          homepage: 'https://www.npmjs.com/package/dsh-cover-letter',
+          installSpec: 'dsh-cover-letter',
+          installed: false,
+          version: '',
+          source: '',
+          planned: true,
+          capabilities: [],
+          hasTools: false,
+        },
+      ],
+    });
+  }
   if (target.endsWith('/state')) return json(state);
   if (target.includes('/resume/duplicate')) return json({ resume: { ...resume, id: 'r_copy' } });
   if (target.includes('/resume/revisions')) {
@@ -242,6 +298,7 @@ if (!loaded) throw new Error('bundle did not register a module');
 
 const mod = loaded.factory(requireShim);
 const registered = [];
+const selectedPanels = [];
 mod.apply({
   effect(fn) {
     fn();
@@ -254,7 +311,7 @@ mod.apply({
       return () => {};
     },
   },
-  layout: { selectPanel: () => {} },
+  layout: { selectPanel: (key) => { selectedPanels.push(key); } },
 });
 const panel = registered.find((r) => r.definition.name === 'main');
 if (!panel) throw new Error('panel registration missing');
@@ -272,7 +329,9 @@ const check = (ok, message) => {
 };
 
 await act(async () => {
-  reactRoot.render(React.createElement(panel.component, {}));
+  // real host 会把 inject 的返回值作为面板 props（含 layout），这里照同样方式挂载
+  const panelProps = panel.definition.inject ? panel.definition.inject() : {};
+  reactRoot.render(React.createElement(panel.component, panelProps));
   await sleep(60);
 });
 
@@ -457,9 +516,27 @@ check(text().includes('彻底删除'), 'purge button missing');
 // --- settings tab ---------------------------------------------------------
 await act(async () => {
   byText('.rm-tab', '设置').click();
-  await sleep(30);
+  await sleep(140);
 });
 check(text().includes('数据'), 'settings view missing');
+
+// --- 兼容插件卡片：插件市场跳转 + 已安装能力 chips + AI 工具开关 ---------
+check(fetchCalls.some((call) => call.includes('/compat/state')), 'compat state 未被请求');
+check(!!byText('.rm-btn', '打开插件市场'), '兼容插件卡片缺少「打开插件市场」');
+check(!!byText('.rm-btn', '重新检测'), '兼容插件卡片缺少「重新检测」');
+check(!!byText('.rm-btn', '去插件市场'), '未安装插件缺少「去插件市场」');
+check(!!byText('.rm-btn', '直接安装'), '未安装插件缺少「直接安装」');
+check(text().includes('已安装 · 已启用'), '已安装插件缺少「已安装 · 已启用」pill');
+check(text().includes('工具：resume_screen'), '已安装插件的能力 chip missing');
+check(text().includes('允许 AI 对话调用已安装插件的工具'), 'chatTools 勾选框 missing');
+check(!!byText('.rm-btn', '暂未上线'), 'planned 插件缺少「暂未上线」禁用按钮');
+const marketBtn = byText('.rm-btn', '打开插件市场');
+await act(async () => {
+  marketBtn.click();
+  await sleep(40);
+});
+check(selectedPanels.includes('dsh-market'), '「打开插件市场」没有调用 layout.selectPanel(dsh-market)，got: ' + JSON.stringify(selectedPanels));
+check(text().includes('已切到插件市场面板'), '「打开插件市场」缺少 toast 提示');
 
 // --- 模板库：新建 / 编辑 / 图片生成 / 发布 -------------------------------
 await act(async () => {

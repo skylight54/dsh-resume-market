@@ -38,8 +38,10 @@ function resumeMarketApply(ctx) {
         name: 'main',
         key: 'resume-market',
         locale: NS,
+        // inject 的返回值会作为面板组件的 props：把 layout 传进去，设置页里的「打开插件市场」
+        // 才能调 layout.selectPanel('dsh-market') 切到 DSH 自带的插件市场面板。
         inject: function () {
-          return {};
+          return { layout: ctx.layout, slots: ctx.slots };
         },
       },
       ResumePanel

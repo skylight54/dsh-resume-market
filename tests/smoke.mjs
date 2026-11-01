@@ -72,6 +72,16 @@ const ctx = {
   },
   get(name) {
     if (name === 'webRuntime') return { trustedHosts: [] };
+    if (name === 'tools') {
+      // 兼容插件能力发现读的是宿主 tools 服务；这里给一个最小的假实现。
+      return {
+        schemas: () => [
+          { name: 'resume_market_list', description: '本插件自己的工具' },
+          { name: 'resume_screen_upload', description: '批量筛选简历：把候选人简历入库并按技能分类' },
+        ],
+        execute: async () => ({ isError: false, content: [{ type: 'text', text: 'ok' }] }),
+      };
+    }
     return undefined;
   },
   webServer: {
@@ -446,6 +456,30 @@ assert.ok(res.json.value.json.includes('rm-t-'), '投稿 JSON 里应有模板 cl
 res = await call('POST', '/settings', { author: '测试作者', marketUrl: 'http://127.0.0.1:8787' });
 assert.equal(res.status, 200);
 assert.equal(res.json.value.settings.author, '测试作者');
+
+// 9b) 兼容插件：目录 + 能力发现字段 + chatTools 设置往返
+res = await call('GET', '/compat/state');
+assert.equal(res.status, 200, res.body);
+const compat = res.json.value;
+assert.equal(compat.items.length, 4, '兼容目录应有 4 条（3 个真实包 + 1 个规划中）');
+assert.equal(compat.toolsKnown >= 2, true, '应能看到宿主已注册的工具数，实际 ' + compat.toolsKnown);
+for (const item of compat.items) {
+  assert.ok(Array.isArray(item.capabilities), item.id + ' 应带 capabilities 数组');
+  assert.equal(typeof item.hasTools, 'boolean', item.id + ' 应带 hasTools');
+  assert.equal(item.capabilities.some((cap) => cap.name === 'resume_market_list'), false, '本插件工具不能算能力');
+}
+assert.equal(
+  compat.items.every((item) => item.installed === false),
+  true,
+  '测试用临时 DSH_HOME 里没有兼容插件，应全部未安装',
+);
+res = await call('POST', '/settings', { chatTools: true });
+assert.equal(res.status, 200);
+assert.equal(res.json.value.settings.chatTools, true, 'chatTools 应能保存');
+res = await call('GET', '/state');
+assert.equal(res.json.value.settings.chatTools, true, 'chatTools 应持久化');
+res = await call('POST', '/settings', { chatTools: false });
+assert.equal(res.json.value.settings.chatTools, false);
 
 // 10) 安全围栏：非 loopback Host / cross-site 必须 403
 res = await call('GET', '/state', undefined, { host: 'evil.example.com' });
