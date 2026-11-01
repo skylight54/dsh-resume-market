@@ -216,7 +216,13 @@ export function createGithubMarket({ store, log, fetchImpl }) {
     return template;
   }
 
-  /** 把「一份模板 + 一份示例数据」打包成 GitHub 投稿 JSON 与几个直达链接。 */
+  /**
+   * 把「一份模板 + 一份示例数据」打包成 GitHub 投稿 JSON 与一个可直接打开的 Issue。
+   *
+   * 投稿走 Issue：Issue 正文只写人类可读的元信息 + 提交步骤，模板 JSON 与预览图由插件下载到
+   * 本地，用户把它们拖进 Issue 输入框即可（GitHub 会转成附件）。这样 Issue 不再是一坨 JSON，
+   * 维护者读起来轻松，CI 也能直接校验附件。
+   */
   function buildSubmission(input) {
     const { repo, branch } = source();
     const id = makeTemplateId({ title: input.slug || input.name, data: { basics: { name: input.slug || input.name } } });
@@ -229,6 +235,8 @@ export function createGithubMarket({ store, log, fetchImpl }) {
           .filter(Boolean)
           .slice(0, 6);
     const sampleData = normalizeData(input.sample || DEMO_RESUME_DATA);
+    const rawAuthor = String(input.author || store.settings().author || '').trim();
+    const author = rawAuthor === '我' || rawAuthor === '匿名' ? '' : rawAuthor.slice(0, 40);
     const payload = {
       schema: 1,
       id,
@@ -236,7 +244,7 @@ export function createGithubMarket({ store, log, fetchImpl }) {
       en: String(input.en || '').slice(0, 40),
       tagline,
       tags,
-      author: String(input.author || store.settings().author || '匿名').slice(0, 40),
+      author: author || '匿名',
       accent: /^#[0-9a-fA-F]{3,8}$/.test(String(input.accent)) ? input.accent : '#2f6fde',
       cls: input.cls || 'rm-t-' + id,
       templateId: 'pub-' + id.slice(3, 23),
@@ -246,33 +254,56 @@ export function createGithubMarket({ store, log, fetchImpl }) {
       createdAt: new Date().toISOString(),
     };
     const filename = payload.id + '.json';
+    const previewName = payload.id + '-preview.png';
     const repoPath = 'market/templates/' + filename;
+    const style = payload.style || {};
+    const layoutBits = [
+      style.layout === 'sidebar' ? '左侧栏' : '单栏',
+      style.headerStyle === 'band' || (!style.headerStyle && style.headerBand) ? '整宽页眉色带' : style.headerStyle === 'split' ? '页眉左右分栏' : style.headerStyle === 'ribbon' ? '左上角斜标签' : '无页眉色带',
+      style.headingStyle ? '标题 ' + style.headingStyle : '',
+      style.contentStyle === 'card' ? '内容块带边框' : '',
+    ].filter(Boolean);
     const title = '[模板投稿] ' + name;
     const body = [
-      '## 模板：' + name,
+      '## 模板投稿：' + name,
       '',
-      '- 作者：' + payload.author,
-      '- 一句话：' + tagline,
-      '- 标签：' + (tags.join(' / ') || '（无）'),
-      '- 模板 id：`' + payload.id + '`',
+      '| 项 | 内容 |',
+      '| --- | --- |',
+      '| 作者 | ' + (author ? '@' + author : '（请填你的 GitHub 用户名）') + ' |',
+      '| 模板 id | ' + payload.id + ' |',
+      '| 一句话 | ' + tagline + ' |',
+      '| 标签 | ' + (tags.join(' / ') || '（无）') + ' |',
+      '| 版式 | ' + layoutBits.join(' · ') + ' |',
+      '| 主色 | ' + payload.accent + ' |',
       '',
-      '投稿方式（二选一）：',
-      '1. 在 PR 里新建 `' + repoPath + '`，把下面的 JSON 贴进去；',
-      '2. 把 JSON 附在本 Issue 里，维护者会代为添加。',
+      '### 提交步骤',
       '',
-      '> JSON 已由插件生成，包含模板 CSS 与示例数据（示例数据不是真实个人信息）。',
+      '1. 在插件里点「下载投稿 JSON」和「下载预览图」，得到 ' + filename + ' 与 ' + previewName + '；',
+      '2. 把这两个文件直接拖进下面这个输入框（GitHub 会自动贴成附件）；',
+      '3. 提交 Issue，维护者合并后其他用户就能在「公共市场」安装。',
+      '',
+      '> 预览图是插件用模板 + 示例数据渲染的 A4 效果图，方便维护者判断版式。',
+      '',
+      '#### 维护者备注',
+      '',
+      '合并方式：把附件 JSON 放到 ' + repoPath + '（文件名必须与模板 id 一致），在 market/index.json 加一条同 id 的索引项，然后跑 node market/validate.mjs。',
     ].join('\n');
-    const issueUrl = webUrl(repo, '/issues/new?labels=template-submission&title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body));
-    const newFileUrl = webUrl(repo, '/new/' + branch + '/market/templates?filename=' + encodeURIComponent(filename));
+    const issueUrl = webUrl(repo,
+      '/issues/new?template=template-submission.yml&labels=template-submission&title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(body));
+    const maintainerUrl = webUrl(repo, '/new/' + branch + '/market/templates?filename=' + encodeURIComponent(filename));
     return {
       repo,
       branch,
       filename,
+      previewName,
       repoPath,
       json: JSON.stringify(payload, null, 2),
       payload,
+      author,
+      needAuthor: !author,
       issueUrl,
-      newFileUrl,
+      maintainerUrl,
+      body,
     };
   }
 

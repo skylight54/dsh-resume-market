@@ -40,6 +40,8 @@ const SYSTEM_PROMPT = [
   '- 字段可以省略（省略 = 保留初稿），但不要输出上面没有的字段；颜色必须是 #rrggbb。',
   '- 不要编造简历内容；demoText 只用于示例姓名/岗位占位，没有依据就留空。',
   '- 只在有明确视觉证据时改；不确定就保留原值，并在 notes 里说明。',
+  '- 即使源文档没有可读文本（纯图片/未解析出文字），也要按通用中文简历规范做一次体检：字号层级是否清晰、区块间距是否过紧、页眉是否需要底色，能改的就给出微调。',
+  '- notes 里至少说清「改了哪些维度 + 判断依据」；一个维度都没改时，说明为什么初稿已经合理。',
 ].join('\n');
 
 function short(text, max) {
@@ -192,6 +194,9 @@ export async function refineTemplate(input) {
   const user = [
     '源文档摘要：',
     buildSourceDigest(source),
+    /\\S/.test(String(source.text || '')) || (Array.isArray(source.blocks) && source.blocks.length)
+      ? ''
+      : '（注意：解析结果里没有文本或块特征，只能依据初稿做通用版式体检。）',
     '',
     '程序生成的模板初稿（style）：',
     JSON.stringify(draftStyle, null, 2).slice(0, 4000),
@@ -202,7 +207,7 @@ export async function refineTemplate(input) {
     ctx,
     system: SYSTEM_PROMPT,
     user,
-    maxTokens: 1600,
+    maxTokens: 2200,
     temperature: 0.15,
     timeoutMs: 120000,
   });

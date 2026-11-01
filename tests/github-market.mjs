@@ -171,6 +171,11 @@ assert.ok(/^rm-[a-z0-9-]+-[a-z0-9]{4}$/.test(payload.id), '投稿 id 必须符�
 assert.equal(published.filename, payload.id + '.json');
 assert.equal(published.repoPath, 'market/templates/' + payload.id + '.json');
 assert.ok(published.issueUrl.startsWith('https://github.com/skylight54/dsh-resume-market/issues/new'));
+assert.ok(published.issueUrl.includes('template=template-submission.yml'), '投稿应走 Issue 表单：' + published.issueUrl);
+assert.equal(published.previewName, payload.id + '-preview.png', '投稿应带预览图文件名');
+assert.equal(published.needAuthor, true, '没有署名时 needAuthor 应为 true');
+assert.equal(published.author, '', '没有署名时 author 为空');
+assert.ok(published.body.includes('| 作者'), 'Issue 正文应包含元信息表格');
 assert.equal(payload.schema, 1);
 assert.ok(String(payload.css || '').includes('.rm-t-'), '投稿 css 应带 .rm-t-* 根选择器');
 assert.ok(payload.cls && /^rm-t-[a-z0-9-]+$/.test(payload.cls), '投稿应带合法 cls');

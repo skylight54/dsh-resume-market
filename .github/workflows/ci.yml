@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: build + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 构建客户端产物
+        run: node build/build.mjs
+
+      - name: 检查产物与提交一致
+        run: |
+          if ! git diff --quiet -- lib/; then
+            echo "::error::lib/ 与源码不一致，请本地跑 node build/build.mjs 并提交产物"
+            git diff --stat -- lib/
+            exit 1
+          fi
+
+      - name: 包形状检查
+        run: node tools/check.mjs
+
+      - name: 服务端 / 数据 / 导出测试
+        run: |
+          node tests/smoke.mjs
+          node tests/github-market.mjs
+          node tests/selection.mjs
+          node tests/archive.mjs
+          node tests/ai.mjs
+          node tests/import.mjs
+          node tests/docx.mjs
+          node tests/photo.mjs
+
+      - name: 市场模板校验
+        run: node market/validate.mjs
+
+      - name: 渲染 / 面板测试（依赖 jsdom，失败不阻塞合并）
+        continue-on-error: true
+        run: |
+          node tests/pdf.mjs || true
+          node tests/render.mjs || true
+          node tests/mount.mjs || true
+          node tests/chat.mjs || true

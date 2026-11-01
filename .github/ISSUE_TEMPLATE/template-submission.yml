@@ -1,0 +1,88 @@
+name: 投稿模板到公共市场
+description: 用插件里的「发布模板到市场」生成 JSON 与预览图后，在这里提交；维护者合并后所有装了插件的人都能安装。
+title: "[模板投稿] "
+labels: ["template-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢分享模板！提交流程：
+
+        1. 在插件里打开「模板库」→ 选中模板 →「发布模板到市场」→ 勾选「投稿到 GitHub」。
+        2. 点「下载投稿 JSON」和「下载预览图」，把两个文件**拖进本 Issue 的评论框**（GitHub 会自动上传成附件）。
+        3. 把 JSON 文件名填到下面第 5 项，点提交。
+
+        > 第一次投稿请在第 2 项填一个 GitHub 用户名，用来记录贡献者；之后插件会记住。
+
+  - type: input
+    id: template-name
+    attributes:
+      label: 模板名
+      description: 和 JSON 里的 name 一致即可
+      placeholder: 例如：克制的深蓝
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: 作者（GitHub 用户名）
+      description: 贡献者署名，会写进市场索引；首次投稿必填
+      placeholder: 例如：yourname
+    validations:
+      required: true
+
+  - type: input
+    id: tagline
+    attributes:
+      label: 一句话卖点
+      description: 市场卡片上展示的一句话
+      placeholder: 适合投研发岗，信息密度中等
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: 标签
+      description: 空格分隔，最多 5 个
+      placeholder: 商务 蓝灰 单栏
+
+  - type: dropdown
+    id: layout
+    attributes:
+      label: 版式
+      options:
+        - 单栏
+        - 左侧栏
+        - 不确定
+    validations:
+      required: true
+
+  - type: input
+    id: json-file
+    attributes:
+      label: JSON 文件名
+      description: 附件上传后的文件名（形如 你的模板id.json）
+      placeholder: my-template.json
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 说明（可选）
+      description: 适合什么岗位、参考了什么风格、有什么已知不足
+      placeholder: 页面留白偏大；侧栏只适合技能较少的简历。
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 这套模板是我自己做的，或者我有权分享
+          required: true
+        - label: JSON 里的 CSS 只作用于 .rm-t-* 模板根类，没有覆盖全局样式
+          required: true
+        - label: 我已经在插件里用示例数据预览过，排版没有溢出/错位
+          required: true

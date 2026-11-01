@@ -248,3 +248,42 @@ async function rmPdfBase64(resume, template) {
   }
   return rmBytesToBase64(rmBuildPdf(pages));
 }
+
+/**
+ * 把模板 + 示例数据渲染成一张 A4 预览 PNG（dataURL），给「投稿 Issue」当预览图。
+ * 和 PDF 同一条 foreignObject → canvas 路径，只是单页、1.5 倍分辨率。
+ * @returns {Promise<string>}
+ */
+async function rmPreviewPng(template, resume, scale) {
+  const parts = buildPreviewParts(resume, template);
+  const paperClass = templateClass(template);
+  const doc = document.implementation.createHTMLDocument('template-preview');
+  const root = doc.createElement('div');
+  root.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  const style = doc.createElement('style');
+  style.textContent = parts.css;
+  root.appendChild(style);
+  const paper = doc.createElement('div');
+  paper.className = 'rm-doc rm-paper ' + paperClass;
+  paper.innerHTML = parts.html;
+  root.appendChild(paper);
+  const xhtml = new XMLSerializer().serializeToString(root);
+  const factor = Number(scale) > 0 ? Number(scale) : 1.5;
+  const width = Math.round(PAPER_W * factor);
+  const height = Math.round(PAPER_H * factor);
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
+    '<foreignObject width="' + width + '" height="' + height + '">' +
+    xhtml +
+    '</foreignObject></svg>';
+  const img = await rmLoadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('preview/no-canvas');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(img, 0, 0, width, height);
+  return canvas.toDataURL('image/png');
+}

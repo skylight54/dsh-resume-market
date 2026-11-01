@@ -16,7 +16,7 @@
   字号、行距、页边距、标题样式、页眉色带等元素格式，右侧 A4 实时预览；也可以「从文件生成」——
   丢一张简历截图、一份 Word（.doc/.docx）或 PDF 进去，插件先在本地解析出颜色 / 版式 / 文本块
   跑一版初稿，再让 AI 对着原文件和初稿比对、补全版式细节（AI 不可用时保留初稿，一样能用）。
-  保存后可一键「发布」到本地市场（可选是否携带示例内容）或生成 GitHub 公共投稿。
+  保存后可一键「发布」到本地市场（可选是否携带示例内容）或生成 GitHub 公共投稿（JSON + 预览图 + Issue 表单，署名只需填一次）。
 - **结构化编辑器**：基本信息 8 字段两列网格；工作经历 / 项目 / 教育 / 技能 / 奖项均为
   可排序、可增删的条目列表，自动保存（900ms 防抖）；教育背景可选填「主修课程」，导出时单独
   一行跟在学历 / 专业下面（HTML / Word / PDF 都带上）。
@@ -245,14 +245,32 @@ docs/MARKET.md                    上架 DSH 插件市场的收录指南 + 公�
 > 这个加速前缀；不想走第三方代理，到「设置」页把「GitHub 加速前缀」清空即可
 > （之后依次试官方 raw、jsDelivr）。
 
-投稿（两种都行，改完提交 PR 即可）：
+投稿走 Issue（推荐，不用手动贴 JSON）：
 
-1. 在「模板库」里选中自己做的模板 → 点「发布」→ 勾选「同时生成 GitHub 公共投稿」→ 弹窗里「打开 Issue」，把 JSON 贴进去提交；
-2. 或点「新建模板文件」，文件名和路径已带好，直接提交 PR。
+1. 在「模板库」里选中自己做的模板 →「发布」→ 勾选「同时生成 GitHub 公共投稿」；
+2. 弹窗里先「下载投稿 JSON」和「下载预览图」，再点「打开投稿 Issue」——会打开带表单的 Issue 页面；
+3. 第一次投稿填一个 GitHub 用户名（之后会记住），把两个文件拖进 Issue 评论框，提交即可；
+4. 维护者把 JSON 放进 `market/templates/<id>.json`、在 `market/index.json` 加索引、跑 `node market/validate.mjs` 后合并。
+
+> 「维护者直连（需要仓库写权限）」那个入口折叠在弹窗里，只给有写权限的人用：**main 分支已按
+> 该流程保护，普通用户推不上去**，详见下面「分支保护」。
 
 合并进 `market/` 后，所有装了插件的人在公共市场里就能看到并安装。投稿规范见
 [`market/README.md`](market/README.md)；只想给自己团队用时，在「设置」页把公共市场仓库改成
 自己的 `owner/repo` 即可——读的是同一个目录结构。
+
+### 分支保护（main 只接受 PR）
+
+仓库的 `main` 走 GitHub Ruleset 保护，任何人不带 PR 直推都会被拒绝，合并前必须过 CI：
+
+- Required status checks：`ci / build + tests`（构建产物一致、包形状、全部测试、市场校验）
+- PR 触碰 `market/**` 时额外跑 `market / 市场模板校验`
+- 维护者自己在 Ruleset 里可以开 bypass；给贡献者的路径只有「Issue 投稿」与「fork → PR」
+
+开启方式：仓库 Settings → Rules → New ruleset → Target `main` → 勾选
+`Require a pull request before merging`、`Require status checks to pass`（选 `ci` 与 `market`）、
+`Block force pushes`。没开之前，及时在仓库设置里补上。
+
 
 ## 自建模板市场（可选，零依赖）
 

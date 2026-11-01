@@ -3,6 +3,17 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.12.0 — 2026-11-01
+
+- 投稿流程改成「一键 Issue + 附件」，不再让人手动粘 JSON：`src/github-market.js` 的 `buildSubmission()` 重写，返回 `previewName` / `author` / `needAuthor`，`issueUrl` 指向带表单的 Issue（`template-submission.yml`），正文放人类可读的元信息表格与三步提交说明；`src/client/55-pdf.js` 新增 `rmPreviewPng()`（模板 + 示例数据渲染 A4 → PNG），发布弹窗可分别「下载投稿 JSON」「下载预览图」，拖进 Issue 即可。Issue 表单每项都带说明，维护者不用再猜。
+- 署名：首次投稿在发布弹窗里填 GitHub 用户名（空着且选 GitHub 投稿会拦下来），随 `POST /settings` 记住；`store.settings().author` 的占位值「我 / 匿名」不再当作投稿署名（否则 `needAuthor` 永远为 false）。
+- 「直接改 main」的入口收起来了：弹窗里只留折叠的「维护者直连（需要仓库写权限）」，主路径是 Issue；README 补上分支保护说明（Ruleset + Required status checks `ci` / `market`，禁止直推 main）。
+- AI 优化版式从「生成前弹窗」搬到「生成后的模板编辑器」：编辑器头部新增「AI 优化版式」按钮，用的是当前示例文本 + 当前 style，返回后直接合并并列出 `布局：single → sidebar` 这类 diff chips 与 AI 说明——生成初稿后随时可测、可回退（手动改任意字段即覆盖）。导入弹窗里也补了 A4 预览（程序初稿 / AI 优化后各看一眼）。
+- 服务端 prompt 增补：源文件没有可读文本时也要求做一次通用版式体检（字号层级 / 区间距 / 页眉底色），并在 notes 里写清改了哪些维度，避免只回一句「保留初稿」。
+- 左侧栏观感优化：`rmStyleToCss` 的 sidebar 分支补左栏层级（姓名加粗、岗位小一号、联系方式行高与标签宽度）、左栏模块间距与分隔线、右侧栏留白、标签 pill 样式，让侧栏模板不再是「左栏一坨」。
+- 新增 GitHub Actions：`.github/workflows/ci.yml`（构建产物一致性 + `tools/check.mjs` + 8 个无依赖测试 + 市场校验；jsdom 系列测试标记 `continue-on-error`）、`market.yml`（PR 触碰 `market/**` 跑 `node market/validate.mjs`）、`ISSUE_TEMPLATE/template-submission.yml`（投稿表单：模板名 / 作者 / 卖点 / 标签 / 版式 / JSON 附件 / 原创确认）。
+- 测试：`tests/github-market.mjs` 增加 `previewName` / `author` / `needAuthor` / Issue 表单 URL / 正文表格断言。
+
 ## v0.11.2 — 2026-11-01
 
 - 修「上传照片只显示左上角」：`src/client/40-editor.js` 的 `rmReadPhoto()` 先把图片按 `480/max(w,h)` 缩放，却拿**缩放后**的尺寸当源矩形去 `drawImage(img, sx, sy, outW, outH, …)`——源坐标本该是原图像素，结果等于从原图左上角抠了一块约 480px 的角落放大显示。新增 `photoCropRect(width, height, fit, maxSide)`（`src/shared/doc.js` 导出）统一算裁剪：正方形模式按短边居中裁 `min(w,h)` 再缩到 480；等比模式整图缩放到最长边 480。旧照片在浏览器里已经被裁坏，需要重新上传。

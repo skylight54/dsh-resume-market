@@ -147,14 +147,78 @@ function PublishDialog(props) {
   );
 }
 
+function rmDownloadFile(name, content, type) {
+  var blob = content instanceof Blob ? content : new Blob([content], { type: type || 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(function () {
+    if (link.parentNode) link.parentNode.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 1200);
+}
+
+/**
+ * 公共投稿结果弹窗：Issue 里只放人读的元信息，JSON 与预览图下载到本地再拖进 Issue。
+ * 维护者直连（直接往 main 新建文件）只作为折叠项保留，不再当主路径。
+ */
 function PublicSubmitDialog(props) {
   var info = props.info || {};
+  var busyState = useState(false);
+  var busy = busyState[0];
+  var setBusy = busyState[1];
+  var errState = useState('');
+  var error = errState[0];
+  var setError = errState[1];
+
   function copy() {
     rmCopyText(info.json || '').then(
       function () { props.onToast('已复制投稿 JSON'); },
       function (err) { props.onToast('复制失败：' + rmErrText(err), true); }
     );
   }
+
+  function downloadJson() {
+    rmDownloadFile(info.filename || 'template.json', info.json || '', 'application/json');
+    props.onToast('已下载投稿 JSON');
+  }
+
+  function downloadPreview() {
+    var payload = info.payload || {};
+    var template = {
+      id: payload.templateId || payload.id || 'preview',
+      name: payload.name || '模板预览',
+      cls: payload.cls || 'rm-t-preview',
+      css: payload.css || '',
+    };
+    var sample = payload.sample || DEMO_RESUME_DATA;
+    var resume = rmSampleResume(sample);
+    setBusy(true);
+    setError('');
+    rmPreviewPng(template, resume)
+      .then(function (dataUrl) {
+        setBusy(false);
+        var link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = info.previewName || 'template-preview.png';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(function () {
+          if (link.parentNode) link.parentNode.removeChild(link);
+        }, 1200);
+        props.onToast('已下载预览图，把它和 JSON 一起拖进 Issue');
+      })
+      .catch(function (err) {
+        setBusy(false);
+        setError('预览图生成失败：' + rmErrText(err));
+      });
+  }
+
   return h(
     'div',
     { className: 'rm-modal', onMouseDown: function (event) { if (event.target === event.currentTarget) props.onClose(); } },
@@ -169,23 +233,41 @@ function PublicSubmitDialog(props) {
       ),
       h(
         'div',
-        { className: 'rm-modal-b' },
+        { className: 'rm-modal-b rm-col' },
+        h('div', { className: 'rm-hint' }, '目标文件：', h('code', { className: 'rm-mono' }, info.repoPath || '')),
+        h('div', { className: 'rm-hint' }, '投稿走 Issue：依次点下面两个「下载」按钮，把 JSON 和预览图拖进打开的 Issue 输入框，GitHub 会自动贴成附件。'),
         h(
           'div',
+          { className: 'rm-row', style: { flexWrap: 'wrap', gap: '8px' } },
+          h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: downloadJson }, '下载投稿 JSON'),
+          h('button', { type: 'button', className: 'rm-btn rm-btn-sm', disabled: busy, onClick: downloadPreview }, busy ? '生成预览图…' : '下载预览图')
+        ),
+        error ? h('span', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, error) : null,
+        info.author ? null : h('span', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, '还没填署名：Issue 里请补上你的 GitHub 用户名，维护者按它记录贡献者。'),
+        h(
+          'details',
           { className: 'rm-col' },
-          h('div', { className: 'rm-hint' }, '目标文件：', h('code', { className: 'rm-mono' }, info.repoPath || '')),
-          h('div', { className: 'rm-hint' }, '方式一：点「打开 Issue」把下面的 JSON 贴进去提交，仓库维护者合并后上架。'),
-          h('div', { className: 'rm-hint' }, '方式二：点「新建模板文件」直接发起 PR，文件名和位置已经带在链接里。'),
-          h('textarea', { className: 'rm-pub-json', readOnly: true, rows: 10, value: info.json || '' })
+          h('summary', { className: 'rm-hint', style: { cursor: 'pointer' } }, '查看 / 复制完整 JSON'),
+          h('textarea', { className: 'rm-pub-json', readOnly: true, rows: 8, value: info.json || '' })
+        ),
+        h(
+          'details',
+          { className: 'rm-col' },
+          h('summary', { className: 'rm-hint', style: { cursor: 'pointer' } }, '维护者直连（需要仓库写权限）'),
+          h('div', { className: 'rm-hint' }, '有写权限的维护者可以跳过 Issue，直接在 main 上新建模板文件：'),
+          h(
+            'button',
+            { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { window.open(info.maintainerUrl || '', '_blank'); } },
+            '新建模板文件'
+          )
         )
       ),
       h(
         'div',
         { className: 'rm-modal-f' },
         h('button', { type: 'button', className: 'rm-btn', onClick: copy }, '复制 JSON'),
-        h('button', { type: 'button', className: 'rm-btn', onClick: function () { window.open(info.issueUrl || '', '_blank'); } }, '打开 Issue'),
-        h('button', { type: 'button', className: 'rm-btn', onClick: function () { window.open(info.newFileUrl || '', '_blank'); } }, '新建模板文件'),
-        h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: props.onClose }, '知道了')
+        h('button', { type: 'button', className: 'rm-btn', onClick: props.onClose }, '关闭'),
+        h('button', { type: 'button', className: 'rm-btn rm-btn-primary', onClick: function () { window.open(info.issueUrl || '', '_blank'); } }, '打开投稿 Issue')
       )
     )
   );
@@ -1168,52 +1250,62 @@ function ResumePanel(props) {
   function submitTemplatePublish(payload) {
     if (busy || !payload || !payload.templateId) return;
     var publishing = templatePublish || {};
+    var publishAuthor = String(payload.author || (boot.settings && boot.settings.author) || '').trim();
     setBusy('template-publish');
-    rmApi('/template/publish', {
-      method: 'POST',
-      body: {
-        templateId: payload.templateId,
-        title: payload.title,
-        tagline: payload.tagline,
-        tags: payload.tags,
-        desc: payload.desc,
-        includeSample: !!payload.includeSample,
-        sample: publishing.sample || undefined,
-      },
-    }).then(function () {
-      if (!payload.publishGh) return null;
-      return rmApi('/github/publish-template', {
-        method: 'POST',
-        body: {
-          templateId: payload.templateId,
-          name: payload.title,
-          tagline: payload.tagline,
-          tags: payload.tags,
-          includeSample: !!payload.includeSample,
-          sample: publishing.sample || undefined,
+    var saveAuthor = publishAuthor
+      ? rmApi('/settings', { method: 'POST', body: { author: publishAuthor } })
+      : Promise.resolve();
+    saveAuthor
+      .then(function () {
+        return rmApi('/template/publish', {
+          method: 'POST',
+          body: {
+            templateId: payload.templateId,
+            title: payload.title,
+            tagline: payload.tagline,
+            tags: payload.tags,
+            desc: payload.desc,
+            includeSample: !!payload.includeSample,
+            sample: publishing.sample || undefined,
+          },
+        });
+      })
+      .then(function () {
+        if (!payload.publishGh) return null;
+        return rmApi('/github/publish-template', {
+          method: 'POST',
+          body: {
+            templateId: payload.templateId,
+            name: payload.title,
+            tagline: payload.tagline,
+            tags: payload.tags,
+            includeSample: !!payload.includeSample,
+            sample: publishing.sample || undefined,
+            author: publishAuthor,
+          },
+        }).then(function (info) {
+          setPublicSubmission(info);
+          return info;
+        });
+      })
+      .then(
+        function () {
+          setBusy('');
+          setTemplatePublish(null);
+          setMarketSource('local');
+          return reload().then(function () {
+            setTab('market');
+            flash('模板已发布到本地市场' + (payload.publishGh ? '，公共投稿已生成' : ''));
+          });
         },
-      }).then(function (info) {
-        setPublicSubmission(info);
-        return info;
-      });
-    }).then(
-      function () {
-        setBusy('');
-        setTemplatePublish(null);
-        setMarketSource('local');
-        return reload().then(function () {
-          setTab('market');
-          flash('模板已发布到本地市场' + (payload.publishGh ? '，公共投稿已生成' : ''));
-        });
-      },
-      function (err) {
-        setBusy('');
-        flash('发布失败：' + rmErrText(err), true);
-        setTemplatePublish(function (prev) {
-          return prev ? Object.assign({}, prev, { error: rmErrText(err) }) : prev;
-        });
-      }
-    );
+        function (err) {
+          setBusy('');
+          flash('发布失败：' + rmErrText(err), true);
+          setTemplatePublish(function (prev) {
+            return prev ? Object.assign({}, prev, { error: rmErrText(err) }) : prev;
+          });
+        }
+      );
   }
 
   function remoteBase() {
@@ -1865,6 +1957,7 @@ function ResumePanel(props) {
       : null,
     templatePublish
       ? h(TemplatePublishDialog, {
+          author: (boot.settings && boot.settings.author) || '',
           template: templatePublish,
           busy: busy === 'template-publish',
           error: templatePublish.error,

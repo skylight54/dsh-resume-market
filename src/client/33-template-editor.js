@@ -582,6 +582,21 @@ function rmStyleToCss(style, cls) {
       rule(railSel + ' .rm-skill-k', 'display:block;margin:0 0 3px;letter-spacing:.08em;');
       rule(railSel + ' .rm-edu-courses', 'color:' + railSoft + ';');
       rule(railSel + ' .rm-bullets', 'padding-left:16px;');
+      /* 侧栏观感优化：左栏层级、间距、分隔线、标签样式 */
+      rule(root + ' .rm-head', 'padding:' + Math.max(26, st.padY + 2) + 'px 22px ' + Math.max(28, st.padY + 8) + 'px;');
+      rule(root + ' .rm-head .rm-name', 'font-weight:700;letter-spacing:.01em;line-height:1.18;margin:0;');
+      rule(root + ' .rm-head .rm-role', 'margin:8px 0 0;font-size:' + Math.max(11, Math.round(st.bodySize * 0.86)) + 'px;text-transform:none;');
+      rule(root + ' .rm-head .rm-contact .rm-c', 'display:flex;gap:8px;align-items:baseline;line-height:1.5;');
+      rule(root + ' .rm-head .rm-contact .rm-k', 'min-width:34px;font-size:10.5px;letter-spacing:.04em;');
+      rule(root + ' .rm-head .rm-contact .rm-v', 'font-size:' + Math.max(10.5, Math.round(st.bodySize * 0.84)) + 'px;word-break:break-all;');
+      rule(root + ' .rm-head .rm-photo', 'border-radius:6px;box-shadow:0 6px 16px rgba(9,17,28,.22);');
+      rule(railSel, 'padding-bottom:' + Math.max(14, st.sectionGap) + 'px;font-size:' + Math.max(11, Math.round(st.bodySize * 0.94)) + 'px;line-height:' + Math.max(1.45, st.lineHeight) + ';');
+      rule(railSel + ' + ' + railSel.replace(/,/g, ' + '), 'border-top:1px solid ' + rmRgba(railInk, 0.22) + ';padding-top:' + Math.max(8, Math.round(st.sectionGap * 0.55)) + 'px;');
+      rule(railSel + ' .rm-sec-t', 'font-size:' + Math.max(9.5, Math.round(st.headingSize * 0.78)) + 'px;letter-spacing:.14em;font-weight:700;');
+      rule(railSel + ' .rm-sec-h', 'margin:0 0 ' + Math.max(6, Math.round(st.sectionGap * 0.4)) + 'px;padding-bottom:5px;');
+      rule(railSel + ' .rm-item-path, ' + railSel + ' .rm-item-line', 'margin:0 0 3px;line-height:1.5;');
+      rule(railSel + ' .rm-tag', 'display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;letter-spacing:.02em;margin:0 6px 6px 0;');
+      rule(rightSel, 'padding-bottom:' + Math.max(18, st.padY) + 'px;');
     } else {
       rule(root + ' .rm-body', 'grid-column:2;grid-row:1;padding:' + st.padY + 'px ' + st.padX + 'px;');
     }
@@ -1773,6 +1788,9 @@ function TemplateEditor(props) {
   var setLocalError = errState[1];
 
   var previewTemplate = { id: initial.id || 'rm-tpl-editor', name: name || '模板预览', cls: cls, css: cssText };
+  var aiState = useState({ busy: false, notes: '', error: '', diff: [] });
+  var aiInfo = aiState[0];
+  var setAiInfo = aiState[1];
   var previewResume = props.resume || rmSampleResume(initial.sample || DEMO_RESUME_DATA);
 
   function patchStyle(patch) {
@@ -1827,6 +1845,36 @@ function TemplateEditor(props) {
     setCssText(rmStyleToCss(next, cls));
   }
 
+  /** 基于当前示例文本 + 当前 style 让 AI 复核版式；返回的 style 直接合并进编辑器。 */
+  function refineStyle() {
+    if (aiInfo.busy) return;
+    var before = style;
+    var source = {
+      kind: 'template',
+      sourceName: String(name || '模板示例'),
+      colors: (before && before.colors) || {},
+      fonts: (before && before.fontFamily) || 'sans',
+      text: rmTemplateSampleText(previewResume),
+    };
+    setAiInfo({ busy: true, notes: '', error: '', diff: [] });
+    rmApi('/template/refine', { method: 'POST', body: { source: source, draft: { style: before } } })
+      .then(function (value) {
+        var next = rmStyleMerge(before, (value && value.style) || null);
+        setStyleState(next);
+        setManual(false);
+        setCssText(rmStyleToCss(next, cls));
+        setAiInfo({
+          busy: false,
+          notes: (value && value.notes) || '',
+          error: '',
+          diff: rmStyleDiffChips(before, next),
+        });
+      })
+      .catch(function (err) {
+        setAiInfo({ busy: false, notes: '', error: rmErrText(err) || 'AI 优化失败，可以继续手动调整', diff: [] });
+      });
+  }
+
   function submit(publish) {
     var finalName = String(name || '').trim();
     if (!finalName) {
@@ -1863,6 +1911,11 @@ function TemplateEditor(props) {
         h('span', { className: 'rm-muted', style: { fontSize: '11px' } }, headingHint),
         h(
           'button',
+          { type: 'button', className: 'rm-btn rm-btn-sm', disabled: aiInfo.busy, onClick: refineStyle },
+          aiInfo.busy ? 'AI 比对中…' : 'AI 优化版式'
+        ),
+        h(
+          'button',
           { type: 'button', className: 'rm-btn rm-btn-sm', style: { marginLeft: 'auto' }, onClick: props.onClose },
           '关闭'
         )
@@ -1870,6 +1923,13 @@ function TemplateEditor(props) {
       h(
         'div',
         { className: 'rm-modal-b rm-tpl-editor-body' },
+        aiInfo.diff && aiInfo.diff.length
+          ? h('div', { className: 'rm-row', style: { flexWrap: 'wrap', gap: '6px' } }, aiInfo.diff.map(function (text) {
+              return h('span', { key: text, className: 'rm-pill' }, text);
+            }))
+          : null,
+        aiInfo.notes ? h('div', { className: 'rm-hint' }, 'AI 说明：' + aiInfo.notes) : null,
+        aiInfo.error ? h('div', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, aiInfo.error) : null,
         h(
           'div',
           { className: 'rm-tpl-editor-form' },
@@ -2154,6 +2214,64 @@ function rmImportAnalysisFromValue(value, fileName) {
 }
 
 /** 把 AI 优化返回的 style / demoText 合并进程序初稿（不修改传入对象）。 */
+/** 把示例简历压成纯文本，给 /template/refine 当判断依据（生成初稿之后也能用）。 */
+function rmTemplateSampleText(resume) {
+  var data = (resume && resume.data) || {};
+  var basics = data.basics || {};
+  var out = [];
+  function push(value) {
+    var text = String(value == null ? '' : value).trim();
+    if (text) out.push(text);
+  }
+  push(basics.name);
+  push(basics.role);
+  ['phone', 'email', 'city', 'wechat', 'github', 'website'].forEach(function (key) { push(basics[key]); });
+  push(data.summary);
+  var groups = [data.experience, data.projects, data.education, data.skills, data.awards];
+  groups.forEach(function (group) {
+    if (!Array.isArray(group)) return;
+    group.forEach(function (item) {
+      if (!item || typeof item !== 'object') return;
+      push(item.company || item.name || item.school || item.group || item.title);
+      push(item.role || item.degree || item.major || item.items || item.desc);
+      push(item.period || item.date);
+      if (Array.isArray(item.bullets)) item.bullets.forEach(push);
+    });
+  });
+  return out.slice(0, 160).join('\n').slice(0, 6000);
+}
+
+/** 比较两份 style，给出「改了哪些维度」的短标签，用于 AI 优化后告诉用户差在哪。 */
+function rmStyleDiffChips(before, after) {
+  var a = before || {};
+  var b = after || {};
+  var chips = [];
+  function pair(label, left, right) {
+    if (left === undefined || right === undefined || left === right) return;
+    chips.push(label + '：' + String(left) + ' → ' + String(right));
+  }
+  pair('布局', a.layout, b.layout);
+  pair('页眉', a.headerStyle, b.headerStyle);
+  pair('标题', a.headingStyle, b.headingStyle);
+  pair('内容块', a.contentStyle, b.contentStyle);
+  pair('联系列数', a.contactCols, b.contactCols);
+  pair('字体', a.fontFamily, b.fontFamily);
+  pair('姓名字号', a.nameSize, b.nameSize);
+  pair('标题字号', a.headingSize, b.headingSize);
+  pair('正文字号', b.bodySize === undefined ? undefined : a.bodySize, b.bodySize);
+  pair('区块间距', a.sectionGap, b.sectionGap);
+  var ca = a.colors || {};
+  var cb = b.colors || {};
+  pair('强调色', ca.accent, cb.accent);
+  pair('标题色', ca.headingColor, cb.headingColor);
+  pair('正文色', ca.bodyColor, cb.bodyColor);
+  if (Array.isArray(a.sidebarSections) || Array.isArray(b.sidebarSections)) {
+    pair('侧栏模块', (a.sidebarSections || []).join('/'), (b.sidebarSections || []).join('/'));
+  }
+  return chips.slice(0, 6);
+}
+
+
 function rmApplyRefined(base, refined) {
   if (!base || !refined) return base;
   var style = rmStyleMerge(rmStyleFromAnalysis(base), refined.style);
@@ -2465,6 +2583,25 @@ function TemplateImportDialog(props) {
                 })
               ),
               h('span', { className: 'rm-hint' }, layoutText),
+              refined && refined.style
+                ? h(
+                    'div',
+                    { className: 'rm-row', style: { flexWrap: 'wrap', gap: '6px' } },
+                    rmStyleDiffChips(rmStyleFromAnalysis(baseAnalysis), shown.style).map(function (text) {
+                      return h('span', { key: text, className: 'rm-pill' }, text);
+                    })
+                  )
+                : null,
+              refined && refined.notes ? h('span', { className: 'rm-hint' }, 'AI 说明：' + refined.notes) : null,
+              h(
+                'div',
+                { className: 'rm-import-preview' },
+                h(TemplateEditorPreview, {
+                  resume: rmSampleResume(shown.sample || DEMO_RESUME_DATA),
+                  template: { cls: 'rm-t-import-preview', css: rmStyleToCss(shown.style, 'rm-t-import-preview') },
+                  label: refined ? 'AI 优化后预览' : '程序初稿预览',
+                })
+              ),
               shown.note ? h('span', { className: 'rm-hint' }, shown.note) : null,
               shown.document
                 ? h(
@@ -2569,9 +2706,20 @@ function TemplatePublishDialog(props) {
   var ghState = useState(false);
   var publishGh = ghState[0];
   var setPublishGh = ghState[1];
+  var authorState = useState(String((props.author || template.author || '')));
+  var author = authorState[0];
+  var setAuthor = authorState[1];
+  var localErrState = useState('');
+  var localError = localErrState[0];
+  var setLocalError = localErrState[1];
 
   function submit() {
     if (!props.onSubmit) return;
+    if (publishGh && !String(author || '').trim()) {
+      setLocalError('投稿到 GitHub 需要填一个用户名（会显示为贡献者，首次填完会记住）');
+      return;
+    }
+    setLocalError('');
     props.onSubmit({
       templateId: template.id,
       title: String(title || '').trim(),
@@ -2580,6 +2728,7 @@ function TemplatePublishDialog(props) {
       desc: String(desc || '').trim(),
       includeSample: !!includeSample,
       publishGh: !!publishGh,
+      author: String(author || '').trim(),
     });
   }
 
@@ -2598,7 +2747,8 @@ function TemplatePublishDialog(props) {
           Fields2,
           null,
           h(Field, { label: '标题', value: title, placeholder: '给模板起个市场标题', onChange: setTitle }),
-          h(Field, { label: '一句话卖点', value: tagline, placeholder: '投产品岗很稳，信息密度中等', onChange: setTagline })
+          h(Field, { label: '一句话卖点', value: tagline, placeholder: '投产品岗很稳，信息密度中等', onChange: setTagline }),
+          h(Field, { label: '作者（GitHub 用户名）', value: author, placeholder: '第一次投稿时填一下，之后会记住', onChange: setAuthor }),
         ),
         h(Field, { label: '标签（空格分隔，最多 5 个）', value: tags, placeholder: '商务 蓝灰 单栏', onChange: setTags, wide: true }),
         h(Area, { label: '详细描述（可选）', rows: 3, value: desc, placeholder: '适合什么岗位、什么风格的简历', onChange: setDesc }),
@@ -2614,6 +2764,7 @@ function TemplatePublishDialog(props) {
           h('input', { type: 'checkbox', checked: publishGh, onChange: function (event) { setPublishGh(event.target.checked); } }),
           '同时生成 GitHub 公共投稿（发布后给你 Issue / 文件链接）'
         ),
+        localError ? h('span', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, localError) : null,
         props.error ? h('span', { className: 'rm-text-danger', style: { fontSize: '11.5px' } }, props.error) : null
       ),
       h(
@@ -2658,6 +2809,15 @@ function TemplatePreviewDialog(props) {
         h('div', { ref: hostRef, style: { width: '100%', display: 'flex', justifyContent: 'center' } },
           h(PreviewScaled, { resume: resume, template: template, width: width, frame: true }))
       ),
+        h('button', {
+          type: 'button',
+          className: 'rm-btn rm-btn-sm',
+          style: { marginLeft: 'auto' },
+          disabled: aiInfo.busy,
+          onClick: refineStyle,
+        },
+          aiInfo.busy ? 'AI 比对中…' : 'AI 优化版式'
+        ),
       h(
         'div',
         { className: 'rm-modal-f' },

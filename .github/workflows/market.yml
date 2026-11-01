@@ -1,0 +1,41 @@
+name: market
+
+on:
+  pull_request:
+    paths:
+      - 'market/**'
+      - 'tools/market-validate.mjs'
+      - 'market/validate.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'market/**'
+      - 'market/validate.mjs'
+
+concurrency:
+  group: market-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: 市场模板校验
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 校验 market/ 结构与模板字段
+        run: node market/validate.mjs
+
+      - name: 检查 PR 只动了市场文件
+        if: github.event_name == 'pull_request'
+        run: |
+          files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -v '^market/' | grep -v '^docs/' | grep -v '^README.md' || true)
+          if [ -n "$files" ]; then
+            echo "::warning::这次 PR 还改了市场以外的文件，请维护者重点看一下："
+            echo "$files"
+          fi
