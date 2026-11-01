@@ -26,6 +26,7 @@ const FILES = [
   'src/client/55-pdf.js',
   'src/client/50-panel.js',
   'src/client/60-chat.js',
+  'src/client/65-archive.js',
   'src/client/70-entry.js',
 ];
 

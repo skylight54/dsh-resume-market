@@ -3,6 +3,14 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.11.0 — 2026-11-01
+
+- 修「A4 预览的『适合宽度』『100%』按钮点一下变成纯白色色块」：`.rm-zoom-btn.is-on` 原本用 `background: var(--dsw-alias-brand-primary, #2f6fde)`，在浅色主题下该 token 解析成浅色，白字配浅底就成了「白块」。改为固定品牌蓝 `#2f6fde` + 白色文字/描边，并补 `:focus-visible` 焦点环（选中态在键盘聚焦时仍有对比度）。
+- 新增「框选修改」：A4 预览工具条多一个开关，打开后鼠标 hover 出现虚线框、点击选中一个元素（姓名 / 某个联系方式 / 模块标题 / 某条要点 / 一整段经历），右下角小面板写一句指令（Enter 提交、Shift+Enter 换行、Esc 取消），插件把「结构化位置 + 指令」发给 AI，只改这一处。新增 `src/selection-edit.js` + `POST /resume-market/api/selection/edit`：内容改动按路径白名单落到 `resume.data` / `sectionTitles`（换模板也保留）；样式改动返回 stylePatch，由客户端用 `rmStyleToCss` 生成覆盖 CSS，再二次提交落成 `resume.styleOverride` + `styleOverrideCss`（预览/PDF/HTML 生效，Word 导出回退模板默认样式并明确告知）。危险 CSS（`</style>`、`<script>`、`javascript:`）直接丢弃。切模板时清掉样式覆盖并提示「内容修改都保留」，避免用户以为改丢了。
+- 新增「档案 + 按 JD 定制」：顶栏多一个「档案」标签，可把当前简历存成长期档案（也可从空白档案逐项填），选档案 + 粘贴 JD → AI 按 JD 重写简介、重排裁剪要点（禁止编造），返回匹配度评分、改动说明、能力缺口，一键生成新简历进编辑器。新增 `src/archive.js`（`archiveMeta` / `normalizeArchive` / `tailorArchive`）+ `src/client/65-archive.js`（ArchiveView），store 新增 `archives`（上限 50、reconcile 清洗、原子写盘）+ 接口 `/archive`、`/archive/from-resume`、`/archive/tailor`、`DELETE /archive?id=`；`/state` 带上 archives。
+- 证件照两种压缩方式：基本信息照片上传新增「压缩方式」单选——**正方形**（1:1 居中裁切，证件照标准）与**等比**（保持原比例不裁切）。`basics.photoFit` 贯穿预览（object-fit + 浅灰底）、HTML、Word `.docx`（cover 固定 86×86 + srcRect，contain 等比 ≤86×86）、PDF；顺带修好 quiet-luxury / compact-one / tech-grid 三套 split 页眉在 Word 里不显示照片的问题。
+- 测试：新增 `tests/selection.mjs`（7 组：内容/样式两阶段、白名单、CSS 消毒、错误码）、`tests/archive.mjs`（6 组：meta、tailor、score 夹取、错误码）；`tests/smoke.mjs` 增加 `/state.archives` 与 `/archive` 全流程；`tests/docx.mjs` 扩到 21 组（cover/contain 两态）。`src/store.js` 的 `createArchiveFromResume` 曾因 `mutate` 返回 Promise 未 await 导致响应 `{}`，已修。
+
 ## v0.10.0 — 2026-11-01
 
 - 修复「导出 doc 还是没有预期格式」：v0.9.0 的 Word 兼容 HTML 在真实 Word 里仍会走样（页眉浅灰字配浅灰底看不清、正文贴边、模块标题与内容粘连）。这一版彻底换方案：新增 `src/word-docx.js`，零依赖手写 OOXML（Node 内置 `zlib` 打 zip + XML），直接产出**真正的 .docx**。A4 页边距、页眉色带、模块标题色块（banner/tab/pill/bar/icon/leftbar 各自近似）、左栏侧边栏、联系方式两列、条目左右对齐、照片内嵌 `word/media/`，Word / WPS 都能正确还原；生成失败才回退旧的 `.doc`。导出格式 id 仍是 `doc`，文件名后缀变为 `.docx`。`tests/smoke.mjs` 增加 zip 签名 + `word/document.xml` + A4 `w:sectPr` 断言，新增 `tests/docx.mjs`（19 组）。

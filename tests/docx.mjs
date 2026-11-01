@@ -347,6 +347,37 @@ ok('照片：方角 + 纵向裁切', () => {
   assert.ok(xml.includes('<a:srcRect t="25000" b="25000"/>'), '1:2 照片应上下各裁 25%');
 });
 
+ok('照片：photoFit=contain 等比完整（不裁切、按比例缩小）', () => {
+  const data = coursesData();
+  data.basics.photo = photoDataUrl(80, 40); // 2:1
+  data.basics.photoShape = 'square';
+  data.basics.photoFit = 'contain';
+  const { zip, xml } = docOf(resumeOf(data), TEMPLATES[0]);
+  assert.ok(zip.has('word/media/photo.png'), 'contain 仍应写入 media');
+  assert.ok(!xml.includes('<a:srcRect'), 'contain 不应出现 srcRect 裁切');
+  // 86×86 框内等比：宽 86px=819150 EMU，高 43px=409575 EMU。
+  assert.ok(xml.includes('cx="819150"'), 'contain 宽应撑满 86px');
+  assert.ok(xml.includes('cy="409575"'), 'contain 高应按 2:1 等比缩到 43px');
+  assert.ok(xml.includes('<a:stretch><a:fillRect/></a:stretch>'), 'contain 应保留 fillRect 填充');
+  xmlBalanced(xml, 'contain photo document.xml');
+});
+
+ok('照片：缺省/旧数据视为 cover，contain+圆形仍用 ellipse', () => {
+  const legacy = coursesData();
+  legacy.basics.photo = photoDataUrl(80, 40);
+  legacy.basics.photoShape = 'square';
+  const { xml: coverXml } = docOf(resumeOf(legacy), TEMPLATES[0]);
+  assert.ok(coverXml.includes('<a:srcRect l="25000" r="25000"/>'), '没有 photoFit 时应按 cover 裁切');
+
+  const round = coursesData();
+  round.basics.photo = photoDataUrl(80, 40);
+  round.basics.photoShape = 'circle';
+  round.basics.photoFit = 'contain';
+  const { xml: roundXml } = docOf(resumeOf(round), TEMPLATES[0]);
+  assert.ok(roundXml.includes('<a:prstGeom prst="ellipse">'), 'contain 圆形照片仍应是 ellipse');
+  assert.ok(!roundXml.includes('<a:srcRect'), 'contain 圆形照片不裁切');
+});
+
 ok('照片：http 外链不抓取', () => {
   const data = coursesData();
   data.basics.photo = 'https://example.com/avatar.png';

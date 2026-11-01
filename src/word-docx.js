@@ -531,6 +531,8 @@ function decodePhoto(data) {
     w: dim.w || 0,
     h: dim.h || 0,
     shape: basics.photoShape === 'square' ? 'square' : 'circle',
+    // cover = 正方形居中裁切（srcRect）；contain = 等比完整显示、不裁切。
+    fit: basics.photoFit === 'contain' ? 'contain' : 'cover',
   };
 }
 
@@ -548,9 +550,25 @@ function photoCrop(media) {
 }
 
 function photoDrawing(media) {
-  const cx = String(PHOTO_PX * EMU_PER_PX);
-  const cy = String(PHOTO_PX * EMU_PER_PX);
   const geom = media.shape === 'square' ? 'roundRect' : 'ellipse';
+  let cx;
+  let cy;
+  let crop = '';
+  if (media.fit === 'contain') {
+    // 等比完整：按比例缩进 86×86 的框内，不裁切（宽高可能小于 86px）。
+    const w = media.w || 0;
+    const h = media.h || 0;
+    const k = w && h ? Math.min(PHOTO_PX / w, PHOTO_PX / h) : 0;
+    const outW = w && h ? Math.max(1, Math.round(w * k)) : PHOTO_PX;
+    const outH = w && h ? Math.max(1, Math.round(h * k)) : PHOTO_PX;
+    cx = String(outW * EMU_PER_PX);
+    cy = String(outH * EMU_PER_PX);
+  } else {
+    // 正方形居中裁切：固定 86×86 画框，用 srcRect 裁掉溢出部分。
+    cx = String(PHOTO_PX * EMU_PER_PX);
+    cy = String(PHOTO_PX * EMU_PER_PX);
+    crop = photoCrop(media);
+  }
   const a = 'http://schemas.openxmlformats.org/drawingml/2006/main';
   const pic = 'http://schemas.openxmlformats.org/drawingml/2006/picture';
   return (
@@ -562,7 +580,7 @@ function photoDrawing(media) {
     '<a:graphic xmlns:a="' + a + '"><a:graphicData uri="' + pic + '">' +
     '<pic:pic xmlns:pic="' + pic + '">' +
     '<pic:nvPicPr><pic:cNvPr id="1" name="photo.' + media.ext + '"/><pic:cNvPicPr/></pic:nvPicPr>' +
-    '<pic:blipFill><a:blip r:embed="rIdPhoto"/>' + photoCrop(media) +
+    '<pic:blipFill><a:blip r:embed="rIdPhoto"/>' + crop +
     '<a:stretch><a:fillRect/></a:stretch></pic:blipFill>' +
     '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>' +
     '<a:prstGeom prst="' + geom + '"><a:avLst/></a:prstGeom>' +
@@ -715,8 +733,26 @@ function headerBlock(data, L, st, tone, media) {
         })
       : '';
     const contact = contactTable(data, L, st, rightW - 240, tone, false);
+    // split 页眉也要带照片：左侧单元格里再套一张「姓名/职位 + 照片」的小表格。
+    let idBlock = stack([namePara, rolePara]);
+    if (media) {
+      const photoW = Math.round(tw(PHOTO_PX)) + 300;
+      const nameW = Math.max(1200, leftW - 240 - photoW);
+      const photoCell = cell(para('<w:r>' + photoDrawing(media) + '</w:r>', { align: 'center' }), {
+        width: photoW,
+        valign: 'top',
+        margin: { right: 180 },
+      });
+      const nameCell = cell(idBlock, { width: nameW, valign: 'top' });
+      const left = b.photoSide === 'left';
+      idBlock = table(
+        left ? [photoW, nameW] : [nameW, photoW],
+        [left ? [photoCell, nameCell] : [nameCell, photoCell]],
+        { width: leftW - 240 }
+      );
+    }
     const cells = [
-      cell(stack([namePara, rolePara]), { width: leftW, valign: 'bottom', margin: { bottom: 160 } }),
+      cell(idBlock, { width: leftW, valign: 'bottom', margin: { bottom: 160 } }),
       cell(contact, { width: rightW, valign: 'bottom', margin: { left: 240, bottom: 160 } }),
     ];
     return table([leftW, rightW], [cells], {

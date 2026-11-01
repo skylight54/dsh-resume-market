@@ -68,6 +68,9 @@ const BASE_CSS = `
 .rm-doc .rm-photo img{display:block;width:100%;height:100%;object-fit:cover;}
 .rm-doc .rm-photo-circle{border-radius:50%;}
 .rm-doc .rm-photo-square{border-radius:6px;}
+/* 等比完整模式：图片按比例缩进方形框内，多出来的部分留浅灰底，不裁切。 */
+.rm-doc .rm-photo.rm-photo-contain-box{background:#f1f3f6;}
+.rm-doc .rm-photo img.rm-photo-contain{object-fit:contain;background:#f1f3f6;}
 .rm-doc .rm-head.rm-has-photo .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));flex:none;width:auto;margin-top:12px;}
 .rm-doc .rm-id{min-width:0;}
 .rm-doc .rm-name{margin:0;}
@@ -436,10 +439,12 @@ function normalizeData(raw) {
       wechat: str(basicsSrc.wechat, 40),
       github: str(basicsSrc.github, 80),
       website: str(basicsSrc.website, 80),
-      // 可选照片：只接受内嵌图片或 http(s) 链接；位置 / 形状控制排版。
+      // 可选照片：只接受内嵌图片或 http(s) 链接；位置 / 形状 / 压缩方式控制排版。
       photo: normalizePhoto(basicsSrc.photo),
       photoSide: basicsSrc.photoSide === 'left' ? 'left' : 'right',
       photoShape: basicsSrc.photoShape === 'square' ? 'square' : 'circle',
+      // cover = 正方形居中裁切；contain = 等比完整显示（留白）。旧数据没有该字段 → cover。
+      photoFit: basicsSrc.photoFit === 'contain' ? 'contain' : 'cover',
     },
     summary: str(src.summary, 1200),
     experience: arr(src.experience, 12).map((it) => ({
@@ -521,7 +526,16 @@ function richLines(value) {
 }
 
 function labelsOf(resume) {
-  return LABELS[resume && resume.lang === 'en' ? 'en' : 'zh'];
+  const base = LABELS[resume && resume.lang === 'en' ? 'en' : 'zh'];
+  const titles = resume && resume.sectionTitles && typeof resume.sectionTitles === 'object' ? resume.sectionTitles : null;
+  if (!titles) return base;
+  // AI 框选修改可以改写模块标题，这里把用户保存的标题覆盖到标签上。
+  const merged = Object.assign({}, base);
+  for (const id of SECTION_ORDER) {
+    const text = titles[id];
+    if (typeof text === 'string' && text.trim()) merged[id] = text.trim().slice(0, 60);
+  }
+  return merged;
 }
 
 const CONTACT_FIELDS = ['phone', 'email', 'city', 'wechat', 'github', 'website'];
@@ -556,8 +570,10 @@ function renderHead(data, L) {
   if (b.photo) {
     const side = b.photoSide === 'left' ? 'left' : 'right';
     const shape = b.photoShape === 'square' ? 'square' : 'circle';
+    const contain = b.photoFit === 'contain';
     const photo =
-      '<div class="rm-photo rm-photo-' + shape + '"><img alt="" src="' + esc(b.photo) + '"></div>';
+      '<div class="rm-photo rm-photo-' + shape + (contain ? ' rm-photo-contain-box' : '') + '">' +
+      '<img class="' + (contain ? 'rm-photo-contain' : 'rm-photo-cover') + '" alt="" src="' + esc(b.photo) + '"></div>';
     const main = '<div class="rm-head-main">' + idHtml.join('') + contact + '</div>';
     return (
       '<header class="rm-head rm-has-photo rm-photo-' + side + '">' +
@@ -733,10 +749,18 @@ function renderBody(resume) {
   return html.join('');
 }
 
+/** 用户/AI 对某份简历做的样式覆盖（只影响这份简历，不污染模板）。 */
+function styleOverrideCssOf(resume) {
+  const css = String((resume && resume.styleOverrideCss) || '');
+  if (!css) return '';
+  if (/<\/style|<script|javascript:/i.test(css)) return '';
+  return '\n' + css.slice(0, 20000);
+}
+
 /** 预览用：返回 { css, html }，调用方用 templateClass(tpl) 取纸面根 class。 */
 function buildPreviewParts(resume, template) {
   const tpl = template || templateById(resume && resume.templateId);
-  return { css: BASE_CSS + '\n' + (tpl.css || ''), html: renderBody(resume) };
+  return { css: BASE_CSS + '\n' + (tpl.css || '') + styleOverrideCssOf(resume), html: renderBody(resume) };
 }
 
 /**
@@ -768,7 +792,7 @@ function buildHtml(resume, template, opts) {
     '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>' + esc(name) + ' · ' + esc(tpl.name) + '</title>' +
-    '<style>' + BASE_CSS + '\n' + (tpl.css || '') + PRINT_CSS + '</style>' +
+    '<style>' + BASE_CSS + '\n' + (tpl.css || '') + styleOverrideCssOf(resume) + PRINT_CSS + '</style>' +
     '</head><body class="rm-export"><main class="rm-doc rm-paper ' + esc(templateClass(tpl)) + '">' +
     renderBody(resume) + '</main>' + autoPrint + '</body></html>'
   );
@@ -922,12 +946,14 @@ function wordPhotoHtml(data) {
   const b = data.basics || {};
   if (!b.photo) return '';
   const shape = b.photoShape === 'square' ? 'square' : 'circle';
+  const contain = b.photoFit === 'contain';
   const style =
     'width:86px;height:86px;' +
     (shape === 'circle' ? 'border-radius:43px;' : 'border-radius:3px;') +
-    'border:1px solid #dfe5ec;';
+    'border:1px solid #dfe5ec;' +
+    (contain ? 'object-fit:contain;background:#f1f3f6;' : 'object-fit:cover;');
   return (
-    '<img class="rm-photo rm-photo-' + shape + '" alt="" src="' + esc(b.photo) +
+    '<img class="rm-photo rm-photo-' + shape + (contain ? ' rm-photo-contain' : '') + '" alt="" src="' + esc(b.photo) +
     '" width="86" height="86" style="' + style + '">'
   );
 }
@@ -1469,6 +1495,14 @@ function normalizeResume(raw) {
   const sections = Array.isArray(src.sections)
     ? src.sections.filter((s) => SECTION_ORDER.indexOf(s) !== -1)
     : SECTION_ORDER.slice();
+  const overrideCss = typeof src.styleOverrideCss === 'string' ? src.styleOverrideCss.slice(0, 20000) : '';
+  const titles = {};
+  if (src.sectionTitles && typeof src.sectionTitles === 'object') {
+    for (const id of SECTION_ORDER) {
+      const text = src.sectionTitles[id];
+      if (typeof text === 'string' && text.trim()) titles[id] = text.trim().slice(0, 60);
+    }
+  }
   return {
     id: typeof src.id === 'string' && src.id ? src.id : null,
     title: String(src.title || '我的简历').slice(0, 80).trim() || '我的简历',
@@ -1479,6 +1513,10 @@ function normalizeResume(raw) {
     lang: src.lang === 'en' ? 'en' : 'zh',
     sections: sections.length ? sections : SECTION_ORDER.slice(),
     data: normalizeData(src.data),
+    // 框选 AI 修改产生的「只作用于这份简历」的样式覆盖与模块标题。
+    styleOverride: sanitizeStyle(src.styleOverride),
+    styleOverrideCss: overrideCss && !/<\/style|<script|javascript:/i.test(overrideCss) ? overrideCss : '',
+    sectionTitles: Object.keys(titles).length ? titles : null,
     createdAt: typeof src.createdAt === 'string' ? src.createdAt : null,
     updatedAt: typeof src.updatedAt === 'string' ? src.updatedAt : null,
   };

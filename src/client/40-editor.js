@@ -101,8 +101,11 @@ function BulletsArea(props) {
   });
 }
 
-/** 把用户选的图片缩到最长边 480px，转成 JPEG dataURL，避免简历文件里塞原图。 */
-function rmReadPhoto(file, onDone, onFail) {
+/**
+ * 把用户选的图片缩到最长边 480px，转成 JPEG dataURL，避免简历文件里塞原图。
+ * fit=cover：再居中裁成 1:1（正方形证件照）；fit=contain：保留原始比例、不裁切。
+ */
+function rmReadPhoto(file, fit, onDone, onFail) {
   if (!file) return;
   if (!/^image\//.test(file.type || '')) {
     if (onFail) onFail('请选择图片文件（JPG / PNG / WebP）');
@@ -118,15 +121,22 @@ function rmReadPhoto(file, onDone, onFail) {
       var scale = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
       var w = Math.max(1, Math.round((img.width || 1) * scale));
       var hh = Math.max(1, Math.round((img.height || 1) * scale));
+      // cover：以短边为正方形边长，居中裁切；contain：画布保持原始比例。
+      var square = fit !== 'contain';
+      var side = Math.min(w, hh);
+      var outW = square ? side : w;
+      var outH = square ? side : hh;
+      var sx = square ? Math.round((w - side) / 2) : 0;
+      var sy = square ? Math.round((hh - side) / 2) : 0;
       try {
         var canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = hh;
+        canvas.width = outW;
+        canvas.height = outH;
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, hh);
-        ctx.drawImage(img, 0, 0, w, hh);
-        onDone(canvas.toDataURL('image/jpeg', 0.86));
+        ctx.fillRect(0, 0, outW, outH);
+        ctx.drawImage(img, sx, sy, outW, outH, 0, 0, outW, outH);
+        onDone(canvas.toDataURL('image/jpeg', 0.85));
       } catch (err) {
         if (onFail) onFail('图片处理失败，换一张试试');
       }
@@ -141,6 +151,9 @@ function BasicsCard(props) {
   var errState = useState('');
   var err = errState[0];
   var setErr = errState[1];
+  var noteState = useState('');
+  var note = noteState[0];
+  var setNote = noteState[1];
   function set(key) {
     return function (value) {
       var next = Object.assign({}, data);
@@ -150,13 +163,16 @@ function BasicsCard(props) {
   }
   var side = data.photoSide === 'left' ? 'left' : 'right';
   var shape = data.photoShape === 'square' ? 'square' : 'circle';
+  var fit = data.photoFit === 'contain' ? 'contain' : 'cover';
   function upload(event) {
     var input = event.target;
     var file = input.files && input.files[0];
     rmReadPhoto(
       file,
+      fit,
       function (dataUrl) {
         setErr('');
+        setNote('');
         set('photo')(dataUrl);
         input.value = '';
       },
@@ -165,6 +181,15 @@ function BasicsCard(props) {
         input.value = '';
       }
     );
+  }
+  function switchFit(next) {
+    set('photoFit')(next);
+    // 已经按正方形裁切过的图无法还原成完整比例，只能提示重新上传。
+    if (next === 'contain' && data.photo && fit === 'cover') {
+      setNote('等比模式会完整显示整张图；当前照片已按正方形裁切，建议重新上传原图。');
+    } else {
+      setNote('');
+    }
   }
   return h(
     'div',
@@ -191,7 +216,9 @@ function BasicsCard(props) {
         h(
           'div',
           { className: 'rm-photo-thumb' + (data.photo ? '' : ' is-empty') },
-          data.photo ? h('img', { alt: '', src: data.photo }) : h('span', null, '无照片')
+          data.photo
+            ? h('img', { alt: '', src: data.photo, className: fit === 'contain' ? 'rm-photo-contain' : '' })
+            : h('span', null, '无照片')
         ),
         h(
           'div',
@@ -206,9 +233,9 @@ function BasicsCard(props) {
               h('input', { type: 'file', accept: 'image/*', onChange: upload, style: { display: 'none' } })
             ),
             data.photo
-              ? h('button', { type: 'button', className: 'rm-btn rm-btn-danger rm-btn-sm', onClick: function () { set('photo')(''); } }, '移除照片')
+              ? h('button', { type: 'button', className: 'rm-btn rm-btn-danger rm-btn-sm', onClick: function () { set('photo')(''); setNote(''); } }, '移除照片')
               : null,
-            h('span', { className: 'rm-muted' }, '可选 · 自动压缩到 480px')
+            h('span', { className: 'rm-muted' }, '可选 · 自动压缩，最长边 480px')
           ),
           err ? h('div', { className: 'rm-hint rm-text-danger' }, err) : null,
           h(
@@ -224,7 +251,23 @@ function BasicsCard(props) {
             h('span', { className: 'rm-toggle-k' }, '照片形状'),
             h('button', { type: 'button', className: 'rm-mini' + (shape === 'circle' ? ' is-on' : ''), onClick: function () { set('photoShape')('circle'); } }, '圆形'),
             h('button', { type: 'button', className: 'rm-mini' + (shape === 'square' ? ' is-on' : ''), onClick: function () { set('photoShape')('square'); } }, '方形')
-          )
+          ),
+          h(
+            'div',
+            { className: 'rm-toggle-row' },
+            h('span', { className: 'rm-toggle-k' }, '压缩方式'),
+            h(
+              'button',
+              { type: 'button', className: 'rm-mini' + (fit === 'cover' ? ' is-on' : ''), onClick: function () { switchFit('cover'); }, title: '自动压缩成正方形：居中裁切多余部分，适合证件照' },
+              '正方形裁切'
+            ),
+            h(
+              'button',
+              { type: 'button', className: 'rm-mini' + (fit === 'contain' ? ' is-on' : ''), onClick: function () { switchFit('contain'); }, title: '等比压缩：完整显示整张图，两侧/上下留白' },
+              '等比完整'
+            )
+          ),
+          note ? h('div', { className: 'rm-hint' }, note) : null
         )
       )
     )

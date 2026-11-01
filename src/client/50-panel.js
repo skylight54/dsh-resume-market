@@ -655,6 +655,7 @@ function ResumePanel(props) {
       settings: value.settings || {},
       resumes: resumes,
       templates: value.templates || [],
+      archives: value.archives || [],
       deleted: value.deleted || [],
       market: value.market || [],
       storeFile: value.storeFile || '',
@@ -799,8 +800,31 @@ function ResumePanel(props) {
     flash('已打开《' + found.title + '》');
   }
 
-  function renameResume(id, title) {
-    var item = null;
+  // 档案「按 JD 定制」得到的是候选简历（没有 id），先落盘再进编辑器。
+  function adoptTailoredResume(resume) {
+    if (!resume || typeof resume !== 'object') return;
+    setBusy('save');
+    rmApi('/resume', { method: 'POST', body: { resume: resume } }).then(
+      function (value) { return value.resume; }
+    ).then(
+      function (saved) {
+        setBusy('');
+        setBoot(function (prev) {
+          if (!prev || prev.status !== 'ready') return prev;
+          return Object.assign({}, prev, { resumes: [saved].concat(prev.resumes || []) });
+        });
+        setDraft(saved);
+        setTab('editor');
+        flash('已按 JD 生成《' + saved.title + '》，可继续编辑');
+      },
+      function (err) {
+        setBusy('');
+        flash('保存定制简历失败：' + rmErrText(err), true);
+      }
+    );
+  }
+
+  function renameResume(id, title) {    var item = null;
     (boot.resumes || []).forEach(function (r) { if (r.id === id) item = r; });
     if (!item) return;
     rmApi('/resume', { method: 'POST', body: { resume: Object.assign({}, item, { title: title }) } }).then(
@@ -865,9 +889,34 @@ function ResumePanel(props) {
     );
   }
 
+  /** 简历若有 AI 框选产生的样式覆盖，预览/PDF 需要把这段 CSS 叠在模板 CSS 后面。 */
+  function templateFor(resume) {
+    if (!resume) return null;
+    var tpl = rmResolveTemplate(resume.templateId, boot.templates);
+    var css = resume.styleOverrideCss ? String(resume.styleOverrideCss) : '';
+    if (!tpl || !css) return tpl;
+    return Object.assign({}, tpl, { css: (tpl.css || '') + '\n' + css });
+  }
+
+  /**
+   * 切换模板。内容修改（data）跟着走；但框选改出来的样式绑在旧模板 class 上，
+   * 换模板后自动失效，所以主动清掉并提示，免得用户以为改的东西丢了。
+   */
+  function switchTemplate(templateId, immediate) {
+    if (!draft || !templateId) return;
+    var patch = { templateId: templateId };
+    if (draft.styleOverrideCss) {
+      patch.styleOverride = null;
+      patch.styleOverrideCss = '';
+      flash('已切换模板：之前的样式微调已清除（内容修改都保留）');
+    }
+    updateDraft(patch);
+    if (immediate) persist(Object.assign({}, draft, patch), true);
+  }
+
   /** PDF 在浏览器里渲染，再把字节交给 Host 落盘：不依赖本机浏览器无头打印。 */
   function renderPdf() {
-    var template = rmResolveTemplate(draft.templateId, boot.templates);
+    var template = templateFor(draft);
     return rmPdfBase64(draft, template).then(function (data) {
       return rmApi('/export/pdf', { method: 'POST', body: { id: draft.id, data: data } });
     });
@@ -968,8 +1017,7 @@ function ResumePanel(props) {
       );
       return;
     }
-    updateDraft({ templateId: template.id });
-    persist(Object.assign({}, draft, { templateId: template.id }), true);
+    switchTemplate(template.id, true);
     flash('已切换到「' + template.name + '」');
   }
 
@@ -1557,6 +1605,14 @@ function ResumePanel(props) {
       onPurge: purgeResume,
       onRevisions: openRevisions,
     });
+  } else if (tab === 'archive') {
+    body = h(ArchiveView, {
+      archives: boot.archives || [],
+      resume: draft,
+      onReload: function () { reload(); },
+      onApplyResume: adoptTailoredResume,
+      onToast: flash,
+    });
   } else if (tab === 'templates') {
     body = h(TemplatesView, {
       templates: boot.templates,
@@ -1621,7 +1677,20 @@ function ResumePanel(props) {
       sections: draft.sections,
       onData: function (data) { updateDraft({ data: data }); },
       onSections: function (sections) { updateDraft({ sections: sections }); },
-    }), h(PreviewPanel, { resume: draft, template: template }));
+    }), h(PreviewPanel, {
+      resume: draft,
+      template: templateFor(draft),
+      onChanged: function (next) {
+        if (!next || !next.id) return;
+        setDraft(next);
+        setBoot(function (prev) {
+          if (!prev || prev.status !== 'ready') return prev;
+          return Object.assign({}, prev, {
+            resumes: prev.resumes.map(function (item) { return item.id === next.id ? next : item; }),
+          });
+        });
+      },
+    }));
   }
 
   return h(
@@ -1650,7 +1719,7 @@ function ResumePanel(props) {
                 style: { width: '150px' },
                 value: draft.templateId,
                 onChange: function (event) {
-                  updateDraft({ templateId: event.target.value });
+                  switchTemplate(event.target.value);
                 },
               },
               (boot.templates || []).map(function (item, index) {
@@ -1728,6 +1797,7 @@ function ResumePanel(props) {
       [
         ['editor', '编辑简历'],
         ['resumes', '我的简历'],
+        ['archive', '档案'],
         ['templates', '模板库'],
         ['market', '模板市场'],
         ['settings', '设置'],

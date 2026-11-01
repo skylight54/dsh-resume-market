@@ -1,6 +1,6 @@
 {
   "id": "dsh-plugin-resume-market",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "files": [
     "src/shared/doc.js",
     "src/client/00-preface.js",
@@ -13,9 +13,10 @@
     "src/client/55-pdf.js",
     "src/client/50-panel.js",
     "src/client/60-chat.js",
+    "src/client/65-archive.js",
     "src/client/70-entry.js"
   ],
-  "sha256": "dfff07f2b34e31106a8d23545305b9edf3c9500f364bbdbff3a83bedf683d3b5",
-  "bytes": 362591,
-  "builtAt": "2026-11-01T06:00:42.348Z"
+  "sha256": "97524585ae323d0cc9cff59f642a7aeb62881e6babd671fbdb8c728b3e1be2b0",
+  "bytes": 433437,
+  "builtAt": "2026-11-01T06:30:37.258Z"
 }

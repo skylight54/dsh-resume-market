@@ -16,6 +16,8 @@ import { createGithubMarket } from './github-market.js';
 import { StoreError } from './store.js';
 import { IMPORT_MAX_BYTES, importTemplateFile } from './template-import.js';
 import { refineTemplate } from './template-ai.js';
+import { editSelection } from './selection-edit.js';
+import { tailorArchive } from './archive.js';
 
 export const PREFIX = '/resume-market/api';
 const MAX_BODY_BYTES = 12 * 1024 * 1024;
@@ -189,6 +191,7 @@ export function createHandler({ ctx, store }) {
           resumes: snapshot.resumes,
           deleted: snapshot.deleted,
           templates: store.listTemplates(),
+          archives: store.listArchives(),
           market: snapshot.market,
           storeFile: store.file,
         }),
@@ -345,6 +348,61 @@ export function createHandler({ ctx, store }) {
       const body = await readJsonBody(req);
       if (!body || !body.id) return { status: 400, body: fail('http/bad-request', '缺少插件 id') };
       return { status: 200, body: ok(await installPlugin({ id: String(body.id) })) };
+    }
+
+    // 框选编辑：预览里选中一块内容，让 AI 就地改写（内容走 data，样式走 styleOverride）。
+    if (suffix === '/selection/edit' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || typeof body !== 'object') return { status: 400, body: fail('http/bad-request', '缺少请求内容') };
+      return {
+        status: 200,
+        body: ok(
+          await editSelection({
+            ctx,
+            store,
+            resumeId: body.resumeId,
+            descriptor: body.descriptor,
+            instruction: body.instruction,
+            styleOverride: body.styleOverride,
+            styleOverrideCss: body.styleOverrideCss,
+          }),
+        ),
+      };
+    }
+
+    // 个人档案：关键信息存一份，按 JD 快速生成定制简历。
+    if (suffix === '/archive' && method === 'GET') {
+      return { status: 200, body: ok({ archives: store.listArchives() }) };
+    }
+
+    if (suffix === '/archive' && method === 'POST') {
+      const body = await readJsonBody(req);
+      const input = body && body.archive ? body.archive : body;
+      if (!input || typeof input !== 'object' || Array.isArray(input)) {
+        return { status: 400, body: fail('http/bad-request', '缺少档案内容') };
+      }
+      return { status: 200, body: ok({ archive: await store.saveArchive(input) }) };
+    }
+
+    if (suffix === '/archive' && method === 'DELETE') {
+      const id = query.get('id');
+      if (!id) return { status: 400, body: fail('http/bad-request', '缺少 id') };
+      return { status: 200, body: ok(await store.deleteArchive(id)) };
+    }
+
+    if (suffix === '/archive/from-resume' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.resumeId) return { status: 400, body: fail('http/bad-request', '缺少 resumeId') };
+      return { status: 200, body: ok({ archive: await store.createArchiveFromResume({ resumeId: String(body.resumeId), name: body.name }) }) };
+    }
+
+    if (suffix === '/archive/tailor' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || typeof body !== 'object') return { status: 400, body: fail('http/bad-request', '缺少请求内容') };
+      return {
+        status: 200,
+        body: ok(await tailorArchive({ ctx, store, archiveId: body.archiveId, jd: body.jd, title: body.title })),
+      };
     }
 
     // 模板库：新建 / 编辑模板、把模板发布到市场（发布主语是模板，不是简历）。

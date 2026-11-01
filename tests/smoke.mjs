@@ -524,6 +524,38 @@ assert.equal(res.json.value.settings.chatTools, true, 'chatTools 应持久化');
 res = await call('POST', '/settings', { chatTools: false });
 assert.equal(res.json.value.settings.chatTools, false);
 
+// 9c) 档案 + 框选编辑：CRUD 往返、/state.archives、错误码
+res = await call('GET', '/state');
+assert.ok(Array.isArray(res.json.value.archives), '/state 应带 archives 数组');
+const smokeResume = res.json.value.resumes[0];
+res = await call('POST', '/archive/from-resume', { resumeId: smokeResume.id, name: '冒烟档案' });
+assert.equal(res.status, 200, res.body);
+const archive = res.json.value.archive;
+assert.equal(archive.name, '冒烟档案');
+assert.ok(archive.id, '档案应有 id');
+assert.equal(typeof archive.meta.years, 'number', '档案应带 meta.years');
+assert.equal(archive.data.basics.name, smokeResume.data.basics.name, '档案应复制简历的关键信息');
+res = await call('GET', '/archive');
+assert.equal(res.json.value.archives.length, 1);
+res = await call('GET', '/state');
+assert.equal(res.json.value.archives.length, 1, '/state 应带档案');
+res = await call('POST', '/archive', { archive: { id: archive.id, name: '改名档案', data: archive.data } });
+assert.equal(res.json.value.archive.name, '改名档案');
+assert.equal(res.json.value.archive.id, archive.id, '编辑不应换 id');
+res = await call('POST', '/archive/tailor', { archiveId: archive.id, jd: '' });
+assert.equal(res.status, 400);
+assert.equal(res.json.error.code, 'archive/no-jd');
+res = await call('POST', '/selection/edit', { resumeId: smokeResume.id, descriptor: { scope: 'summary' }, instruction: '   ' });
+assert.equal(res.status, 400);
+assert.equal(res.json.error.code, 'selection/no-instruction');
+res = await call('POST', '/selection/edit', { resumeId: 'r_none', descriptor: { scope: 'summary' }, instruction: '改一下' });
+assert.equal(res.status, 404);
+assert.equal(res.json.error.code, 'selection/no-resume');
+res = await call('DELETE', '/archive?id=' + encodeURIComponent(archive.id));
+assert.equal(res.status, 200);
+res = await call('GET', '/archive');
+assert.equal(res.json.value.archives.length, 0, '删除后档案应清空');
+
 // 10) 安全围栏：非 loopback Host / cross-site 必须 403
 res = await call('GET', '/state', undefined, { host: 'evil.example.com' });
 assert.equal(res.status, 403);

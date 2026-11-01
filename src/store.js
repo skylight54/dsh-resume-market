@@ -19,11 +19,14 @@ import {
   templateClass,
 } from './shared/doc.js';
 import { seedMarket } from './seed.js';
+import { archiveMeta, normalizeArchive } from './archive.js';
 
 const STATE_VERSION = 1;
 const MAX_RESUMES = 200;
 const MAX_TEMPLATES = 100;
 const MAX_MARKET = 500;
+/** 个人档案最多存多少份（一份档案 = 一套可复用的关键信息）。 */
+const MAX_ARCHIVES = 50;
 /** 每份简历保留的历史版本数（自动保存会节流，不会每 900ms 生成一个）。 */
 const MAX_REVISIONS = 20;
 /** 至少间隔这么久才留一个历史版本，避免自动保存把历史刷满。 */
@@ -188,6 +191,7 @@ function freshState() {
     settings: { ...SETTINGS_DEFAULTS },
     resumes: [],
     templates: [],
+    archives: [],
     market: seedMarket(),
     github: { fetchedAt: '', items: [], likes: {} },
   };
@@ -249,6 +253,24 @@ function reconcile(raw) {
       templates.push(item);
     }
     state.templates = templates;
+  }
+  if (Array.isArray(raw.archives)) {
+    const used = new Set();
+    state.archives = [];
+    for (const item of raw.archives) {
+      if (!item || typeof item !== 'object') continue;
+      if (state.archives.length >= MAX_ARCHIVES) break;
+      const archive = normalizeArchive(item);
+      let id = String(archive.id || '').replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40);
+      if (!id) id = newId('a');
+      while (used.has(id)) id = newId('a');
+      used.add(id);
+      archive.id = id;
+      archive.createdAt = archive.createdAt || nowIso();
+      archive.updatedAt = archive.updatedAt || archive.createdAt;
+      archive.meta = archiveMeta(archive.data);
+      state.archives.push(archive);
+    }
   }
   if (Array.isArray(raw.market)) {
     const saved = raw.market.filter((m) => m && typeof m === 'object');
@@ -417,6 +439,7 @@ export function openStore(options = {}) {
           })),
         ),
         templates: clone(state.templates),
+        archives: clone(state.archives),
         market: clone(state.market),
         github: clone(state.github),
       };
@@ -453,6 +476,56 @@ export function openStore(options = {}) {
 
     listMarket() {
       return clone(state.market);
+    },
+
+    listArchives() {
+      return clone(state.archives);
+    },
+
+    getArchive(id) {
+      const archive = state.archives.find((a) => a.id === id);
+      return archive ? clone(archive) : null;
+    },
+
+    saveArchive(input = {}) {
+      return mutate(() => {
+        const now = nowIso();
+        const existing = input.id ? state.archives.find((a) => a.id === input.id) : null;
+        const base = existing || { id: newId('a'), createdAt: now };
+        const archive = normalizeArchive({ ...base, ...input, id: base.id });
+        archive.id = base.id;
+        archive.createdAt = base.createdAt || now;
+        archive.updatedAt = now;
+        archive.meta = archiveMeta(archive.data);
+        if (existing) {
+          Object.assign(existing, archive);
+          return clone(existing);
+        }
+        if (state.archives.length >= MAX_ARCHIVES) {
+          throw new StoreError('archive/limit', `最多保存 ${MAX_ARCHIVES} 份档案，请先删除旧的`, 409);
+        }
+        state.archives.unshift(archive);
+        return clone(archive);
+      });
+    },
+
+    deleteArchive(id) {
+      return mutate(() => {
+        const index = state.archives.findIndex((a) => a.id === id);
+        if (index === -1) throw new StoreError('archive/not-found', '找不到这份档案，可能已经被删除', 404);
+        const [removed] = state.archives.splice(index, 1);
+        return { id: removed.id };
+      });
+    },
+
+    async createArchiveFromResume(input = {}) {
+      const resume = findResume(input.resumeId);
+      const basics = (resume.data && resume.data.basics) || {};
+      return this.saveArchive({
+        name: input.name || basics.name || '我的档案',
+        templateId: resume.templateId,
+        data: clone(resume.data),
+      });
     },
 
     createResume(input = {}) {
