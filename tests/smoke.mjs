@@ -153,6 +153,8 @@ assert.equal(res.json.value.app, 'resume-market');
 res = await call('GET', '/state');
 assert.equal(res.status, 200);
 assert.equal(res.json.value.templates.length, 7, '内置模板应为 7 套');
+const builtinFlags = res.json.value.templates.map((t) => t.builtin);
+assert.ok(builtinFlags.every((flag) => flag === true), '内置模板必须带 builtin:true 标记（客户端据此渲染「复制为新模板」）');
 assert.equal(res.json.value.market.length, 3, '种子市场应有 3 条');
 assert.equal(res.json.value.resumes.length, 0);
 

@@ -18,10 +18,14 @@ function rmSampleResume(sample) {
 function TemplateCard(props) {
   var template = props.template;
   var onUse = props.onUse;
-  var builtin = !!template.builtin;
+  var builtin = !!template.builtin || template.source === 'builtin';
+  function pick(event) {
+    if (event && event.target && event.target.closest && event.target.closest('button')) return;
+    if (onUse) onUse(template);
+  }
   return h(
     'div',
-    { className: 'rm-tpl' + (props.current ? ' is-current' : '') },
+    { className: 'rm-tpl is-clickable' + (props.current ? ' is-current' : ''), onClick: pick, title: '点击直接套用这套模板' },
     h(Thumb, { resume: rmSampleResume(props.sample), template: template, initialWidth: 190 }),
     h(
       'div',
@@ -135,9 +139,9 @@ function TemplatesView(props) {
     h(
       'div',
       { className: 'rm-grid' },
-      templates.map(function (template) {
+      templates.map(function (template, index) {
         return h(TemplateCard, {
-          key: template.id,
+          key: (template.builtin || template.source === 'builtin' ? 'b:' : 'c:') + template.id + ':' + index,
           template: template,
           current: props.currentTemplateId === template.id,
           sample: template.sample || DEMO_RESUME_DATA,

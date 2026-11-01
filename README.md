@@ -39,6 +39,9 @@
   本仓库 `market/index.json`，不需要服务器和账号；安装时只拉那一套模板的 JSON，10 分钟内走本地缓存，
   GitHub 不可达时退回上次缓存。发布弹窗勾选「同时生成 GitHub 公共投稿」会生成规范 JSON + Issue /
   新建文件链接，提交 PR 合并进 `market/` 即对所有用户上架。
+- **兼容插件**：设置页「兼容插件」卡片列出与本插件互补的简历相关插件（如 `dsh-resume-skills`、
+  `dsh-resume-expert`），自动检测当前 profile 装没装，没装的一键「下载安装」（交给 DSH 插件管理器），
+  装完重启 DSH 或刷新页面生效。
 - **AI 协作**：给「大肥鱼」提供 9 个工具，直接用结构化数据生成/修改/导出/发布简历，浏览与安装公共市场模板。
 
 > 文档：[安装说明](docs/INSTALL.md) · [发布步骤](docs/RELEASE.md) · [贡献指南](CONTRIBUTING.md) ·
@@ -59,6 +62,25 @@ dsh plugin add file:<本目录绝对路径>
 ```
 
 安装后重启 / 刷新 DSH Web 页面，侧栏会出现「简历市场」。
+
+## 兼容插件
+
+设置页（侧栏「简历市场」→「设置」）底部有一张「兼容插件」卡片，用来装与本插件互补的独立插件：
+
+- **清单**：内置一份静态目录（源码里的 `src/compat.js` → `COMPAT_CATALOG`），每条带分类、关键词和
+  一句话说明；还没发布的条目显示「即将上线」，只展示不提供安装按钮。
+- **检测**：读 `~/.dsh/profiles/*/package.json`（`dependencies` 与 `dsh.profile.bundles`）以及
+  `node_modules/<包名>/package.json`，判断每个包装没装、装的什么版本；自动选中装了本插件的 profile，
+  也可以用环境变量 `DSH_PROFILE` 指定要检测的 profile。
+- **一键安装**：点「下载安装」后，Host 会执行 `dsh plugin --profile <profile> add <包名>`，交给 DSH 插件
+  管理器（profile 目录下的 pnpm）下载安装，命令输出会回填到卡片上；已经装过的会跳过。
+- **装完要重启**：DSH 在启动时加载插件，所以安装完成后需要**重启 DSH 或刷新 Web 页面**才会生效，
+  卡片上的按钮旁也会提示这一点。
+- **找不到 `dsh` 命令**：把环境变量 `DSH_CLI` 指向 `dsh` 可执行文件，或按卡片提示手动执行安装命令。
+- 接口（只本机同源可访问）：`GET /resume-market/api/compat/state`、
+  `POST /resume-market/api/compat/install`（body：`{"id": "resume-skills"}`）。
+- **想加条目**：改 `src/compat.js` 里的 `COMPAT_CATALOG` 即可；`dsh-resume-market` 自身的 `lib/` 不用重建
+  （这是 Host 侧文件，不进客户端 bundle）。
 
 ## 给 AI（大肥鱼）的工具
 

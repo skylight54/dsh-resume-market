@@ -10,6 +10,7 @@
  */
 import { buildHtml, templateById } from './shared/doc.js';
 import { createChatService } from './chat.js';
+import { installPlugin, listStatus } from './compat.js';
 import { resolveFormat, revealExport, saveRenderedPdf, writeResumeExport } from './export-file.js';
 import { createGithubMarket } from './github-market.js';
 import { StoreError } from './store.js';
@@ -276,6 +277,17 @@ export function createHandler({ ctx, store }) {
     if (suffix === '/settings' && method === 'POST') {
       const body = await readJsonBody(req);
       return { status: 200, body: ok({ settings: await store.updateSettings(body || {}) }) };
+    }
+
+    // 兼容插件：设置页列出可兼容的简历相关插件；「下载安装」直接交给 DSH 插件管理器。
+    if (suffix === '/compat/state' && method === 'GET') {
+      return { status: 200, body: ok(listStatus()) };
+    }
+
+    if (suffix === '/compat/install' && method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body || !body.id) return { status: 400, body: fail('http/bad-request', '缺少插件 id') };
+      return { status: 200, body: ok(await installPlugin({ id: String(body.id) })) };
     }
 
     // 模板库：新建 / 编辑模板、把模板发布到市场（发布主语是模板，不是简历）。

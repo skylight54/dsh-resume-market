@@ -399,6 +399,19 @@ await act(async () => {
 const templateCards = container.querySelectorAll('.rm-stage .rm-tpl');
 check(templateCards.length === 8, 'expected 7 builtin + 1 custom template cards, got ' + templateCards.length);
 check(text().includes('内置'), 'template builtin pill missing');
+check(
+  Array.prototype.some.call(templateCards, (card) => String(card.className).includes('is-clickable')),
+  'template card should be clickable',
+);
+
+// --- 点整张模板卡应直接套用（这是用户报告的「模板库点不了模板」） ---
+const cardCallsBefore = fetchCalls.filter((c) => c.includes('/resume-market/api/resume')).length;
+await act(async () => {
+  templateCards[0].dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+  await sleep(120);
+});
+const cardCallsAfter = fetchCalls.filter((c) => c.includes('/resume-market/api/resume')).length;
+check(cardCallsAfter > cardCallsBefore, 'clicking template card should apply it (POST /resume), got: ' + JSON.stringify(fetchCalls.slice(-3)));
 
 // --- market tab -----------------------------------------------------------
 await act(async () => {

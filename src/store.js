@@ -221,10 +221,31 @@ function reconcile(raw) {
       });
   }
   if (Array.isArray(raw.templates)) {
-    state.templates = raw.templates
-      .filter((t) => t && typeof t === 'object')
-      .slice(0, MAX_TEMPLATES)
-      .map((t) => ({ ...normalizeTemplate(t), author: String(t.author || '').slice(0, 40), addedAt: String(t.addedAt || nowIso()) }));  }
+    const builtinIds = new Set(TEMPLATES.map((t) => t.id));
+    const used = new Set();
+    const templates = [];
+    for (const t of raw.templates) {
+      if (!t || typeof t !== 'object') continue;
+      if (templates.length >= MAX_TEMPLATES) break;
+      const item = { ...normalizeTemplate(t), author: String(t.author || '').slice(0, 40), addedAt: String(t.addedAt || nowIso()) };
+      // 旧版本可能存下与内置模板同 id 的自定义条目，React 列表 key 会冲突、点击也会错位，这里统一改名。
+      let id = String(item.id || '').replace(/[^a-z0-9-]/g, '').slice(0, 40);
+      if (!id) id = newTemplateId();
+      if (builtinIds.has(id) || used.has(id)) {
+        let n = 2;
+        let candidate = id + '-copy' + n;
+        while (builtinIds.has(candidate) || used.has(candidate)) {
+          n += 1;
+          candidate = id + '-copy' + n;
+        }
+        id = candidate;
+      }
+      item.id = id;
+      used.add(id);
+      templates.push(item);
+    }
+    state.templates = templates;
+  }
   if (Array.isArray(raw.market)) {
     const saved = raw.market.filter((m) => m && typeof m === 'object');
     const byId = new Map(saved.map((m) => [String(m.id), m]));
@@ -421,9 +442,9 @@ export function openStore(options = {}) {
     templateForResume,
 
     listTemplates() {
-      return TEMPLATES.map((t) => ({ ...t, source: 'builtin' })).concat(
-        state.templates.map((t) => ({ ...t, source: 'custom' })),
-      );
+      const builtin = TEMPLATES.map((t) => ({ ...t, source: 'builtin', builtin: true }));
+      const custom = state.templates.map((t) => ({ ...t, source: 'custom', builtin: false }));
+      return builtin.concat(custom);
     },
 
     listMarket() {

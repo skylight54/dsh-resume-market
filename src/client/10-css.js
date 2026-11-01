@@ -60,6 +60,8 @@ var RM_CSS = `
 .rm-add{margin-top:10px;border:1px dashed var(--dsw-alias-border-l2,#d8dce2);background:transparent;color:var(--dsw-alias-label-secondary,#6b7280);border-radius:9px;padding:7px;font:inherit;font-size:12px;cursor:pointer;width:100%}
 .rm-add:hover{color:var(--dsw-alias-brand-primary,#2f6fde);border-color:var(--dsw-alias-brand-primary,#2f6fde)}
 .rm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(206px,1fr));gap:14px;padding:16px 18px 48px;overflow:auto;align-content:start;width:100%}
+.rm-tpl.is-clickable{cursor:pointer}
+.rm-tpl.is-clickable:hover{border-color:var(--dsw-alias-brand-primary,#2f6fde);box-shadow:0 2px 10px rgba(15,23,42,.08)}
 .rm-tpl{border:1px solid var(--dsw-alias-border-l1,#e5e7eb);border-radius:12px;background:var(--dsw-alias-bg-base,#fff);overflow:hidden;display:flex;flex-direction:column}
 .rm-tpl.is-current{border-color:var(--dsw-alias-brand-primary,#2f6fde);box-shadow:0 0 0 1px var(--dsw-alias-brand-primary,#2f6fde)}
 .rm-tpl-thumb{background:#eef1f5;display:flex;justify-content:center;overflow:hidden;border-bottom:1px solid var(--dsw-alias-border-l1,#e5e7eb);flex:0 0 auto}
