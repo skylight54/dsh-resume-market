@@ -3,6 +3,14 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.12.1 — 2026-11-01
+
+- CI 首次跑起来就抓到问题：产物不可复现。`build/build.mjs` 之前把源码原样拼进 bundle，Windows 工作区是 CRLF、Linux CI 是 LF，本地构建 448890 字节、CI 441341 字节，导致「产物与提交一致」检查永远失败。现在构建统一按 LF 归一源码行尾，并加了 `.gitattributes`（`* text=auto eol=lf`），从任意平台重建都得到同一份产物。
+- `lib/client.meta.json` 去掉时间戳字段，避免每次构建都产生无意义 diff。
+- 撤回用户直推进 main 的左侧栏模板文件（`market/templates/rm-mvxi0bil-c18e-9qik.json` 没进 index，市场校验直接失败）——这条也正好说明为什么需要 PR + CI。左侧栏生成效果已在这一版重调（间距 / 字号 / 分隔线 / 标签），在编辑器里点「AI 优化版式」或重新发布后可再看效果再投稿。
+- 投稿说明里的「版式」一行，对没有结构化 style 的内置模板改为从 CSS 嗅探页眉色带，不再一律写「无页眉色带」。
+- `main` 分支保护已开启：必须走 PR，且 `build + tests` 通过才能合并；管理员保留紧急直推能力（`enforce_admins: false`），对协作者一律生效。
+
 ## v0.12.0 — 2026-11-01
 
 - 投稿流程改成「一键 Issue + 附件」，不再让人手动粘 JSON：`src/github-market.js` 的 `buildSubmission()` 重写，返回 `previewName` / `author` / `needAuthor`，`issueUrl` 指向带表单的 Issue（`template-submission.yml`），正文放人类可读的元信息表格与三步提交说明；`src/client/55-pdf.js` 新增 `rmPreviewPng()`（模板 + 示例数据渲染 A4 → PNG），发布弹窗可分别「下载投稿 JSON」「下载预览图」，拖进 Issue 即可。Issue 表单每项都带说明，维护者不用再猜。
