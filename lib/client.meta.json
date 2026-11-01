@@ -16,7 +16,7 @@
     "src/client/65-archive.js",
     "src/client/70-entry.js"
   ],
-  "sha256": "d8378d8d1d5dd0ac9c4ac3a183d8b583d781fdf63443a78d63ea5dd1fdc3d4ca",
-  "bytes": 446619,
-  "builtAt": "2026-11-01T07:43:25.055Z"
+  "sha256": "554d03c79be478a8e90a56d4fabe17d72e5f671d1af66ebb30354e6b4d61fa1d",
+  "bytes": 448890,
+  "builtAt": "2026-11-01T07:49:01.649Z"
 }
