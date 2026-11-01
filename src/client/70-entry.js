@@ -81,6 +81,17 @@ function resumeMarketApply(ctx) {
           }
         },
         buildPdf: rmBuildPdf,
+        styleToCss: function (style, cls) {
+          return rmStyleToCss(style, cls || 'rm-t-preview');
+        },
+        styleFromAnalysis: function (analysis) {
+          return rmStyleFromAnalysis(analysis);
+        },
+        analyzePixels: typeof rmAnalyzePixels === 'function' ? rmAnalyzePixels : undefined,
+        previewParts: typeof buildPreviewParts === 'function' ? buildPreviewParts : undefined,
+        buildHtml: typeof buildHtml === 'function' ? buildHtml : undefined,
+        demoData: typeof DEMO_RESUME_DATA !== 'undefined' ? DEMO_RESUME_DATA : undefined,
+        normalizeData: typeof normalizeData === 'function' ? normalizeData : undefined,
       };
     }
   } catch (err) {

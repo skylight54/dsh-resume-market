@@ -385,6 +385,18 @@ assert.equal(bannerTemplate.style.gold, '#c9a227', '应接受嵌套 colors.gold'
 assert.equal(bannerTemplate.style.accent, '#2c6474', '应接受嵌套 colors.accent');
 assert.equal(bannerTemplate.style.nameSize, 44);
 res = await call('POST', '/template/save', {
+  template: {
+    name: '版式字段测试',
+    style: { layout: 'sidebar', headerStyle: 'band', contentStyle: 'card', headingStyle: 'pill', contactCols: 1 },
+  },
+});
+assert.equal(res.status, 200, res.body);
+const layoutTemplate = res.json.value.template;
+assert.equal(layoutTemplate.style.layout, 'sidebar', '应接受左侧栏布局');
+assert.equal(layoutTemplate.style.headerStyle, 'band', '应接受整宽色带页眉');
+assert.equal(layoutTemplate.style.contentStyle, 'card', '应接受卡片内容块');
+assert.equal(layoutTemplate.style.headingStyle, 'pill', '应接受胶囊标题');
+res = await call('POST', '/template/save', {
   template: { id: customTemplate.id, name: '我的测试模板 v2', css: '.' + customTemplate.cls + '{padding:40px;color:#111}' },
 });
 assert.equal(res.status, 200, res.body);
@@ -459,7 +471,7 @@ for (const tool of tools) {
   assert.ok(['object', 'array'].includes(tool.output.schema.type), tool.name + ' 的 output.schema 类型不受支持');
 }
 const listed = await byName.get('resume_market_list').execute({ include: 'all' });
-assert.equal(listed.templates.length, 11, '7 内置 + 1 市场安装 + 1 公共市场安装 + 2 模板库新建');
+assert.equal(listed.templates.length, 12, '7 内置 + 1 市场安装 + 1 公共市场安装 + 3 模板库新建');
 const saved = await byName.get('resume_save').execute({
   title: 'AI 直出简历',
   templateId: 'quiet-luxury',

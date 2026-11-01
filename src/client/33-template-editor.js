@@ -94,8 +94,38 @@ var RM_HEADING_STYLES = [
   ['bar', '色块'],
   ['banner', '斜切色带'],
   ['underline', '下划线'],
+  ['tab', '斜角标签'],
+  ['pill', '胶囊标签'],
+  ['icon', '圆形图标'],
+  ['leftbar', '左侧竖条'],
   ['plain', '无装饰'],
 ];
+
+var RM_LAYOUTS = [
+  ['single', '单栏'],
+  ['sidebar', '左侧栏'],
+];
+
+var RM_HEADER_STYLES = [
+  ['plain', '纯文字'],
+  ['band', '整宽色带'],
+  ['split', '左右分栏'],
+  ['ribbon', '左上角标签'],
+];
+
+var RM_CONTENT_STYLES = [
+  ['plain', '无边框'],
+  ['card', '卡片'],
+];
+
+/** 枚举字段收敛：只认白名单里的值，否则回落到 fallback。 */
+function rmStylePickEnum(value, options, fallback) {
+  if (typeof value !== 'string') return fallback;
+  for (var i = 0; i < options.length; i++) {
+    if (options[i][0] === value) return value;
+  }
+  return fallback;
+}
 
 var RM_FONT_FAMILIES = [
   ['sans', '黑体'],
@@ -137,6 +167,9 @@ function rmStyleDefaults() {
     fontFamily: 'sans',
     headerAlign: 'left',
     headerBand: false,
+    layout: 'single',
+    headerStyle: 'plain',
+    contentStyle: 'plain',
   };
 }
 
@@ -145,32 +178,56 @@ var RM_STYLE_PRESETS = {
   'business-minimal': {
     colors: { accent: '#1f2328', nameColor: '#111827', headingColor: '#111827', bodyColor: '#333941', background: '#ffffff', bandColor: '#f3f4f6', gold: '#b8912c' },
     nameSize: 34, headingSize: 12, bodySize: 13.5, lineHeight: 1.62, padX: 60, padY: 54, sectionGap: 18,
-    headingStyle: 'rule', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2,
+    headingStyle: 'rule', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
   },
   'quiet-luxury': {
     colors: { accent: '#5f7896', nameColor: '#1f2b3d', headingColor: '#3d4c61', bodyColor: '#2a3442', background: '#ffffff', bandColor: '#f1f4f8', gold: '#b8912c' },
     nameSize: 34, headingSize: 12, bodySize: 13.2, lineHeight: 1.68, padX: 62, padY: 56, sectionGap: 20,
-    headingStyle: 'underline', fontFamily: 'serif', headerAlign: 'left', headerBand: false, contactCols: 2,
+    headingStyle: 'underline', fontFamily: 'serif', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
   },
   'fresh-creative': {
     colors: { accent: '#7ccab6', nameColor: '#135c4f', headingColor: '#175e52', bodyColor: '#22343a', background: '#ffffff', bandColor: '#e6f6f2', gold: '#c9a227' },
     nameSize: 36, headingSize: 12.5, bodySize: 13.5, lineHeight: 1.64, padX: 48, padY: 38, sectionGap: 18,
-    headingStyle: 'bar', fontFamily: 'sans', headerAlign: 'left', headerBand: true, contactCols: 3,
+    headingStyle: 'bar', fontFamily: 'sans', headerAlign: 'left', headerBand: true, contactCols: 3, layout: 'single', headerStyle: 'band', contentStyle: 'plain',
   },
   'compact-one': {
     colors: { accent: '#3f4753', nameColor: '#1d2129', headingColor: '#2c3138', bodyColor: '#2c3138', background: '#ffffff', bandColor: '#f1f2f4', gold: '#b8912c' },
     nameSize: 27, headingSize: 11.5, bodySize: 12.2, lineHeight: 1.55, padX: 44, padY: 38, sectionGap: 14,
-    headingStyle: 'underline', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2,
+    headingStyle: 'underline', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
   },
   'timeline-pro': {
     colors: { accent: '#2f6fde', nameColor: '#1f3352', headingColor: '#1f3352', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#eaf1fc', gold: '#c9a227' },
     nameSize: 32, headingSize: 12.5, bodySize: 13.5, lineHeight: 1.62, padX: 56, padY: 50, sectionGap: 18,
-    headingStyle: 'rule', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2,
+    headingStyle: 'rule', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
   },
   'tech-grid': {
     colors: { accent: '#2c5f96', nameColor: '#10213a', headingColor: '#133a63', bodyColor: '#16202e', background: '#ffffff', bandColor: '#eef2f7', gold: '#c9a227' },
     nameSize: 31, headingSize: 12.5, bodySize: 13.2, lineHeight: 1.6, padX: 54, padY: 48, sectionGap: 18,
-    headingStyle: 'underline', fontFamily: 'mono', headerAlign: 'left', headerBand: false, contactCols: 2,
+    headingStyle: 'underline', fontFamily: 'mono', headerAlign: 'left', headerBand: false, contactCols: 2, layout: 'single', headerStyle: 'plain', contentStyle: 'plain',
+  },
+  'sidebar-deep': {
+    colors: { accent: '#1f3a5f', nameColor: '#0f2540', headingColor: '#1f3a5f', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#f1f5f9', gold: '#c9a227' },
+    nameSize: 26, headingSize: 12.5, bodySize: 13, lineHeight: 1.6, padX: 40, padY: 34, sectionGap: 16,
+    headingStyle: 'icon', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 1,
+    layout: 'sidebar', headerStyle: 'plain', contentStyle: 'plain',
+  },
+  'pill-blue': {
+    colors: { accent: '#2f6fde', nameColor: '#10213a', headingColor: '#1f3352', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#1f4b7a', gold: '#c9a227' },
+    nameSize: 30, headingSize: 12.5, bodySize: 13.4, lineHeight: 1.62, padX: 54, padY: 44, sectionGap: 18,
+    headingStyle: 'pill', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2,
+    layout: 'single', headerStyle: 'band', contentStyle: 'plain',
+  },
+  'icon-blue': {
+    colors: { accent: '#3978a3', nameColor: '#10213a', headingColor: '#133a63', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#3978a3', gold: '#c9a227' },
+    nameSize: 32, headingSize: 12.5, bodySize: 13.4, lineHeight: 1.62, padX: 54, padY: 44, sectionGap: 18,
+    headingStyle: 'icon', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2,
+    layout: 'single', headerStyle: 'band', contentStyle: 'plain',
+  },
+  'card-light': {
+    colors: { accent: '#284967', nameColor: '#10213a', headingColor: '#284967', bodyColor: '#1f2937', background: '#ffffff', bandColor: '#284967', gold: '#c9a227' },
+    nameSize: 30, headingSize: 12.5, bodySize: 13.2, lineHeight: 1.6, padX: 50, padY: 40, sectionGap: 14,
+    headingStyle: 'leftbar', fontFamily: 'sans', headerAlign: 'left', headerBand: false, contactCols: 2,
+    layout: 'single', headerStyle: 'band', contentStyle: 'card',
   },
   // 兼容短名
   business: null,
@@ -298,7 +355,11 @@ function rmCloneStyle(base) {
       if (RM_HEADER_ALIGNS[k][0] === base.headerAlign) out.headerAlign = base.headerAlign;
     }
   }
+  out.layout = rmStylePickEnum(base.layout, RM_LAYOUTS, out.layout);
+  out.headerStyle = rmStylePickEnum(base.headerStyle, RM_HEADER_STYLES, out.headerStyle);
+  out.contentStyle = rmStylePickEnum(base.contentStyle, RM_CONTENT_STYLES, out.contentStyle);
   if (typeof base.headerBand === 'boolean') out.headerBand = base.headerBand;
+  else out.headerBand = out.headerStyle === 'band';
   return out;
 }
 
@@ -334,7 +395,11 @@ function rmStyleMerge(base, patch) {
       if (RM_HEADER_ALIGNS[k][0] === patch.headerAlign) out.headerAlign = patch.headerAlign;
     }
   }
+  out.layout = rmStylePickEnum(patch.layout, RM_LAYOUTS, out.layout);
+  out.headerStyle = rmStylePickEnum(patch.headerStyle, RM_HEADER_STYLES, out.headerStyle);
+  out.contentStyle = rmStylePickEnum(patch.contentStyle, RM_CONTENT_STYLES, out.contentStyle);
   if (typeof patch.headerBand === 'boolean') out.headerBand = patch.headerBand;
+  else if (patch.headerStyle) out.headerBand = out.headerStyle === 'band';
   return out;
 }
 
@@ -420,6 +485,21 @@ function rmStyleToCss(style, cls) {
   if (stack) rootBody += 'font-family:' + stack + ';';
   rule(root, rootBody);
 
+  // 左侧栏布局：页眉整块搬进左栏，正文在右栏；栏宽固定 268px 保证和 A4 比例合适。
+  if (st.layout === 'sidebar') {
+    rule(root, 'display:grid;grid-template-columns:268px minmax(0,1fr);padding:0;align-items:start;background:linear-gradient(90deg,' + (st.headerStyle === 'band' ? c.bandColor : c.accent) + ' 0 268px,' + c.background + ' 268px);');
+    rule(
+      root + ' .rm-head',
+      'display:block;grid-column:1;grid-row:1;align-self:stretch;padding:' + Math.max(24, st.padY) + 'px 24px ' + Math.max(30, st.padY + 6) + 'px;background:' + (st.headerStyle === 'band' ? c.bandColor : c.accent) + ';color:#ffffff;'
+    );
+    rule(root + ' .rm-head .rm-name', 'color:#ffffff;font-size:' + Math.max(20, Math.round(st.nameSize * 0.82)) + 'px;letter-spacing:.02em;');
+    rule(root + ' .rm-head .rm-role', 'color:' + rmRgba('#ffffff', 0.84) + ';letter-spacing:.06em;');
+    rule(root + ' .rm-head .rm-contact', 'grid-template-columns:minmax(0,1fr);gap:7px;margin:16px 0 0;');
+    rule(root + ' .rm-head .rm-contact .rm-k', 'color:' + rmRgba('#ffffff', 0.6) + ';');
+    rule(root + ' .rm-head .rm-contact .rm-v', 'color:#ffffff;');
+    rule(root + ' .rm-head .rm-photo', 'width:84px;height:84px;margin:0 auto 18px;');
+    rule(root + ' .rm-body', 'grid-column:2;grid-row:1;padding:' + st.padY + 'px ' + st.padX + 'px;');
+  }
   rule(root + ' .rm-name', 'color:' + c.nameColor + ';font-size:' + st.nameSize + 'px;font-weight:700;letter-spacing:.04em;');
   rule(root + ' .rm-role', 'color:' + rmMixHex(c.accent, c.nameColor, 0.25) + ';font-size:' + Math.max(11, Math.round(st.bodySize * 108) / 100) + 'px;');
   rule(root + ' .rm-contact', 'grid-template-columns:repeat(' + Math.round(st.contactCols) + ',minmax(0,1fr));color:' + c.bodyColor + ';');
@@ -449,6 +529,22 @@ function rmStyleToCss(style, cls) {
     rule(root + ' .rm-sec-h::before', 'content:"";position:absolute;left:-10px;top:2px;width:5px;height:calc(100% - 8px);background:' + c.gold + ';');
   } else if (st.headingStyle === 'underline') {
     rule(root + ' .rm-sec-h', 'border-bottom:2px solid ' + c.accent + ';padding-bottom:3px;');
+  } else if (st.headingStyle === 'tab') {
+    rule(root + ' .rm-sec-h', 'border-bottom:1px solid ' + rmRgba(c.accent, 0.48) + ';padding-bottom:2px;');
+    rule(
+      root + ' .rm-sec-t',
+      'display:inline-block;padding:6px 40px 6px 18px;background:linear-gradient(100deg,' + c.headingColor + ' 0%,' + c.accent + ' 100%);color:#ffffff;font-size:' + st.headingSize + 'px;font-weight:700;letter-spacing:.14em;clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%);'
+    );
+  } else if (st.headingStyle === 'pill') {
+    rule(root + ' .rm-sec-h', 'border-bottom:1px solid ' + rmRgba(c.accent, 0.42) + ';padding-bottom:3px;');
+    rule(root + ' .rm-sec-t', 'display:inline-block;padding:5px 22px;border-radius:999px;background:' + c.accent + ';color:#ffffff;font-size:' + st.headingSize + 'px;font-weight:600;letter-spacing:.12em;');
+  } else if (st.headingStyle === 'icon') {
+    rule(root + ' .rm-sec-h', 'position:relative;padding-left:34px;border-bottom:1px solid ' + rmRgba(c.accent, 0.42) + ';padding-bottom:3px;');
+    rule(root + ' .rm-sec-h::before', 'content:"";position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:' + c.accent + ';');
+  } else if (st.headingStyle === 'leftbar') {
+    rule(root + ' .rm-sec-h', 'border-bottom:0;padding-left:11px;position:relative;');
+    rule(root + ' .rm-sec-h::before', 'content:"";position:absolute;left:0;top:2px;bottom:2px;width:4px;border-radius:2px;background:' + c.accent + ';');
+    rule(root + ' .rm-sec-t', 'color:' + c.headingColor + ';font-size:' + st.headingSize + 'px;font-weight:700;letter-spacing:.08em;');
   } else {
     rule(root + ' .rm-sec-h', 'border-bottom:1px solid transparent;padding-bottom:2px;');
   }
@@ -463,6 +559,38 @@ function rmStyleToCss(style, cls) {
       root + ' .rm-head',
       'margin:' + -st.padY + 'px ' + -st.padX + 'px ' + Math.max(10, Math.round(st.sectionGap * 0.7)) + 'px;padding:' + st.padY + 'px ' + st.padX + 'px 18px;background:' + c.bandColor + ';border-bottom:1px solid ' + rmRgba(c.accent, 0.24) + ';'
     );
+  }
+
+  if (st.headerStyle === 'band' && st.layout !== 'sidebar') {
+    // 整宽页眉底色：底色偏深时整块反白，偏浅时保持深字。
+    var bandBg = rmLuminance(c.bandColor) > 0.9 ? rmMixHex('#ffffff', c.accent, 0.18) : c.bandColor;
+    var bandDark = rmLuminance(bandBg) < 0.6;
+    rule(
+      root + ' .rm-head',
+      'margin:' + -st.padY + 'px ' + -st.padX + 'px ' + Math.max(10, Math.round(st.sectionGap * 0.7)) + 'px;padding:' + (st.padY + 8) + 'px ' + st.padX + 'px ' + (st.padY + 2) + 'px;background:' + bandBg + ';border-bottom:1px solid ' + rmRgba(c.accent, 0.24) + ';' + (bandDark ? 'color:#ffffff;' : '')
+    );
+    if (bandDark) {
+      rule(root + ' .rm-head .rm-name', 'color:#ffffff;');
+      rule(root + ' .rm-head .rm-role', 'color:' + rmRgba('#ffffff', 0.84) + ';');
+      rule(root + ' .rm-head .rm-contact .rm-k', 'color:' + rmRgba('#ffffff', 0.64) + ';');
+      rule(root + ' .rm-head .rm-contact .rm-v', 'color:#ffffff;');
+    }
+  } else if (st.headerStyle === 'split' && st.layout !== 'sidebar') {
+    // 名字占左、联系信息占右的两栏页眉，底下一条强调色横线。
+    rule(root + ' .rm-head', 'display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:26px;border-bottom:2px solid ' + c.accent + ';padding-bottom:12px;');
+    rule(root + ' .rm-head .rm-id', 'grid-column:1;grid-row:1;');
+    rule(root + ' .rm-head .rm-contact', 'grid-column:2;grid-row:1;grid-template-columns:repeat(' + Math.min(2, Math.max(1, Math.round(st.contactCols))) + ',minmax(0,1fr));gap:4px 18px;margin:0;');
+    rule(root + ' .rm-head.rm-has-photo', 'grid-template-columns:minmax(0,1fr) auto auto;');
+    rule(root + ' .rm-head .rm-photo', 'grid-column:3;grid-row:1;');
+  } else if (st.headerStyle === 'ribbon') {
+    // 左上角斜角标签：页眉给标签让出上边距。
+    rule(root + ' .rm-head', 'position:relative;padding-top:' + Math.max(st.padY + 22, 56) + 'px;');
+    rule(root + ' .rm-head::before', 'content:"";position:absolute;left:0;top:0;width:132px;height:34px;background:' + c.accent + ';clip-path:polygon(0 0,100% 0,100% 76%,0 100%);');
+  }
+
+  if (st.contentStyle === 'card') {
+    rule(root + ' .rm-sec', 'margin-top:' + st.sectionGap + 'px;border:1px solid ' + rmRgba(c.accent, 0.2) + ';border-radius:6px;padding:10px 14px 12px;background:' + c.background + ';');
+    rule(root + ' .rm-sec-h', 'border-bottom:1px solid ' + rmRgba(c.accent, 0.22) + ';padding-bottom:6px;margin-bottom:9px;');
   }
 
   // 斜切色带的页眉强调：底部青→金斜切色带 + 名字右侧金色竖线 + 角色行拉宽字距。
@@ -499,7 +627,17 @@ function rmAnalysisFallback(note) {
       bandColor: st.colors.bandColor,
       gold: st.colors.gold,
     },
-    layout: { headerBand: false, headerAlign: 'left', headingStyle: 'rule', contactCols: 2, headingBands: 0, fontFamily: 'sans' },
+    layout: {
+      layout: 'single',
+      headerStyle: 'plain',
+      contentStyle: 'plain',
+      headerBand: false,
+      headerAlign: 'left',
+      headingStyle: 'rule',
+      contactCols: 2,
+      headingBands: 0,
+      fontFamily: 'sans',
+    },
     size: { width: 0, height: 0 },
     note: note || '没有从图片里读到可用颜色，已用默认初稿',
     fallback: true,
@@ -592,51 +730,53 @@ function rmLightestBigBucketColor(buckets, minCount) {
 }
 
 /**
- * 图片 → { palette, layout, size, note }。
- * 统计口径：饱和且不算太暗的像素里最常见的颜色当强调色；最暗的一撮当姓名色；
- * 整图最常见的颜色当纸张底色；顶部 26% 区域里强调色占比高 → 有页眉色带；
- * 顶部文字的水平重心在中间 → 页眉居中。
- * 还能认出「斜切色带分块标题」：正文区里成排的高墨量横条 ≥3 条 → banner。
+ * 图片像素 → { palette, layout, size, note }。纯函数：只读 pixels.data（RGBA），
+ * 不碰 canvas / DOM / 全局对象，所以能在 node 里拿真实样图跑回归（tools/analyze-samples.mjs）。
+ *
+ * 统计口径（阈值全部用 w / h 的比例，不依赖固定像素尺寸）：
+ * - 颜色：饱和且不算太暗的像素里最常见的颜色当强调色；最暗的一撮当姓名色；
+ *   整图最常见且够亮的颜色当纸张底色；暖色（金色）单独统计给「青金斜切」用。
+ * - 布局：左侧 12%~45% 宽、贯穿大半页的深色竖栏 → sidebar；
+ *   顶部整宽单色填充 → band；左上角贴左边的高饱和色块 → ribbon；顶部明显的左右两栏 → split。
+ * - 标题装饰：先给彩色像素做 3x3 腐蚀（去掉 Windows ClearType 给文字加的彩色毛边），
+ *   再把「实心彩色」按连通行块量几何：近正方形小块 → icon；窄长条 → tab / pill（两端是否收窄）；
+ *   整宽高条 → banner；贴着标题行左边 4px 的窄竖条 → leftbar；只剩 1~2px 长横线 → underline。
+ * - 内容块：成片的浅灰细线（长横线 + 长竖线同时出现）→ card。
  */
-function rmAnalyzeImageElement(img) {
-  var nw = img.naturalWidth || img.width || 0;
-  var nh = img.naturalHeight || img.height || 0;
-  if (!nw || !nh) return rmAnalysisFallback('读不到图片尺寸，已用默认初稿');
-  var maxSide = 160;
-  var scale = Math.min(1, maxSide / Math.max(nw, nh));
-  var w = Math.max(1, Math.round(nw * scale));
-  var h = Math.max(1, Math.round(nh * scale));
-  var canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  var ctx = canvas.getContext && canvas.getContext('2d');
-  if (!ctx) return rmAnalysisFallback('当前环境不支持 canvas，已用默认初稿');
-  ctx.drawImage(img, 0, 0, w, h);
-  var data;
-  try {
-    data = ctx.getImageData(0, 0, w, h).data;
-  } catch (err) {
-    return rmAnalysisFallback('读不到图片像素，已用默认初稿');
-  }
-
+function rmAnalyzePixels(pixels) {
+  var data = pixels && pixels.data;
+  var w = pixels ? Math.round(pixels.width || 0) : 0;
+  var h = pixels ? Math.round(pixels.height || 0) : 0;
+  if (!data || w < 8 || h < 8) return rmAnalysisFallback('读不到图片像素，已用默认初稿');
   var total = w * h;
-  var accentBuckets = {};
-  var bgBuckets = {};
-  var warmBuckets = {};
-  var darkBuckets = {};
-  var darkSum = { r: 0, g: 0, b: 0, n: 0 };
-  var rowInk = [];
-  var rowColorful = [];
-  var rowDark = [];
-  var bandRows = Math.max(2, Math.round(h * 0.26));
   var i;
   var x;
   var y;
+
+  var rowInk = new Int32Array(h);
+  var rowDark = new Int32Array(h);
+  var rowColorful = new Int32Array(h);
+  var rowWarm = new Int32Array(h);
+  var colInk = new Int32Array(w);
+  var colorMask = new Uint8Array(total);
+  var lightMask = new Uint8Array(total);
+  var bgBuckets = {};
+  var accentBuckets = {};
+  var warmBuckets = {};
+  var darkBuckets = {};
+  var darkSum = { r: 0, g: 0, b: 0, n: 0 };
+  var inkTopY = Math.round(h * 0.06);
+  var inkBotY = Math.round(h * 0.96);
+  var inkRows = Math.max(1, inkBotY - inkTopY);
+  var bandInkRows = Math.max(2, Math.round(h * 0.26));
+  var bandInk = 0;
+  var bandInkX = 0;
+
   for (y = 0; y < h; y++) {
+    var rowBase = y * w;
     for (x = 0; x < w; x++) {
-      i = (y * w + x) * 4;
-      var a = data[i + 3];
-      if (a < 24) continue;
+      i = (rowBase + x) * 4;
+      if (data[i + 3] < 24) continue;
       var r = data[i];
       var g = data[i + 1];
       var b = data[i + 2];
@@ -644,37 +784,37 @@ function rmAnalyzeImageElement(img) {
       var min = Math.min(r, g, b);
       var sat = max - min;
       var lum = 0.299 * r + 0.587 * g + 0.114 * b;
-      var key = (r >> 4) + '-' + (g >> 4) + '-' + (b >> 4);
-      // 每行的墨量 / 彩色量 / 深色量：后面用来找斜切色带和判断大标题字号。
-      if (rowInk[y] == null) rowInk[y] = 0;
-      if (rowColorful[y] == null) rowColorful[y] = 0;
-      if (rowDark[y] == null) rowDark[y] = 0;
-      if (lum < 150 || sat > 40) rowInk[y]++;
-      if (sat > 42 && max < 235 && lum > 34) rowColorful[y]++;
+      if (lum < 150 || sat > 40) {
+        rowInk[y]++;
+        if (y >= inkTopY && y < inkBotY) colInk[x]++;
+        if (y < bandInkRows) {
+          bandInk++;
+          bandInkX += x;
+        }
+      }
+      if (sat > 42 && max < 235 && lum > 34) {
+        rowColorful[y]++;
+        colorMask[rowBase + x] = 1;
+      }
+      if (sat < 20 && lum > 200 && lum < 250) lightMask[rowBase + x] = 1;
       if (lum < 120) {
         rowDark[y]++;
-        var darkBucket = darkBuckets[key];
+        var darkBucket = darkBuckets[(r >> 4) + '-' + (g >> 4) + '-' + (b >> 4)];
         if (!darkBucket) {
           darkBucket = { n: 0, r: 0, g: 0, b: 0 };
-          darkBuckets[key] = darkBucket;
+          darkBuckets[(r >> 4) + '-' + (g >> 4) + '-' + (b >> 4)] = darkBucket;
         }
         darkBucket.n++;
         darkBucket.r += r;
         darkBucket.g += g;
         darkBucket.b += b;
       }
-      // 暖色（金色系）单独统计：hue 30~65°、有饱和度、不算过暗。
-      if (sat > 30 && lum > 40 && lum < 244 && rmHueOf(r, g, b) >= 30 && rmHueOf(r, g, b) <= 65) {
-        var warmBucket = warmBuckets[key];
-        if (!warmBucket) {
-          warmBucket = { n: 0, r: 0, g: 0, b: 0 };
-          warmBuckets[key] = warmBucket;
-        }
-        warmBucket.n++;
-        warmBucket.r += r;
-        warmBucket.g += g;
-        warmBucket.b += b;
+      if (sat > 45 && lum > 60 && lum < 232 && (x & 1) === 0) {
+        var warmHue = rmHueOf(r, g, b);
+        if (warmHue >= 28 && warmHue <= 70) rowWarm[y]++;
       }
+      if ((x & 1) || (y & 1)) continue;
+      var key = (r >> 4) + '-' + (g >> 4) + '-' + (b >> 4);
       var bgBucket = bgBuckets[key];
       if (!bgBucket) {
         bgBucket = { n: 0, r: 0, g: 0, b: 0 };
@@ -695,6 +835,20 @@ function rmAnalyzeImageElement(img) {
         accentBucket.g += g;
         accentBucket.b += b;
       }
+      if (sat > 30 && lum > 40 && lum < 244) {
+        var hue = rmHueOf(r, g, b);
+        if (hue >= 30 && hue <= 65) {
+          var warmBucket = warmBuckets[key];
+          if (!warmBucket) {
+            warmBucket = { n: 0, r: 0, g: 0, b: 0 };
+            warmBuckets[key] = warmBucket;
+          }
+          warmBucket.n++;
+          warmBucket.r += r;
+          warmBucket.g += g;
+          warmBucket.b += b;
+        }
+      }
       if (lum < 92) {
         darkSum.r += r;
         darkSum.g += g;
@@ -704,23 +858,21 @@ function rmAnalyzeImageElement(img) {
     }
   }
 
+  /* ---- 颜色：底色 / 强调色 / 姓名色 / 金色 ---- */
   var bgAvg = rmTopBucketColor(bgBuckets);
   var accentAvg = rmTopBucketColor(accentBuckets);
-  // 纸张底色：优先取「面积够大且亮度最高」的色桶，防止整页被文字/色带拉暗。
-  var bigBg = rmLightestBigBucketColor(bgBuckets, Math.max(4, Math.round(total * 0.04)));
+  var bigBg = rmLightestBigBucketColor(bgBuckets, Math.max(4, Math.round(total * 0.02)));
   var background = bigBg ? rmRgbToHex(bigBg) : bgAvg ? rmRgbToHex(bgAvg) : '#ffffff';
   var darkPaper = rmLuminance(background) < 0.45;
-
   var accent = accentAvg ? rmRgbToHex(accentAvg) : darkPaper ? '#7ccab6' : '#2f6fde';
   if (rmLuminance(accent) > 0.72) accent = rmMixHex(accent, '#1f2937', 0.45);
   if (rmLuminance(accent) < 0.14) accent = rmMixHex(accent, '#ffffff', 0.32);
 
-  // 姓名色 = 最暗且面积够大的那种颜色（参考图里标题/分块标题经常同色）。
   var nameColor;
   var darkestBucket = null;
   var darkestLum = 2;
-  Object.keys(darkBuckets).forEach(function (key) {
-    var bucket = darkBuckets[key];
+  Object.keys(darkBuckets).forEach(function (bucketKey) {
+    var bucket = darkBuckets[bucketKey];
     if (!bucket || bucket.n < Math.max(3, total * 0.0005)) return;
     var rgb = { r: Math.round(bucket.r / bucket.n), g: Math.round(bucket.g / bucket.n), b: Math.round(bucket.b / bucket.n) };
     var lum = rmLuminance(rmRgbToHex(rgb));
@@ -737,103 +889,563 @@ function rmAnalyzeImageElement(img) {
     nameColor = darkPaper ? '#f3f6fa' : '#10213a';
   }
   if (!darkPaper && rmLuminance(nameColor) > 0.55) nameColor = '#111827';
-
-  // 金色细线：暖色桶里的主色；没有就退回标准金；太亮/太暗各做一次矫正。
   var warmAvg = rmTopBucketColor(warmBuckets);
   var gold = warmAvg ? rmRgbToHex(warmAvg) : darkPaper ? '#d8c07a' : '#c9a227';
   if (rmLuminance(gold) > 0.8) gold = rmMixHex(gold, '#8a6d14', 0.45);
   if (rmLuminance(gold) < 0.18) gold = rmMixHex(gold, '#ffffff', 0.32);
-
-  // 参考图里姓名与分块标题同色，headingColor 直接跟 nameColor 走。
   var headingColor = nameColor;
   if (rmLuminance(headingColor) < 0.1 && !darkPaper) headingColor = rmMixHex(accent, nameColor, 0.55);
-
   var bodyColor = darkPaper ? '#e6ebf2' : '#1f2937';
   var bandColor = darkPaper ? rmMixHex(background, accent, 0.3) : rmMixHex(background, accent, 0.12);
 
-  // 第二遍：顶部区域统计强调色占比 + 文字水平重心（判断页眉色带 / 居中对齐）。
-  var accentRgb = rmHexToRgb(accent);
-  var bandTotal = bandRows * w;
-  var bandAccent = 0;
-  var bandInk = 0;
-  var bandInkX = 0;
-  for (y = 0; y < bandRows; y++) {
-    for (x = 0; x < w; x++) {
-      i = (y * w + x) * 4;
-      if (data[i + 3] < 24) continue;
-      var rr = data[i];
-      var gg = data[i + 1];
-      var bb = data[i + 2];
-      var dist = Math.abs(rr - accentRgb.r) + Math.abs(gg - accentRgb.g) + Math.abs(bb - accentRgb.b);
-      var lum2 = 0.299 * rr + 0.587 * gg + 0.114 * bb;
-      if (dist < 96) {
-        bandAccent++;
-      } else if (lum2 < 235) {
-        bandInk++;
-        bandInkX += x;
+  /* ---- 布局：左栏侧边栏 ---- */
+  var colFrac = [];
+  for (x = 0; x < w; x++) colFrac[x] = colInk[x] / inkRows;
+  var layoutMode = 'single';
+  var bodyX0 = 0;
+  var sideColor = null;
+  var sideLimit = Math.round(w * 0.55);
+  var firstSideX = -1;
+  for (x = 0; x < Math.round(w * 0.5); x++) {
+    if (colFrac[x] >= 0.55) {
+      firstSideX = x;
+      break;
+    }
+  }
+  if (firstSideX >= 0 && firstSideX <= Math.round(w * 0.05)) {
+    var lastSideX = firstSideX;
+    for (x = firstSideX; x < sideLimit; x++) {
+      if (colFrac[x] >= 0.42) lastSideX = x;
+      else if (x - lastSideX > Math.round(w * 0.03)) break;
+    }
+    var sideW = lastSideX - firstSideX + 1;
+    if (sideW >= w * 0.12 && sideW <= w * 0.46) {
+      var sideBuckets = {};
+      var lightRight = 0;
+      var rightN = 0;
+      var rightFrom = Math.min(w - 1, lastSideX + Math.round(w * 0.06));
+      for (y = inkTopY; y < inkBotY; y += 2) {
+        for (x = firstSideX; x <= lastSideX; x += 2) {
+          i = (y * w + x) * 4;
+          if (data[i + 3] < 24) continue;
+          var skey = (data[i] >> 4) + '-' + (data[i + 1] >> 4) + '-' + (data[i + 2] >> 4);
+          var sideBucket = sideBuckets[skey];
+          if (!sideBucket) {
+            sideBucket = { n: 0, r: 0, g: 0, b: 0 };
+            sideBuckets[skey] = sideBucket;
+          }
+          sideBucket.n++;
+          sideBucket.r += data[i];
+          sideBucket.g += data[i + 1];
+          sideBucket.b += data[i + 2];
+        }
+        for (x = rightFrom; x < w; x += 2) {
+          i = (y * w + x) * 4;
+          if (data[i + 3] < 24) continue;
+          rightN++;
+          if (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2] > 200) lightRight++;
+        }
+      }
+      var sideTop = rmTopBucketColor(sideBuckets);
+      var rightLightFrac = rightN ? lightRight / rightN : 0;
+      if (sideTop && rightLightFrac >= 0.7) {
+        var sideHex = rmRgbToHex(sideTop);
+        if (rmLuminance(sideHex) < 0.72) {
+          layoutMode = 'sidebar';
+          sideColor = sideHex;
+          bodyX0 = Math.min(w - 1, lastSideX + Math.round(w * 0.015));
+        }
       }
     }
   }
-  var headerBand = bandTotal > 0 && bandAccent / bandTotal > 0.18;
-  // 顶部 18% 里彩色像素铺满 → 也算页眉色带（浅色渐变底不一定会被 accent 命中）。
-  var topRows = Math.max(2, Math.round(h * 0.18));
-  var topColorful = 0;
-  for (y = 0; y < topRows; y++) topColorful += rowColorful[y] || 0;
-  if (topRows * w > 0 && topColorful / (topRows * w) > 0.6) headerBand = true;
-  var headerAlign = 'left';
-  if (bandInk > bandTotal * 0.012) {
-    var center = bandInkX / bandInk / w;
-    if (center > 0.44 && center < 0.56) headerAlign = 'center';
+  if (sideColor) {
+    accent = rmLuminance(sideColor) > 0.55 ? rmMixHex(sideColor, '#1f2937', 0.4) : sideColor;
+    bandColor = rmMixHex(sideColor, '#ffffff', 0.12);
   }
 
-  // 分块标题条带：正文区里成排的「彩色横条」= 斜切色带。
-  // 一条带 = 连续 ≥2 行彩色占比 >32%，且换算回原图高度 ≥12px（过滤细下划线／文字行）。
+  /* ---- 页眉：band / ribbon / split / plain ---- */
+  function rmRowFillInfo(rowY, xFrom, xTo) {
+    var buckets = {};
+    var bestKey = null;
+    var xx;
+    for (xx = xFrom; xx < xTo; xx++) {
+      var ii = (rowY * w + xx) * 4;
+      if (data[ii + 3] < 24) continue;
+      var rr = data[ii];
+      var gg = data[ii + 1];
+      var bb = data[ii + 2];
+      if (0.299 * rr + 0.587 * gg + 0.114 * bb > 238) continue;
+      var k = (rr >> 5) + '-' + (gg >> 5) + '-' + (bb >> 5);
+      var bk = buckets[k];
+      if (!bk) {
+        bk = { n: 0, r: 0, g: 0, b: 0, minX: xx, maxX: xx };
+        buckets[k] = bk;
+      }
+      bk.n++;
+      bk.r += rr;
+      bk.g += gg;
+      bk.b += bb;
+      if (xx < bk.minX) bk.minX = xx;
+      if (xx > bk.maxX) bk.maxX = xx;
+      if (!bestKey || buckets[bestKey].n < bk.n) bestKey = k;
+    }
+    if (!bestKey) return null;
+    var top = buckets[bestKey];
+    return { fill: top.n / Math.max(1, xTo - xFrom), minX: top.minX, maxX: top.maxX, color: { r: top.r / top.n, g: top.g / top.n, b: top.b / top.n } };
+  }
+
+  var headerStyle = 'plain';
+  var bandEndY = 0;
+  if (layoutMode === 'single') {
+    var bandMinRows = Math.max(18, Math.round(h * 0.018));
+    var bandScanEnd = Math.round(h * 0.34);
+    var bandRunStart = -1;
+    var bandBestRows = 0;
+    var bandColorSum = { r: 0, g: 0, b: 0, n: 0 };
+    var bandColor = null;
+    for (y = 0; y <= bandScanEnd; y++) {
+      var fill = y < bandScanEnd ? rmRowFillInfo(y, 0, w) : null;
+      var isBandRow = !!fill && fill.fill >= 0.33;
+      if (isBandRow) {
+        if (bandRunStart < 0) bandRunStart = y;
+      } else if (bandRunStart >= 0) {
+        var bandRows = y - bandRunStart;
+        if (bandRows >= bandMinRows && bandRows > bandBestRows) {
+          bandBestRows = bandRows;
+          bandEndY = y - 1;
+          bandColorSum = { r: 0, g: 0, b: 0, n: 0 };
+          for (var by = bandRunStart; by < y; by++) {
+            var binfo = rmRowFillInfo(by, 0, w);
+            if (!binfo) continue;
+            bandColorSum.r += binfo.color.r;
+            bandColorSum.g += binfo.color.g;
+            bandColorSum.b += binfo.color.b;
+            bandColorSum.n++;
+          }
+        }
+        bandRunStart = -1;
+      }
+    }
+    if (bandBestRows && bandColorSum.n) {
+      bandColor = rmRgbToHex({ r: bandColorSum.r / bandColorSum.n, g: bandColorSum.g / bandColorSum.n, b: bandColorSum.b / bandColorSum.n });
+      headerStyle = 'band';
+      // 太接近白纸的「色带」不可用，按 accent 18% 混白重算，保证页眉能看出一层底。
+      if (rmLuminance(bandColor) > 0.9) bandColor = rmMixHex(bandColor, accent, 0.18);
+    }
+  }
+
+  if (headerStyle === 'plain') {
+    // 左上角的高饱和色块（斜角标签）：贴着左边、宽度不超过 40%，其余白。
+    // 只扫顶部 8% 高：真正的角标就在页眉最上面，再往下多半是标题装饰，不能当角标。
+    var ribbonRows = 0;
+    var ribbonScanEnd = Math.round(h * 0.08);
+    var ribbonMaxX = Math.round(w * 0.4);
+    for (y = 0; y < ribbonScanEnd; y++) {
+      var satCount = 0;
+      var satMinX = -1;
+      var satMaxX = -1;
+      for (x = 0; x < ribbonMaxX; x++) {
+        i = (y * w + x) * 4;
+        if (data[i + 3] < 24) continue;
+        var r2 = data[i];
+        var g2 = data[i + 1];
+        var b2 = data[i + 2];
+        var max2 = Math.max(r2, g2, b2);
+        var min2 = Math.min(r2, g2, b2);
+        var sat2 = max2 - min2;
+        var lum2 = 0.299 * r2 + 0.587 * g2 + 0.114 * b2;
+        if (sat2 > 45 && lum2 > 34 && lum2 < 240) {
+          satCount++;
+          if (satMinX < 0) satMinX = x;
+          satMaxX = x;
+        }
+      }
+      var rightWhite = 0;
+      var rightTotal = 0;
+      for (x = Math.round(w * 0.5); x < w; x += 2) {
+        i = (y * w + x) * 4;
+        if (data[i + 3] < 24) continue;
+        rightTotal++;
+        if (data[i] > 225 && data[i + 1] > 225 && data[i + 2] > 225) rightWhite++;
+      }
+      // 色块右侧紧跟着必须还是白的：整宽色带（青金双色带那种）会在这里被刷掉。
+      var justRightSat = 0;
+      for (x = Math.round(w * 0.42); x < Math.round(w * 0.6); x++) {
+        i = (y * w + x) * 4;
+        if (data[i + 3] < 24) continue;
+        var mx3 = Math.max(data[i], data[i + 1], data[i + 2]);
+        var mn3 = Math.min(data[i], data[i + 1], data[i + 2]);
+        if (mx3 - mn3 > 45) justRightSat++;
+      }
+      // 截图常带一圈白边，色块到左边距允许留 6% 宽；再要求这一行本来就是「实心色块」
+      // （填充率 >= 55%），否则斜切的细小装饰/彩色大标题会被误当成左上角标签。
+      var satSpan = satMaxX - satMinX + 1;
+      var ribbonRow =
+        satCount >= w * 0.08 &&
+        satSpan > 0 &&
+        satCount / satSpan >= 0.55 &&
+        satMinX <= Math.round(w * 0.06) &&
+        satMaxX <= Math.round(w * 0.42) &&
+        justRightSat <= w * 0.02 &&
+        rightTotal > 0 &&
+        rightWhite / rightTotal >= 0.6;
+      if (ribbonRow) ribbonRows++;
+    }
+    if (ribbonRows >= Math.max(8, Math.round(h * 0.006)) && ribbonRows <= h * 0.14) headerStyle = 'ribbon';
+  }
+
+  function rmDarkCount(rowY, from, to) {
+    var rowBase3 = rowY * w;
+    var n = 0;
+    for (var xx2 = from; xx2 < to; xx2++) {
+      var ii2 = (rowBase3 + xx2) * 4;
+      if (data[ii2 + 3] < 24) continue;
+      if (0.299 * data[ii2] + 0.587 * data[ii2 + 1] + 0.114 * data[ii2 + 2] < 170) n++;
+    }
+    return n;
+  }
+
+  if (headerStyle === 'plain') {
+    // 顶部左右两栏（名字在左、联系信息在右）且没有整宽色带 → split。
+    var splitRows = 0;
+    var splitFrom = Math.round(h * 0.04);
+    var splitTo = Math.round(h * 0.26);
+    for (y = splitFrom; y < splitTo; y++) {
+      var leftInk = rmDarkCount(y, Math.round(w * 0.04), Math.round(w * 0.4));
+      var rightInk = rmDarkCount(y, Math.round(w * 0.5), Math.round(w * 0.96));
+      if (leftInk >= w * 0.03 && rightInk >= w * 0.04) splitRows++;
+    }
+    if (splitRows >= Math.max(8, Math.round(h * 0.01))) headerStyle = 'split';
+  }
+
+  /* ---- 标题装饰：腐蚀 → 连通行块 → 几何分类 ---- */
+  var solid = new Uint8Array(total);
+  var xFrom = Math.max(1, bodyX0);
+  for (y = 1; y < h - 1; y++) {
+    var base = y * w;
+    for (x = xFrom; x < w - 1; x++) {
+      var p = base + x;
+      if (colorMask[p] && colorMask[p - 1] && colorMask[p + 1] && colorMask[p - w] && colorMask[p + w]) solid[p] = 1;
+    }
+  }
+  var rowSolid = new Int32Array(h);
+  var rowSolidMin = new Int32Array(h);
+  var rowSolidMax = new Int32Array(h);
+  for (y = 1; y < h - 1; y++) {
+    var minX = -1;
+    var maxX = -1;
+    var count = 0;
+    var rowBase2 = y * w;
+    for (x = xFrom; x < w - 1; x++) {
+      if (!solid[rowBase2 + x]) continue;
+      count++;
+      if (minX < 0) minX = x;
+      maxX = x;
+    }
+    rowSolid[y] = count;
+    rowSolidMin[y] = minX;
+    rowSolidMax[y] = maxX;
+  }
+
+  var hasGoldBand = false;
+  var warmMax = 0;
+  for (y = 0; y < h; y++) {
+    if (rowWarm[y] > warmMax) warmMax = rowWarm[y];
+    if (rowWarm[y] * 2 >= w * 0.3) hasGoldBand = true;
+  }
+
+  var scanFrom = Math.round(h * 0.14);
+  if (bandEndY > scanFrom) scanFrom = Math.min(h - 2, bandEndY + Math.round(h * 0.004));
+  var minCols = Math.max(4, Math.round(w * 0.004));
+  var votes = { icon: 0, pill: 0, tab: 0, banner: 0 };
+  var blockDefs = [];
+  var blockStart = -1;
+  for (y = scanFrom; y <= h; y++) {
+    var qualifies = y < h && rowSolid[y] >= minCols;
+    if (qualifies) {
+      if (blockStart < 0) blockStart = y;
+      continue;
+    }
+    if (blockStart < 0) continue;
+    var endY = y - 1;
+    var blockFrom = blockStart;
+    var bh = endY - blockFrom + 1;
+    blockStart = -1;
+    if (bh < Math.max(4, Math.round(h * 0.008))) {
+      blockDefs.push({ start: blockFrom, end: endY, bh: bh, thin: true });
+      continue;
+    }
+    blockDefs.push({ start: blockFrom, end: endY, bh: bh, thin: false });
+    var spanMin = w;
+    var spanMax = -1;
+    var solidTotal = 0;
+    for (var by2 = blockFrom; by2 <= endY; by2++) {
+      if (rowSolid[by2] < minCols) continue;
+      if (rowSolidMin[by2] < spanMin) spanMin = rowSolidMin[by2];
+      if (rowSolidMax[by2] > spanMax) spanMax = rowSolidMax[by2];
+      solidTotal += rowSolid[by2];
+    }
+    if (spanMax < 0) continue;
+    var span = spanMax - spanMin + 1;
+    var spanW = span / w;
+    // 密度 = 实心像素 / 外接框：标题文字被算进色块时会明显偏低（文字笔画只占一小块）。
+    var density = solidTotal / Math.max(1, bh * span);
+    var midY = blockFrom + Math.floor(bh / 2);
+    var topY = blockFrom + 1;
+    var botY = endY - 1;
+    if (rowSolid[topY] < minCols) topY = blockFrom;
+    if (rowSolid[botY] < minCols) botY = endY;
+    var topMin = rowSolidMin[topY];
+    var midMin = rowSolidMin[midY] >= 0 ? rowSolidMin[midY] : spanMin;
+    var midMax = rowSolidMax[midY] >= 0 ? rowSolidMax[midY] : spanMax;
+    var botMax = rowSolidMax[botY];
+    // icon：左边一截实心块（圆形图标也算），右边接标题文字。圆形图标上下收窄，
+    // 所以用「首末行很窄 + 左侧一小段够密 + 右侧低密度」三条一起判，避免把斜切色块误判成图标。
+    var narrowTop = rowSolid[blockFrom] <= Math.max(4, Math.round(bh * 0.6)) && rowSolid[endY] <= Math.max(5, Math.round(bh * 0.75));
+    var leftW = Math.min(span, Math.max(4, Math.round(bh * 1.1)));
+    var leftPix = 0;
+    for (var lx = spanMin; lx < spanMin + leftW; lx++) {
+      for (var ly = blockFrom; ly <= endY; ly++) if (solid[ly * w + lx]) leftPix++;
+    }
+    var leftDensity = leftPix / Math.max(1, leftW * bh);
+    var postPix = 0;
+    var postCols = 0;
+    for (var px = spanMin + leftW; px <= spanMax; px++) {
+      for (var ry6 = blockFrom; ry6 <= endY; ry6++) if (solid[ry6 * w + px]) postPix++;
+      postCols++;
+    }
+    var postDensity = postCols ? postPix / (postCols * bh) : 0;
+    var iconStandalone = spanW <= 0.07 && bh >= h * 0.01 && bh <= h * 0.042 && bh / span >= 0.7 && bh / span <= 1.6;
+    var iconWithText = !iconStandalone && spanW > 0.04 && narrowTop && leftDensity >= 0.32 && postDensity <= 0.45;
+    var isIcon = (iconStandalone || iconWithText) && !(hasGoldBand && spanW >= 0.045);
+    var isWide = spanW >= 0.3 && bh >= h * 0.012 && density >= 0.38;
+    var isStrip = spanW >= 0.045 && spanW < 0.3 && bh >= h * 0.012 && bh <= h * 0.06 && density >= 0.38;
+    if (isIcon) votes.icon++;
+    else if (isWide) votes.banner++;
+    else if (isStrip) {
+      if (hasGoldBand) votes.banner++;
+      else {
+        var roundThreshold = Math.max(2, Math.round(bh * 0.22));
+        var leftRound = topMin - midMin >= roundThreshold;
+        var rightRound = midMax - botMax >= roundThreshold;
+        if (leftRound && rightRound) votes.pill++;
+        else votes.tab++;
+      }
+    }
+  }
+
+  // 细横线：只算「本身很薄」的彩色行带，避免把标题色块本身当成下划线。
+  var lineBands = 0;
+  var inLine = false;
+  for (y = scanFrom; y < h - 1; y++) {
+    var isLineRow = rowColorful[y] >= w * 0.3;
+    if (isLineRow) {
+      var lineBlock = null;
+      for (var bi = 0; bi < blockDefs.length; bi++) {
+        if (y >= blockDefs[bi].start && y <= blockDefs[bi].end) {
+          lineBlock = blockDefs[bi];
+          break;
+        }
+      }
+      if (!lineBlock || lineBlock.bh <= 5) {
+        if (!inLine) {
+          lineBands++;
+          inLine = true;
+        }
+      } else inLine = false;
+    } else inLine = false;
+  }
+
+  // 窄竖条（leftbar）：标题行左侧贴着内容区左边的小方块。
+  var barComps = [];
+  var barFrom = Math.max(1, bodyX0 + 1);
+  var barTo = Math.min(w - 2, bodyX0 + Math.round(w * 0.09));
+  for (y = scanFrom; y < h - 1; y++) {
+    var runStart = -1;
+    for (x = barFrom; x <= barTo; x++) {
+      i = (y * w + x) * 4;
+      var tall = false;
+      if (x < w - 1 && data[i + 3] > 23) {
+        var rr2 = data[i];
+        var gg2 = data[i + 1];
+        var bb2 = data[i + 2];
+        var mx = Math.max(rr2, gg2, bb2);
+        var mn = Math.min(rr2, gg2, bb2);
+        var lum3 = 0.299 * rr2 + 0.587 * gg2 + 0.114 * bb2;
+        tall = mx - mn > 40 && lum3 > 40 && lum3 < 235;
+      }
+      if (tall) {
+        if (runStart < 0) runStart = x;
+      } else if (runStart >= 0) {
+        var runLen = x - runStart;
+        if (runLen >= 2 && runLen <= 8) {
+          var matched = false;
+          for (var ci = 0; ci < barComps.length; ci++) {
+            var comp = barComps[ci];
+            if (comp.endY >= y - 2 && Math.abs(comp.x - runStart) <= 3) {
+              comp.endY = y;
+              comp.len = Math.max(comp.len, runLen);
+              matched = true;
+              break;
+            }
+          }
+          if (!matched) barComps.push({ startY: y, endY: y, x: runStart, len: runLen });
+        }
+        runStart = -1;
+      }
+    }
+  }
+  var leftbarVotes = [];
+  for (var cj = 0; cj < barComps.length; cj++) {
+    var barComp = barComps[cj];
+    var barH = barComp.endY - barComp.startY + 1;
+    if (barH >= Math.max(8, Math.round(h * 0.008)) && barH <= Math.round(h * 0.024) && barComp.x - bodyX0 <= Math.round(w * 0.06)) {
+      var known = false;
+      for (var ck = 0; ck < leftbarVotes.length; ck++) {
+        if (Math.abs(leftbarVotes[ck] - barComp.startY) < h * 0.02) known = true;
+      }
+      if (!known) leftbarVotes.push(barComp.startY);
+    }
+  }
+
+  /* ---- 内容块：浅灰细线成片出现 → card ---- */
+  var lightLineRows = 0;
+  for (y = 1; y < h - 1; y++) {
+    var bestRun = 0;
+    var curRun = 0;
+    var lrowBase = y * w;
+    for (x = 0; x < w; x++) {
+      if (lightMask[lrowBase + x]) {
+        curRun++;
+        if (curRun > bestRun) bestRun = curRun;
+      } else curRun = 0;
+    }
+    if (bestRun >= w * 0.62) lightLineRows++;
+  }
+  var lightLineCols = 0;
+  for (x = 1; x < w - 1; x++) {
+    var bestCol = 0;
+    var curCol = 0;
+    for (y = 0; y < h; y++) {
+      if (lightMask[y * w + x]) {
+        curCol++;
+        if (curCol > bestCol) bestCol = curCol;
+      } else curCol = 0;
+    }
+    if (bestCol >= h * 0.1) lightLineCols++;
+  }
+  var contentStyle = lightLineRows >= Math.max(16, Math.round(h * 0.012)) && lightLineCols >= 2 ? 'card' : 'plain';
+
+  /* ---- 旧版兜底：彩色横条数量（>=3 banner / >=1 bar） ---- */
   var bandRunMin = 2;
   var bandRunMax = Math.max(6, Math.round(h * 0.2));
+  var refW = Math.max(1, w);
   var headingBands = 0;
   var run = 0;
-  var scanFrom = Math.round(h * 0.15);
   for (y = scanFrom; y <= h; y++) {
-    var isBandRow = y < h && (rowColorful[y] || 0) / w > 0.32;
+    var isBandRow = y < h && rowColorful[y] / w > 0.32;
     if (isBandRow) {
       run++;
       continue;
     }
-    if (run >= bandRunMin && run <= bandRunMax && run / Math.max(0.001, scale) >= 12) headingBands++;
+    // 同样折算到 160px 宽参考分辨率，保持旧阈值含义。
+    if (run >= bandRunMin && run <= bandRunMax && run * (160 / refW) >= 12) headingBands++;
     run = 0;
   }
-  var headingStyle = headingBands >= 3 ? 'banner' : headingBands >= 1 ? 'bar' : 'rule';
 
-  // 大标题字号：顶部 30% 的深色「文字行」最长连续段，换算回原图像素判断是否衬线大标题。
-  var titleRows = Math.max(3, Math.round(h * 0.3));
-  var runStart = -1;
-  var bestRun = 0;
-  for (y = 0; y < titleRows; y++) {
-    var ink = rowDark[y] || 0;
-    var isTextRow = ink >= Math.max(1, w * 0.02) && ink / w < 0.6;
-    if (isTextRow) {
-      if (runStart < 0) runStart = y;
-      if (y - runStart + 1 > bestRun) bestRun = y - runStart + 1;
-    } else {
-      runStart = -1;
+  var headingStyle = 'rule';
+  var styleOrder = ['banner', 'icon', 'pill', 'tab'];
+  var bestVote = 0;
+  var bestName = '';
+  styleOrder.forEach(function (name) {
+    if (votes[name] > bestVote) {
+      bestVote = votes[name];
+      bestName = name;
     }
-  }
-  var fontFamily = bestRun / Math.max(0.001, scale) >= 18 ? 'serif' : 'sans';
+  });
+  if (bestVote >= 2) headingStyle = bestName;
+  else if (leftbarVotes.length >= 2) headingStyle = 'leftbar';
+  else if (votes.banner >= 1 && hasGoldBand) headingStyle = 'banner';
+  else if (lineBands >= 2) headingStyle = 'underline';
+  else if (headingBands >= 3) headingStyle = 'banner';
+  else if (headingBands >= 1) headingStyle = 'bar';
 
-  return {
-    palette: { accent: accent, nameColor: nameColor, headingColor: headingColor, bodyColor: bodyColor, background: background, bandColor: bandColor, gold: gold },
+  var titleRows = Math.max(3, Math.round(h * 0.3));
+  var runStart2 = -1;
+  var bestTextRun = 0;
+  for (y = 0; y < titleRows; y++) {
+    var isTextRow = rowDark[y] >= Math.max(1, w * 0.02) && rowDark[y] / w < 0.6;
+    if (isTextRow) {
+      if (runStart2 < 0) runStart2 = y;
+      if (y - runStart2 + 1 > bestTextRun) bestTextRun = y - runStart2 + 1;
+    } else runStart2 = -1;
+  }
+  // 衬线判断：把最高的一段文字行折算到 160px 宽的参考分辨率再比，避免分析分辨率升高后阈值失真。
+  // 左侧栏布局时整条深色竖栏会被当成一大段「文字行」，直接判 sans。
+  var fontFamily =
+    layoutMode !== 'sidebar' && bestTextRun * (160 / Math.max(1, w)) >= 18 ? 'serif' : 'sans';
+  var headerAlign = 'left';
+  if (headerStyle === 'plain' && bandInk > bandInkRows * w * 0.012) {
+    var center = bandInkX / bandInk / w;
+    if (center > 0.44 && center < 0.56) headerAlign = 'center';
+  }
+  if (headerStyle === 'band' && bandColor && rmLuminance(bandColor) > 0.72) bandColor = rmMixHex(accent, '#ffffff', 0.82);
+
+  var result = {
+    palette: {
+      accent: accent,
+      nameColor: nameColor,
+      headingColor: headingColor,
+      bodyColor: bodyColor,
+      background: background,
+      bandColor: bandColor,
+      gold: gold,
+    },
     layout: {
-      headerBand: headerBand,
+      layout: layoutMode,
+      headerStyle: headerStyle,
+      contentStyle: contentStyle,
+      headerBand: headerStyle === 'band',
       headerAlign: headerAlign,
       headingStyle: headingStyle,
       contactCols: 2,
       headingBands: headingBands,
       fontFamily: fontFamily,
     },
-    size: { width: nw, height: nh },
+    size: { width: w, height: h },
     note: '',
     fallback: false,
   };
+  // 顺手把 layout/palette 折成一份完整 style，调试工具和导入弹窗都能直接拿来用。
+  result.style = rmStyleFromAnalysis(result);
+  return result;
+}
+
+/** 缩放图片 → 像素 → rmAnalyzePixels。canvas / DOM 只在这个函数里用。 */
+function rmAnalyzeImageElement(img) {
+  var nw = img.naturalWidth || img.width || 0;
+  var nh = img.naturalHeight || img.height || 0;
+  if (!nw || !nh) return rmAnalysisFallback('读不到图片尺寸，已用默认初稿');
+  // 识别阈值都按比例算，工作分辨率取长边 960：足够看清 1px 细线，也不至于太慢。
+  var maxSide = 960;
+  var scale = Math.min(1, maxSide / Math.max(nw, nh));
+  var w = Math.max(1, Math.round(nw * scale));
+  var h = Math.max(1, Math.round(nh * scale));
+  var canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  var ctx = canvas.getContext && canvas.getContext('2d');
+  if (!ctx) return rmAnalysisFallback('当前环境不支持 canvas，已用默认初稿');
+  ctx.drawImage(img, 0, 0, w, h);
+  var imageData;
+  try {
+    imageData = ctx.getImageData(0, 0, w, h);
+  } catch (err) {
+    return rmAnalysisFallback('读不到图片像素，已用默认初稿');
+  }
+  var analysis = rmAnalyzePixels({ data: imageData.data, width: w, height: h });
+  analysis.size = { width: nw, height: nh };
+  return analysis;
 }
 
 /** 分析结果 → style。 */
@@ -849,7 +1461,13 @@ function rmStyleFromAnalysis(analysis) {
   var layout = analysis.layout || {};
   if (layout.headerBand) st.headerBand = true;
   if (layout.headerAlign === 'center') st.headerAlign = 'center';
-  if (layout.headingStyle) st.headingStyle = layout.headingStyle;
+  if (layout.headingStyle) st.headingStyle = rmStylePickEnum(layout.headingStyle, RM_HEADING_STYLES, st.headingStyle);
+  if (layout.layout) st.layout = rmStylePickEnum(layout.layout, RM_LAYOUTS, st.layout);
+  if (layout.headerStyle) st.headerStyle = rmStylePickEnum(layout.headerStyle, RM_HEADER_STYLES, st.headerStyle);
+  if (layout.contentStyle) st.contentStyle = rmStylePickEnum(layout.contentStyle, RM_CONTENT_STYLES, st.contentStyle);
+  // 左侧栏的页眉在左栏里自己上色，不再叠加整宽色带。
+  if (st.layout === 'sidebar') st.headerStyle = 'plain';
+  st.headerBand = st.headerStyle === 'band';
   for (var fi = 0; fi < RM_FONT_FAMILIES.length; fi++) {
     if (RM_FONT_FAMILIES[fi][0] === layout.fontFamily) {
       st.fontFamily = layout.fontFamily;
@@ -1041,6 +1659,14 @@ function TemplateEditor(props) {
     setCssText(rmStyleToCss(next, cls));
   }
 
+  // 一键套用内置版式预设（侧栏深蓝 / 蓝色胶囊 / 蓝色圆形图标 / 浅灰卡片）。
+  function applyStylePreset(id) {
+    var next = rmStylePreset(id);
+    setStyleState(next);
+    setManual(false);
+    setCssText(rmStyleToCss(next, cls));
+  }
+
   function submit(publish) {
     var finalName = String(name || '').trim();
     if (!finalName) {
@@ -1111,15 +1737,45 @@ function TemplateEditor(props) {
           }),
           card({
             title: '版式',
-            hint: '标题装饰 / 页眉 / 字体 / 联系信息列数',
+            hint: '布局 / 页眉 / 内容块 / 标题装饰 / 字体',
             children: h(
               'div',
               { className: 'rm-col' },
               h(
-                'button',
-                { type: 'button', className: 'rm-btn rm-btn-sm', style: { alignSelf: 'flex-start' }, onClick: applyBannerPreset },
-                '一键套用「青金斜切」'
+                'div',
+                { className: 'rm-row', style: { flexWrap: 'wrap', gap: '6px' } },
+                h(
+                  'button',
+                  { type: 'button', className: 'rm-btn rm-btn-sm', onClick: applyBannerPreset },
+                  '一键套用「青金斜切」'
+                ),
+                h(
+                  'button',
+                  { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { applyStylePreset('sidebar-deep'); } },
+                  '侧栏深蓝'
+                ),
+                h(
+                  'button',
+                  { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { applyStylePreset('pill-blue'); } },
+                  '蓝色胶囊'
+                ),
+                h(
+                  'button',
+                  { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { applyStylePreset('icon-blue'); } },
+                  '蓝色圆形图标'
+                ),
+                h(
+                  'button',
+                  { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { applyStylePreset('card-light'); } },
+                  '浅灰卡片'
+                )
               ),
+              h('span', { className: 'rm-field-k' }, '布局'),
+              h(rmChipRow, { options: RM_LAYOUTS, value: style.layout, onPick: function (v) { patchStyle({ layout: v }); } }),
+              h('span', { className: 'rm-field-k' }, '页眉'),
+              h(rmChipRow, { options: RM_HEADER_STYLES, value: style.headerStyle, onPick: function (v) { patchStyle({ headerStyle: v }); } }),
+              h('span', { className: 'rm-field-k' }, '内容块'),
+              h(rmChipRow, { options: RM_CONTENT_STYLES, value: style.contentStyle, onPick: function (v) { patchStyle({ contentStyle: v }); } }),
               h('span', { className: 'rm-field-k' }, '标题样式'),
               h(rmChipRow, { options: RM_HEADING_STYLES, value: style.headingStyle, onPick: function (v) { patchStyle({ headingStyle: v }); } }),
               h('span', { className: 'rm-field-k' }, '字体'),
@@ -1139,16 +1795,6 @@ function TemplateEditor(props) {
                   value: String(Math.round(style.contactCols)),
                   onPick: function (v) { patchStyle({ contactCols: Number(v) }); },
                 })
-              ),
-              h(
-                'label',
-                { className: 'rm-check' },
-                h('input', {
-                  type: 'checkbox',
-                  checked: !!style.headerBand,
-                  onChange: function (event) { patchStyle({ headerBand: event.target.checked }); },
-                }),
-                '页眉加一条底色色带'
               )
             ),
           }),
@@ -1274,10 +1920,19 @@ function TemplateImportDialog(props) {
   ];
   var layoutText = analysis
     ? '版式初判：' +
-      (analysis.layout.headerBand ? '有页眉色带' : '无页眉色带') +
+      (analysis.layout.layout === 'sidebar' ? '左侧栏布局' : '单栏布局') +
+      ' · ' +
+      (analysis.layout.headerStyle === 'band'
+        ? '整宽页眉色带'
+        : analysis.layout.headerStyle === 'split'
+          ? '页眉左右分栏'
+          : analysis.layout.headerStyle === 'ribbon'
+            ? '左上角斜标签'
+            : analysis.layout.headerBand ? '有页眉色带' : '无页眉色带') +
+      (analysis.layout.contentStyle === 'card' ? ' · 内容块带边框' : '') +
       ' · ' +
       (analysis.layout.headerAlign === 'center' ? '页眉居中' : '页眉左对齐') +
-      ' · 单栏 · 联系信息 ' +
+      ' · 联系信息 ' +
       analysis.layout.contactCols +
       ' 列 · 标题样式 ' +
       rmHeadingStyleLabel(analysis.layout.headingStyle) +
@@ -1297,7 +1952,7 @@ function TemplateImportDialog(props) {
         h(
           'span',
           { className: 'rm-hint' },
-          '上传一张喜欢的简历截图或排版参考图：本机会读取主色、姓名色、底色，并判断有没有页眉色带。生成的是初稿，颜色和版式可以在编辑器里继续调整。'
+          '上传一张喜欢的简历截图或排版参考图：本机会读取主色、姓名色、底色，并判断页眉样式、是否左侧栏、标题装饰和内容块。生成的是初稿，颜色和版式可以在编辑器里继续调整。'
         ),
         h(
           'div',

@@ -828,7 +828,12 @@ function sanitizeStyle(raw) {
     const value = Number(raw[key]);
     if (Number.isFinite(value) && value > 0 && value <= 400) out[key] = value;
   }
-  if (['rule', 'bar', 'underline', 'plain', 'banner'].indexOf(raw.headingStyle) !== -1) out.headingStyle = raw.headingStyle;
+  if (
+    ['rule', 'bar', 'underline', 'plain', 'banner', 'tab', 'pill', 'icon', 'leftbar'].indexOf(raw.headingStyle) !== -1
+  ) out.headingStyle = raw.headingStyle;
+  if (['single', 'sidebar'].indexOf(raw.layout) !== -1) out.layout = raw.layout;
+  if (['plain', 'band', 'split', 'ribbon'].indexOf(raw.headerStyle) !== -1) out.headerStyle = raw.headerStyle;
+  if (['plain', 'card'].indexOf(raw.contentStyle) !== -1) out.contentStyle = raw.contentStyle;
   if (['sans', 'serif', 'mono'].indexOf(raw.fontFamily) !== -1) out.fontFamily = raw.fontFamily;
   if (['left', 'center'].indexOf(raw.headerAlign) !== -1) out.headerAlign = raw.headerAlign;
   if (raw.headerBand === true) out.headerBand = true;
