@@ -1,0 +1,2 @@
+# 统一行尾：仓库内文本一律 LF，避免 Windows 工作区与 CI 产物不一致。
+* text=auto eol=lf

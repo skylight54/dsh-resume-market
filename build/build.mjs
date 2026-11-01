@@ -40,7 +40,9 @@ const seen = [];
 
 for (const rel of FILES) {
   const abs = join(ROOT, rel);
-  let code = await readFile(abs, 'utf8');
+  // 统一按 LF 处理：Windows 工作区源码是 CRLF，若不归一，本地产物与
+  // CI（Linux，LF）重建结果会差出上万个字节，导致「产物与提交不一致」。
+  let code = (await readFile(abs, 'utf8')).replace(/\r\n/g, '\n');
   if (rel.endsWith('doc.js')) {
     // 共享层用 ESM 导出，内联时去掉 `export` 关键字即可（只允许具名 export）。
     code = code.replace(/^export\s+(?=(const|let|var|function|class))/gm, '');
