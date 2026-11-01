@@ -397,7 +397,7 @@ await act(async () => {
   await sleep(40);
 });
 const templateCards = container.querySelectorAll('.rm-stage .rm-tpl');
-check(templateCards.length === 7, 'expected 6 builtin + 1 custom template cards, got ' + templateCards.length);
+check(templateCards.length === 8, 'expected 7 builtin + 1 custom template cards, got ' + templateCards.length);
 check(text().includes('内置'), 'template builtin pill missing');
 
 // --- market tab -----------------------------------------------------------

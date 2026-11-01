@@ -152,7 +152,7 @@ assert.equal(res.json.value.app, 'resume-market');
 // 2) 初始 state：6 套内置模板 + 3 条种子市场内容
 res = await call('GET', '/state');
 assert.equal(res.status, 200);
-assert.equal(res.json.value.templates.length, 6, '内置模板应为 6 套');
+assert.equal(res.json.value.templates.length, 7, '内置模板应为 7 套');
 assert.equal(res.json.value.market.length, 3, '种子市场应有 3 条');
 assert.equal(res.json.value.resumes.length, 0);
 
@@ -347,7 +347,7 @@ res = await call('POST', '/template/install', { id: entryId });
 assert.equal(res.status, 200, res.body);
 const installedTemplateId = res.json.value.template.id;
 res = await call('GET', '/state');
-assert.equal(res.json.value.templates.length, 7);
+assert.equal(res.json.value.templates.length, 8);
 
 // 8) 点赞 / 下架
 res = await call('POST', '/market/like', { id: entryId });
@@ -372,6 +372,18 @@ assert.equal(customTemplate.cls, 'rm-t-' + customTemplate.id);
 assert.equal(customTemplate.style.nameSize, 32);
 assert.equal(customTemplate.style.headingStyle, 'bar');
 assert.ok(customTemplate.sample && customTemplate.sample.basics, '新模板应带示例数据');
+res = await call('POST', '/template/save', {
+  template: {
+    name: '青金分栏测试',
+    style: { headingStyle: 'banner', colors: { gold: '#c9a227', accent: '#2c6474' }, nameSize: 44, fontFamily: 'serif' },
+  },
+});
+assert.equal(res.status, 200, res.body);
+const bannerTemplate = res.json.value.template;
+assert.equal(bannerTemplate.style.headingStyle, 'banner', '应接受斜切色带标题样式');
+assert.equal(bannerTemplate.style.gold, '#c9a227', '应接受嵌套 colors.gold');
+assert.equal(bannerTemplate.style.accent, '#2c6474', '应接受嵌套 colors.accent');
+assert.equal(bannerTemplate.style.nameSize, 44);
 res = await call('POST', '/template/save', {
   template: { id: customTemplate.id, name: '我的测试模板 v2', css: '.' + customTemplate.cls + '{padding:40px;color:#111}' },
 });
@@ -447,7 +459,7 @@ for (const tool of tools) {
   assert.ok(['object', 'array'].includes(tool.output.schema.type), tool.name + ' 的 output.schema 类型不受支持');
 }
 const listed = await byName.get('resume_market_list').execute({ include: 'all' });
-assert.equal(listed.templates.length, 9, '6 内置 + 1 市场安装 + 1 公共市场安装 + 1 模板库新建');
+assert.equal(listed.templates.length, 11, '7 内置 + 1 市场安装 + 1 公共市场安装 + 2 模板库新建');
 const saved = await byName.get('resume_save').execute({
   title: 'AI 直出简历',
   templateId: 'quiet-luxury',

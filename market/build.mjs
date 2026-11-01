@@ -100,6 +100,7 @@ const entries = [
   fromSeed('seed-vibrant', 'rm-vibrant'),
   fromBuiltin('quiet-luxury', 'rm-quiet-luxury', '简历市场'),
   fromBuiltin('tech-grid', 'rm-tech-grid', '简历市场'),
+  fromBuiltin('banner-exec', 'rm-banner-exec', '大肥鱼'),
 ];
 
 const index = {

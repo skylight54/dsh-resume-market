@@ -278,6 +278,40 @@ const TEMPLATES = [
 .rm-t-tech .rm-item-t{color:#10213a;}
 `,
   },
+  {
+    id: 'banner-exec',
+    name: '青金分栏',
+    en: 'Banner Exec',
+    tagline: '斜切色带标题 + 金色细线分栏，稳重又不呆板；行政、国企与综合管理岗很吃这套。',
+    tags: ['行政', '国企', '综合管理'],
+    accent: '#2c6474',
+    desc: '斜切色带 · 双色分栏 · 大标题页眉',
+    css: `
+.rm-t-banner-exec{padding:0 0 52px;color:#26343a;background:#fff;font-family:Georgia,"Songti SC","Noto Serif SC",serif;}
+.rm-t-banner-exec .rm-head{position:relative;padding:46px 58px 34px;background:linear-gradient(180deg,#edf4f6 0%,#f9fcfd 76%,#ffffff 100%);}
+.rm-t-banner-exec .rm-head::before{content:"";position:absolute;right:62px;top:40px;width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#dcbf58,#b8912c);box-shadow:-66px 0 0 -4px rgba(201,162,39,.92);}
+.rm-t-banner-exec .rm-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:13px;background:linear-gradient(90deg,#2c6474 0 52%,#c9a227 52% 100%);clip-path:polygon(0 0,100% 0,calc(100% - 54px) 100%,0 100%);}
+.rm-t-banner-exec .rm-name{padding-right:150px;font-size:42px;font-weight:600;letter-spacing:.22em;color:#1d3d4d;line-height:1.16;}
+.rm-t-banner-exec .rm-name::after{content:"";display:inline-block;width:2px;height:40px;margin-left:24px;vertical-align:-5px;background:linear-gradient(180deg,#c9a227,#e9d7a0);}
+.rm-t-banner-exec .rm-role{margin:7px 0 0 3px;font-family:Georgia,"Songti SC",serif;font-size:12px;letter-spacing:.42em;color:#4f7d90;text-transform:uppercase;}
+.rm-t-banner-exec .rm-contact{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 40px;margin:24px 0 0;max-width:566px;}
+.rm-t-banner-exec .rm-k{font-size:9.5px;letter-spacing:.3em;color:#8aa3ac;}
+.rm-t-banner-exec .rm-v{font-size:12.5px;color:#22323a;}
+.rm-t-banner-exec .rm-sec{margin-top:26px;padding:0 58px;}
+.rm-t-banner-exec .rm-sec-h{position:relative;margin:0 0 12px;padding-bottom:3px;border-bottom:1px solid #c9a227;}
+.rm-t-banner-exec .rm-sec-t{display:inline-block;padding:7px 46px 7px 20px;background:linear-gradient(100deg,#2c6474 0%,#3d7d8f 100%);color:#fff;font-size:13px;font-weight:600;letter-spacing:.3em;clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);}
+.rm-t-banner-exec .rm-sec-h::before{content:"";position:absolute;left:-10px;top:2px;width:5px;height:calc(100% - 8px);background:#c9a227;}
+.rm-t-banner-exec .rm-item{margin-bottom:13px;}
+.rm-t-banner-exec .rm-item-t{font-weight:600;color:#1d3d4d;}
+.rm-t-banner-exec .rm-date{font-size:11.5px;color:#6b8b94;}
+.rm-t-banner-exec .rm-bullets li{margin:4px 0;}
+.rm-t-banner-exec .rm-bullets li::marker{color:#c9a227;}
+.rm-t-banner-exec .rm-tag{border:1px solid #d7e3e6;border-radius:2px;background:#f6fafb;color:#35626f;}
+.rm-t-banner-exec .rm-edu-courses .rm-k{color:#8aa3ac;}
+.rm-t-banner-exec .rm-skill-row{grid-template-columns:104px minmax(0,1fr);}
+.rm-t-banner-exec .rm-item-main{color:#1d3d4d;}
+`,
+  },
 ];
 
 /** 内置模板示例数据：用于模板缩略图与市场里「大肥鱼」的样张。 */
@@ -783,16 +817,18 @@ function buildWordHtml(resume, template) {
 function sanitizeStyle(raw) {
   if (!raw || typeof raw !== 'object') return undefined;
   const out = {};
-  const colors = ['accent', 'nameColor', 'headingColor', 'bodyColor', 'background', 'bandColor'];
+  const flatColors = raw.colors && typeof raw.colors === 'object' ? raw.colors : raw;
+  const colors = ['accent', 'nameColor', 'headingColor', 'bodyColor', 'background', 'bandColor', 'gold'];
   for (const key of colors) {
-    if (/^#[0-9a-fA-F]{3,8}$/.test(String(raw[key] || ''))) out[key] = String(raw[key]);
+    const value = flatColors[key] != null ? flatColors[key] : raw[key];
+    if (/^#[0-9a-fA-F]{3,8}$/.test(String(value || ''))) out[key] = String(value);
   }
   const nums = ['nameSize', 'headingSize', 'bodySize', 'lineHeight', 'padX', 'padY', 'sectionGap', 'contactCols'];
   for (const key of nums) {
     const value = Number(raw[key]);
     if (Number.isFinite(value) && value > 0 && value <= 400) out[key] = value;
   }
-  if (['rule', 'bar', 'underline', 'plain'].indexOf(raw.headingStyle) !== -1) out.headingStyle = raw.headingStyle;
+  if (['rule', 'bar', 'underline', 'plain', 'banner'].indexOf(raw.headingStyle) !== -1) out.headingStyle = raw.headingStyle;
   if (['sans', 'serif', 'mono'].indexOf(raw.fontFamily) !== -1) out.fontFamily = raw.fontFamily;
   if (['left', 'center'].indexOf(raw.headerAlign) !== -1) out.headerAlign = raw.headerAlign;
   if (raw.headerBand === true) out.headerBand = true;
