@@ -295,6 +295,11 @@ assert.match(docText, /WordSection1/);
 assert.match(docText, /rm-contact/);
 assert.match(docText, /class="rm-edu-courses"/, 'Word 导出也应带主修课程行');
 assert.match(docText, /数据结构、计量经济学/);
+// Word 导入不支持 grid/flex/clip-path，产物必须是表格 + 行内样式版式，否则「格式全没了」
+assert.match(docText, /<table/, 'Word 导出应使用 table 版式');
+assert.match(docText, /style="[^"]*color:/, 'Word 导出关键样式应行内化');
+assert.doesNotMatch(docText, /display:\s*grid|display:\s*flex|clip-path|transform:|gap:/, 'Word 导出不应残留 Word 不支持的 CSS');
+assert.match(docText, /工作经历/, 'Word 导出正文模块丢失');
 
 // 5c-3) PDF 导出（Host 兜底路径）：能转换就出文件，不能转换也要给明确的错误码
 res = await call('POST', '/export', { id: resumeId, format: 'pdf' });

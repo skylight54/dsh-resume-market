@@ -371,12 +371,47 @@ var RM_CHAT_DOCK_CSS = [
   '.rm-chat-dock-mini b{font-size:12.5px;}',
   '.rm-chat-dock.is-mini .rm-chat-dock-panel{display:none;}',
   '.rm-chat-dock.is-mini .rm-chat-dock-mini{display:flex;}',
+  /* 拖动把手：标题栏和折叠小条；拖动中禁用选中、换成抓取光标。 */
+  '.rm-chat-dock .rm-chat-head{cursor:grab;touch-action:none;}',
+  '.rm-chat-dock-mini{cursor:grab;touch-action:none;}',
+  '.rm-chat-dock.is-dragging{transition:none;}',
+  '.rm-chat-dock.is-dragging .rm-chat-dock-panel{will-change:transform;}',
+  '.rm-chat-dock.is-dragging,.rm-chat-dock.is-dragging *{cursor:grabbing !important;user-select:none !important;',
+  '  -webkit-user-select:none !important;}',
 ].join('\n');
+
+/** 拖动：离视口边缘的最小留白（px）；起拖阈值，避免点标题栏按钮时误拖。 */
+var RM_CHAT_DOCK_PAD = 8;
+var RM_CHAT_DOCK_SLOP = 3;
+
+/**
+ * 把「相对右下角基点」的偏移 {x, y} 收进视口。
+ * base 是不含 translate 的元素矩形（left/top/right/bottom）；
+ * 约束：base.left + x >= PAD 且 base.right + x <= innerWidth - PAD（纵向同理）。
+ */
+function rmChatClampDock(base, x, y) {
+  var vw = (typeof window !== 'undefined' && window.innerWidth) || 0;
+  var vh = (typeof window !== 'undefined' && window.innerHeight) || 0;
+  var pad = RM_CHAT_DOCK_PAD;
+  function between(value, lo, hi) {
+    if (hi < lo) return lo; // 元素比视口还大：贴住左边/上边
+    if (value < lo) return lo;
+    if (value > hi) return hi;
+    return value;
+  }
+  return {
+    x: between(x, pad - base.left, vw - pad - base.right),
+    y: between(y, pad - base.top, vh - pad - base.bottom),
+  };
+}
 
 /**
  * 右下角浮动的 AI 对话入口。
  *  - 关闭：收起成全局面板外的胶囊按钮；
- *  - 折叠：面板变成一条只留标题的小条（ChatView 只是被 CSS 隐藏，对话记录不丢）。
+ *  - 折叠：面板变成一条只留标题的小条（ChatView 只是被 CSS 隐藏，对话记录不丢）；
+ *  - 拖动：按住标题栏（.rm-chat-head）或折叠小条即可挪窗口；
+ *    位置存成相对右下角基点的偏移 {x, y}，只在上次位置非 0 时以 translate 应用；
+ *    关闭再打开沿用上次位置（刷新页面才归零）。
  * props: { draft, settings, onApply }，直接透传给 ChatView。
  */
 function RMChatDock(props) {
@@ -386,8 +421,129 @@ function RMChatDock(props) {
   var miniState = useState(false);
   var mini = miniState[0];
   var setMini = miniState[1];
+  var posState = useState({ x: 0, y: 0 });
+  var pos = posState[0];
+  var setPos = posState[1];
+  var draggingState = useState(false);
+  var dragging = draggingState[0];
+  var setDragging = draggingState[1];
+  var dockRef = useRef(null);
+  var posRef = useRef(pos);
+  var dragRef = useRef(null);
+  var listenersRef = useRef(null);
+  posRef.current = pos;
+
+  /** 元素当前矩形已经包含 translate，减去偏移即得拖动坐标系的基准矩形。 */
+  function rectWithoutTranslate(element, offset) {
+    var rect = element.getBoundingClientRect();
+    return {
+      left: rect.left - offset.x,
+      top: rect.top - offset.y,
+      right: rect.right - offset.x,
+      bottom: rect.bottom - offset.y,
+    };
+  }
+
+  function onPointerMove(event) {
+    var drag = dragRef.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    var dx = event.clientX - drag.sx;
+    var dy = event.clientY - drag.sy;
+    if (!drag.moved) {
+      if (Math.abs(dx) < RM_CHAT_DOCK_SLOP && Math.abs(dy) < RM_CHAT_DOCK_SLOP) return;
+      drag.moved = true;
+    }
+    setPos(rmChatClampDock(drag.base, drag.bx + dx, drag.by + dy));
+    if (event.cancelable) event.preventDefault();
+  }
+
+  function onPointerUp(event) {
+    var drag = dragRef.current;
+    if (!drag) return;
+    if (event && event.pointerId != null && event.pointerId !== drag.pointerId) return;
+    dragRef.current = null;
+    setDragging(false);
+    var listened = listenersRef.current || [];
+    for (var i = 0; i < listened.length; i += 1) {
+      window.removeEventListener(listened[i][0], listened[i][1]);
+    }
+    listenersRef.current = null;
+  }
+
+  function onPointerDown(event) {
+    var target = event.target;
+    if (!target || !target.closest || dragRef.current) return;
+    if (!target.closest('.rm-chat-head, .rm-chat-dock-mini')) return;
+    // 标题栏里的清空/折叠/关闭按钮不能启动拖动，否则点击会被吞掉。
+    if (target.closest('button, a, input, textarea, select')) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    var dock = dockRef.current;
+    if (!dock) return;
+    var rect = dock.getBoundingClientRect();
+    if (!rect.width && !rect.height) return; // 还没布局（jsdom 里 rect 全 0）
+    var from = posRef.current;
+    dragRef.current = {
+      pointerId: event.pointerId,
+      sx: event.clientX,
+      sy: event.clientY,
+      bx: from.x,
+      by: from.y,
+      base: {
+        left: rect.left - from.x,
+        top: rect.top - from.y,
+        right: rect.right - from.x,
+        bottom: rect.bottom - from.y,
+      },
+      moved: false,
+    };
+    setDragging(true);
+    var listened = [
+      ['pointermove', onPointerMove],
+      ['pointerup', onPointerUp],
+      ['pointercancel', onPointerUp],
+    ];
+    listenersRef.current = listened;
+    for (var i = 0; i < listened.length; i += 1) {
+      window.addEventListener(listened[i][0], listened[i][1]);
+    }
+  }
+
+  // 打开 / 折叠切换 / 窗口 resize 后面板尺寸变了，重新收进视口。
+  useEffect(
+    function () {
+      if (!open) return undefined;
+      function reclamp() {
+        var dock = dockRef.current;
+        if (!dock) return;
+        var rect = dock.getBoundingClientRect();
+        if (!rect.width && !rect.height) return;
+        var cur = posRef.current;
+        var next = rmChatClampDock(rectWithoutTranslate(dock, cur), cur.x, cur.y);
+        if (next.x !== cur.x || next.y !== cur.y) setPos(next);
+      }
+      reclamp();
+      window.addEventListener('resize', reclamp);
+      return function () {
+        window.removeEventListener('resize', reclamp);
+      };
+    },
+    [open, mini]
+  );
+
+  // 卸载时摘掉可能还挂着的拖动监听，避免窗口级事件泄漏。
+  useEffect(function () {
+    return function () {
+      var listened = listenersRef.current || [];
+      for (var i = 0; i < listened.length; i += 1) {
+        window.removeEventListener(listened[i][0], listened[i][1]);
+      }
+      listenersRef.current = null;
+      dragRef.current = null;
+    };
+  }, []);
 
   function close() {
+    onPointerUp();
     setOpen(false);
     setMini(false);
   }
@@ -412,20 +568,26 @@ function RMChatDock(props) {
     );
   }
 
+  var dockClass = 'rm-chat-dock' + (mini ? ' is-mini' : '') + (dragging ? ' is-dragging' : '');
   return h(
     'div',
-    { className: 'rm-chat-dock' + (mini ? ' is-mini' : '') },
+    {
+      ref: dockRef,
+      className: dockClass,
+      style: pos.x || pos.y ? { transform: 'translate(' + pos.x + 'px, ' + pos.y + 'px)' } : undefined,
+      onPointerDown: onPointerDown,
+    },
     h('style', { key: 'rm-chat-dock-css' }, RM_CHAT_DOCK_CSS),
     h(
       'div',
-      { className: 'rm-chat-dock-mini' },
+      { key: 'mini', className: 'rm-chat-dock-mini', title: '按住这里可以拖动窗口' },
       h('b', null, 'AI 对话'),
       h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { setMini(false); } }, '展开'),
       h('button', { type: 'button', className: 'rm-btn rm-btn-sm', title: '关闭对话', onClick: close }, '✕')
     ),
     h(
       'div',
-      { className: 'rm-chat-dock-panel' },
+      { key: 'panel', className: 'rm-chat-dock-panel' },
       h(ChatView, {
         draft: props.draft,
         settings: props.settings,

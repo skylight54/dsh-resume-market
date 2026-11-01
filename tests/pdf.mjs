@@ -77,4 +77,25 @@ for (let i = 1; i < 6; i += 1) {
   }
 }
 
-console.log('pdf ok:', { bytes: bytes.length, objects: 5, page: 'A4' });
+// 多页：两张图应生成 /Count 2，且每页都有独立的 image/content 对象。
+const multiPages = fakeWindow.__resumeMarket.buildPdf([
+  { jpeg: 'data:image/jpeg;base64,' + jpeg, width: 1588, height: 2245 },
+  { jpeg: 'data:image/jpeg;base64,' + jpeg, width: 1588, height: 2245 },
+]);
+if (!(multiPages instanceof Uint8Array)) throw new Error('multi-page buildPdf did not return bytes');
+const multiText = Buffer.from(multiPages).toString('latin1');
+if (!multiText.includes('/Count 2')) throw new Error('multi-page /Count wrong');
+if (!multiText.includes('/Kids [3 0 R 6 0 R]')) throw new Error('multi-page kids wrong');
+if (!multiText.includes('/Im0 ') || !multiText.includes('/Im1 ')) throw new Error('multi-page image names missing');
+const multiXref = multiText.slice(multiText.lastIndexOf('\nxref\n') + 1);
+const multiLines = multiXref.split('\n').filter((line) => /^\d{10} \d{5} [nf] $/.test(line));
+if (multiLines.length !== 9) throw new Error('unexpected multi-page xref entries: ' + multiLines.length);
+for (let i = 1; i < 9; i += 1) {
+  const offset = Number(multiLines[i].slice(0, 10));
+  if (!multiText.startsWith(i + ' 0 obj', offset)) {
+    throw new Error('multi-page xref offset for object ' + i + ' is wrong: ' + offset);
+  }
+}
+if (!multiText.endsWith('%%EOF\n')) throw new Error('multi-page trailer missing');
+
+console.log('pdf ok:', { bytes: bytes.length, objects: 5, page: 'A4', multiBytes: multiPages.length, multiObjects: 8 });

@@ -450,6 +450,21 @@ const primaryBtn = container.querySelector('.rm-btn-primary') || byText('.rm-btn
 check(!!primaryBtn, 'primary action button missing');
 check(text().includes('工作经历'), 'preview/editor missing experience section');
 
+// --- preview: 缩放工具条（缩小/适合宽度/100%/放大） ---
+const zoomBar = container.querySelector('.rm-preview-zoom');
+check(!!zoomBar, 'preview zoom toolbar missing');
+const zoomBtns = zoomBar ? [...zoomBar.querySelectorAll('button')] : [];
+check(zoomBtns.length === 4, 'zoom toolbar should have 4 buttons, got ' + zoomBtns.length);
+const pctEl = zoomBar ? zoomBar.querySelector('.rm-zoom-pct') : null;
+check(!!pctEl && /^\d+%$/.test(pctEl.textContent.trim()), 'zoom percentage missing, got: ' + (pctEl ? pctEl.textContent : 'none'));
+check(!!byText('.rm-preview-zoom .rm-btn', '适合宽度'), '适合宽度 button missing');
+const zoomIn = zoomBtns.find((b) => b.getAttribute('aria-label') === '放大');
+check(!!zoomIn, '放大 button missing');
+const beforePct = pctEl ? parseInt(pctEl.textContent, 10) : 0;
+await act(async () => { if (zoomIn) zoomIn.click(); await sleep(20); });
+const afterPct = pctEl ? parseInt(pctEl.textContent, 10) : 0;
+check(afterPct > beforePct, 'zoom-in should raise percentage, got ' + beforePct + ' -> ' + afterPct);
+
 // --- templates tab --------------------------------------------------------
 await act(async () => {
   byText('.rm-tab', '模板库').click();

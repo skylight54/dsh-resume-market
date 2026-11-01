@@ -3,6 +3,14 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.9.0 — 2026-11-01
+
+- 修复「导出 Word(.doc) 后格式全没了」：以前 `buildWordHtml()` 把 BASE_CSS + 模板 CSS + PRINT_CSS 全塞进 `<style>`，Word/WPS 的 HTML 导入会整段丢掉 `display:grid/flex`、`gap`、`clip-path`、`transform`，只剩裸文字。新增 `renderWordBody()`：纯 `<table>` + 行内 style 重排页头（含照片两列）/联系方式两列/模块标题（按 banner·tab·pill·icon·leftbar·rule 近似上色）/条目左右对齐/`<ul>` 要点/sidebar 两栏；`WORD_CSS` 只留 `@page` A4 与表格基础样式；内置 7 套模板没有结构化 style 时从模板 CSS 嗅探页眉与标题样式。已知退化：斜切角退化成矩形填充、胶囊圆角变直角、渐变变纯色。
+- 修复「预览/导出 PDF 超过一页被截断」：`rmPdfBase64()` 先量内容真实高度、按 A4 高算页数（1–8 页），把整份内容一次性渲染后按页切片成独立 canvas，`rmBuildPdf()` 支持多页 PDF（多页 `/Kids`、`/Count`、逐页对象与 xref）；`tests/pdf.mjs` 增加多页结构断言。
+- A4 预览不再裁切并支持缩放：`PreviewScaled` 新增 `multiPage` 逻辑，按内容高度展开页数、画虚线页线与「第 N 页」标签、可滚动；`PreviewPanel` 新增 `[−][百分比][+][适合宽度][100%]` 工具条（40%–200%、10% 一档）与「共 N 页」pill；缩略图与模板编辑器预览仍保持单页裁切。
+- AI 对话浮窗可自由拖动：按住标题栏或折叠小条拖动，clamp 在窗口内（8px 边距、3px 阈值防误触），窗口 resize 自动收回，关闭/折叠保留位置；标题栏按钮点击不被拖动吞掉。
+- 测试补强：`tests/smoke.mjs` 断言 Word 导出产物为 `<table>` 版式、关键样式行内化、不残留 `display:grid/flex`/`clip-path`/`transform`/`gap`；`tests/mount.mjs` 断言预览缩放工具条四个按钮、「适合宽度」、百分比与点「+」后比例上升。README 同步更新预览/导出/浮窗说明。
+
 ## v0.8.0 — 2026-11-01
 
 - 修复「兼容插件下载装不上」：旧目录里的包名是编造的（`dsh-resume-skills` 等在 npm 上不存在，pnpm 直接 404）。换成真实存在的包：`dsh-resume-screening`（简历筛选 / 人才库）、`@xrxs-ai/dsh-resume-migrator`（批量迁移）、`dsh-plugin-resume-warehouse`（本地简历仓库），`dsh-resume` 因名字已占用且未发布标为「规划中」。
