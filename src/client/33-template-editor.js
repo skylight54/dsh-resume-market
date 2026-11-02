@@ -3020,15 +3020,6 @@ function TemplatePreviewDialog(props) {
         h('div', { ref: hostRef, style: { width: '100%', display: 'flex', justifyContent: 'center' } },
           h(PreviewScaled, { resume: resume, template: template, width: width, frame: true }))
       ),
-        h('button', {
-          type: 'button',
-          className: 'rm-btn rm-btn-sm',
-          style: { marginLeft: 'auto' },
-          disabled: aiInfo.busy,
-          onClick: refineStyle,
-        },
-          aiInfo.busy ? 'AI 比对中…' : 'AI 优化版式'
-        ),
       h(
         'div',
         { className: 'rm-modal-f' },

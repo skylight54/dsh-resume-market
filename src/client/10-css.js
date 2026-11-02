@@ -69,6 +69,7 @@ var RM_CSS = `
 .rm-tpl-name{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650}
 .rm-tpl-tag{font-size:11px;color:var(--dsw-alias-label-secondary,#6b7280);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .rm-tpl-foot{display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap}
+.rm-tpl-foot .rm-btn{flex:0 0 auto;white-space:nowrap;padding-left:9px;padding-right:9px;font-size:11px}
 .rm-tpl-foot .rm-muted{font-size:10.5px}
 .rm-pill{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-size:10.5px;background:var(--dsw-alias-bg-layer-2,#eef1f5);color:var(--dsw-alias-label-secondary,#6b7280);white-space:nowrap}
 .rm-pill-brand{background:rgba(47,111,222,.12);color:var(--dsw-alias-brand-primary,#2f6fde)}

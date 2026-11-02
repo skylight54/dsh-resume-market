@@ -3,6 +3,11 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.13.1 — 2026-11-03
+
+- 修「模板库每张卡点第二个按钮（预览）弹窗一片空白」：`TemplatePreviewDialog` 里混入了一段属于模板编辑器「AI 优化版式」的按钮代码（引用 `aiInfo` / `refineStyle`，这两个变量在预览组件里根本不存在），渲染时直接抛 `ReferenceError`，整个弹窗挂不上、看起来就是「点了没内容」。已删掉这段残留；`tests/mount.mjs` 新增回归：点模板卡的「预览」必须渲染出 `.rm-tpl-preview-dialog .rm-paper`，且期间 console 不能有报错。
+- 模板卡底部按钮不再被挤扁/截断：`.rm-tpl-foot .rm-btn{flex:0 0 auto;white-space:nowrap;padding:0 9px;font-size:11px}`，多按钮时整体换行而不是压缩文字；内置卡一行显示「使用此模板 / 预览 / 复制为新模板」，自定义卡一行显示「使用此模板 / 预览 / 编辑 / 发布 / 删除」。
+
 ## v0.13.0 — 2026-11-01
 
 - 简历模块新增两节：**校园经历**（名称 / 角色 / 时间 / 要点，最多 6 条）和**兴趣爱好**（一句话，按顿号或逗号拆成标签云）。`SECTION_ORDER` 扩到 8 项，编辑器多两张卡片（可排序 / 可隐藏），预览、HTML、Word(.docx)、PDF 全部支持；`tests/smoke.mjs` 增加导出断言，`tests/docx.mjs` 增加中英双语两模块断言。

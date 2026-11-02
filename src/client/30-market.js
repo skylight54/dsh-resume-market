@@ -42,23 +42,17 @@ function TemplateCard(props) {
         'div',
         { className: 'rm-tpl-foot' },
         h('button', { type: 'button', className: 'rm-btn rm-btn-sm' + (props.current ? '' : ' rm-btn-primary'), onClick: function () { onUse(template); } }, props.current ? '换回' : '使用此模板'),
-        props.onPreview ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onPreview(template); } }, '预览') : null
-      ),
-      builtin
-        ? props.onCopy
-          ? h(
-              'div',
-              { className: 'rm-tpl-foot' },
-              h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onCopy(template); } }, '复制为新模板')
-            )
-          : null
-        : h(
-            'div',
-            { className: 'rm-tpl-foot' },
-            props.onEdit ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onEdit(template); } }, '编辑') : null,
-            props.onPublishTemplate ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onPublishTemplate(template); } }, '发布') : null,
-            props.onDelete ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm rm-btn-danger', onClick: function () { props.onDelete(template); } }, '删除') : null
-          )
+        props.onPreview ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onPreview(template); } }, '预览') : null,
+        builtin ? null : props.onEdit ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onEdit(template); } }, '编辑') : null,
+        builtin ? null : props.onPublishTemplate ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onPublishTemplate(template); } }, '发布') : null,
+        builtin
+          ? props.onCopy
+            ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm', onClick: function () { props.onCopy(template); } }, '复制为新模板')
+            : null
+          : props.onDelete
+            ? h('button', { type: 'button', className: 'rm-btn rm-btn-sm rm-btn-danger', onClick: function () { props.onDelete(template); } }, '删除')
+            : null
+      )
     )
   );
 }

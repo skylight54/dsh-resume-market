@@ -487,6 +487,31 @@ await act(async () => {
 const cardCallsAfter = fetchCalls.filter((c) => c.includes('/resume-market/api/resume')).length;
 check(cardCallsAfter > cardCallsBefore, 'clicking template card should apply it (POST /resume), got: ' + JSON.stringify(fetchCalls.slice(-3)));
 
+// --- 预览按钮：弹窗必须真的渲染出 A4 预览（曾因残留 aiInfo 引用报错，弹窗一片空白） ---
+await act(async () => {
+  byText('.rm-tab', '模板库').click();
+  await sleep(40);
+});
+const previewBtn = [...container.querySelectorAll('.rm-stage .rm-tpl button')].find((b) => b.textContent.trim() === '预览');
+check(!!previewBtn, 'template card is missing the 预览 button');
+const errorsBeforePreview = consoleErrors.length;
+await act(async () => {
+  previewBtn.click();
+  await sleep(90);
+});
+const previewModal = container.querySelector('.rm-modal .rm-tpl-preview-dialog');
+check(!!previewModal, 'clicking 预览 did not render the preview dialog (likely a render-time error)');
+check(!!(previewModal && previewModal.querySelector('.rm-paper')), 'preview dialog has no A4 paper content');
+check(
+  consoleErrors.length === errorsBeforePreview,
+  'preview dialog threw: ' + consoleErrors.slice(errorsBeforePreview).join(' | '),
+);
+await act(async () => {
+  const closeBtn = previewModal && [...previewModal.querySelectorAll('button')].find((b) => b.textContent.trim() === '关闭');
+  if (closeBtn) closeBtn.click();
+  await sleep(40);
+});
+
 // --- market tab -----------------------------------------------------------
 await act(async () => {
   byText('.rm-tab', '模板市场').click();
