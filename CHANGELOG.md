@@ -3,6 +3,16 @@
 本文件记录简历市场插件的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## v0.14.0 — 2026-11-14
+
+- 适配 DeepSeek Harness **0.2.2-rc.3**：`package.json` 补 `engines.dsh: ">=0.2.2-rc.1 <0.3.0"`（DSH 0.2.x 的兼容检查优先读它），
+  `peerDependencies.@deepseek-ai/cordis` 由 `~4.0.4` 跟到 `~4.1.0`；`engines.node` 提到 `>=22`。
+- 逐项核对新版契约，无需改业务代码：Host `tools.register(definition)` 仍接受带 `output:{schema,render(args,value)}` 的定义、
+  `webServer.register({kind:'prefix'})` 仍然可用；Client 仍是 `window.__ModuleLoader__.load` + `ctx.slots.inject/register`
+  + `ctx.layout.selectPanel` + `ctx.locale.register`，`main` slot 的 `key` 与侧栏 `sidebar.panellist` 均照旧。
+- CI（`.github/workflows/ci.yml`）构建/测试节点从 Node 22 提到 **Node 24**，与 DSH 0.2.x 的运行时要求对齐。
+- README 安装段补「版本兼容」说明（支持的 DSH 范围 + 为什么小版本升级一般不用改插件）。
+
 ## v0.13.1 — 2026-11-03
 
 - 修「模板库每张卡点第二个按钮（预览）弹窗一片空白」：`TemplatePreviewDialog` 里混入了一段属于模板编辑器「AI 优化版式」的按钮代码（引用 `aiInfo` / `refineStyle`，这两个变量在预览组件里根本不存在），渲染时直接抛 `ReferenceError`，整个弹窗挂不上、看起来就是「点了没内容」。已删掉这段残留；`tests/mount.mjs` 新增回归：点模板卡的「预览」必须渲染出 `.rm-tpl-preview-dialog .rm-paper`，且期间 console 不能有报错。

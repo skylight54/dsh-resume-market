@@ -78,6 +78,10 @@ dsh plugin add file:<本目录绝对路径>
 
 安装后重启 / 刷新 DSH Web 页面，侧栏会出现「简历市场」。
 
+> 版本兼容：需要 DSH `>= 0.2.2-rc.1`（`package.json` 的 `engines.dsh` 已声明 `>=0.2.2-rc.1 <0.3.0`）。
+> 插件不直接 import 任何 `@deepseek-ai/*` 包：Host 只用 `webServer` / `tools` 服务，Client 只用 `slots` /
+> `layout` / `locale`，所以 DSH 小版本升级一般不用改插件代码。
+
 发布到 npm 之后也可以像其他插件一样从 **DSH 内置插件市场** 搜索安装（`dsh-plugin-resume-market`）。
 想把这个插件收录进官方插件市场（awesome-dsh-plugin / awesome-dsh-plugin.com），
 收录要求、可直接粘贴的注册表条目和提 PR 步骤见 [`docs/MARKET.md`](docs/MARKET.md)。

@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-resume-market",
-  "version": "0.13.1",
+  "version": "0.14.0",
   "type": "module",
   "description": "免费简历模板市场：7 套内置模板、8 个字段分栏的个人信息编辑、A4 实时预览、HTML/Word/PDF 导出，可把简历发布到市场分享给其他用户。",
   "license": "MIT",
@@ -21,7 +21,8 @@
     "url": "https://github.com/skylight54/dsh-resume-market/issues"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22",
+    "dsh": ">=0.2.2-rc.1 <0.3.0"
   },
   "scripts": {
     "build": "node build/build.mjs",
@@ -58,6 +59,6 @@
     }
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "~4.0.4"
+    "@deepseek-ai/cordis": "~4.1.0"
   }
 }

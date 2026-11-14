@@ -1,6 +1,6 @@
 {
   "id": "dsh-plugin-resume-market",
-  "version": "0.13.1",
+  "version": "0.14.0",
   "files": [
     "src/shared/doc.js",
     "src/client/00-preface.js",
